@@ -24,7 +24,7 @@ const SERVER_ENV_VARS = [
   'GEMINI_API_KEY', 'K_SERVICE', 'TRUST_PROXY', 'PORT', 'NODE_ENV',
   'TTS_UPSTREAM_PER_MINUTE', 'TTS_UPSTREAM_GLOBAL_PER_MINUTE', 'LESSON_GENERATIONS_PER_10_MIN',
   'AUDIO_MEMORY_MAX_ENTRIES', 'AUDIO_DISK_MAX_ENTRIES',
-  'MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_LESSON_MODE',
+  'MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_LESSON_MODE', 'MOCK_MP3_FILE',
 ];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -155,6 +155,22 @@ describe('server (Gemini and Google Translate are mocked)', () => {
         const html = await (await fetch(url(server, route))).text();
         assert.ok(html.includes('/assets/index-'), route);
         assert.ok(!html.includes('/@vite/client'), route);
+      }
+    });
+
+    it('serves pre-generated audio as audio/mpeg, and a missing audio file is a 404 instead of the app page', async () => {
+      fs.mkdirSync(path.join(workDir, 'dist', 'audio'), { recursive: true });
+      fs.writeFileSync(path.join(workDir, 'dist', 'audio', 'abcdef012345.mp3'), Buffer.from([0xff, 0xf3, 0x64, 0xc4, 0x00, 0x00]));
+
+      const found = await fetch(url(server, '/audio/abcdef012345.mp3'));
+      assert.equal(found.status, 200);
+      assert.equal(found.headers.get('content-type'), 'audio/mpeg');
+      assert.equal(found.headers.get('x-content-type-options'), 'nosniff');
+
+      for (const missing of ['/audio/ffffffffffff.mp3', '/audio/manifest.json', '/audio/']) {
+        const response = await fetch(url(server, missing));
+        assert.equal(response.status, 404, missing);
+        assert.ok(!(await response.text()).includes('id="root"'), `${missing} must not return the app page`);
       }
     });
 
@@ -309,6 +325,27 @@ describe('server (Gemini and Google Translate are mocked)', () => {
         assert.equal(result.model, 'gemini-3.8-flash-lite-tts');
         assert.equal(result.mimeType, 'audio/wav');
         assert.deepEqual(server.calls(), ['gemini:gemini-3.8-flash-lite-tts']);
+      }));
+
+    it('headerless PCM from Gemini is given a WAV header, because browsers cannot play bare PCM', () =>
+      usingServer(withKey({ MOCK_GEMINI_TTS: 'pcm' }), async (server) => {
+        const result = await (await tts(server, 'Привет')).json();
+        assert.equal(result.model, 'gemini-3.8-flash-lite-tts');
+        assert.equal(result.mimeType, 'audio/wav');
+
+        const wav = Buffer.from(result.audio, 'base64');
+        assert.equal(wav.toString('ascii', 0, 4), 'RIFF');
+        assert.equal(wav.toString('ascii', 8, 12), 'WAVE');
+        assert.equal(wav.readUInt16LE(22), 1, 'mono');
+        assert.equal(wav.readUInt32LE(24), 24_000, 'sample rate from the mime type');
+        assert.equal(wav.readUInt32LE(40), wav.length - 44, 'the data chunk covers all the samples');
+        assert.equal(wav.length, 44 + 12_000 * 2);
+
+        // the copy kept in the cache is the playable one too
+        const again = await (await tts(server, 'Привет')).json();
+        assert.equal(again.cached, true);
+        assert.equal(again.mimeType, 'audio/wav');
+        assert.equal(again.audio, result.audio);
       }));
 
     it('a quota error falls back to the other voice and pauses Gemini for a minute', () =>

@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { GoogleGenAI, Type } from '@google/genai';
+import { TTS_MODEL, synthesizeWithGemini, fetchFallbackRussianAudio, type AudioPayload } from './server/tts';
 
 // .env.local is read before .env (the same precedence Vite uses), so the README instructions work
 dotenv.config({ path: ['.env.local', '.env'] });
@@ -20,7 +21,6 @@ const isProduction = process.env.NODE_ENV === 'production' || process.argv.inclu
 // Abuse protection. Every value can be overridden from the environment (see .env.example).
 const MAX_TTS_TEXT_LENGTH = 200; // also the limit of the fallback voice endpoint
 const MAX_TOPIC_LENGTH = 200;
-const TTS_VOICE = 'Kore';
 const LESSON_LEVELS = ['A1', 'A2', 'B1'];
 const TTS_UPSTREAM_PER_MINUTE = intFromEnv('TTS_UPSTREAM_PER_MINUTE', 60); // per visitor
 const TTS_UPSTREAM_GLOBAL_PER_MINUTE = intFromEnv('TTS_UPSTREAM_GLOBAL_PER_MINUTE', 600);
@@ -88,8 +88,6 @@ function sendTooManyRequests(res: express.Response, retryAfterSeconds: number) {
   return res.status(429).json({ error: 'Juda koʻp soʻrov. Birozdan soʻng qayta urinib koʻring.' });
 }
 
-type AudioPayload = { audio: string; mimeType: string };
-
 // Persistent Disk Audio Recording Cache directory
 const AUDIO_CACHE_DIR = path.join(process.cwd(), '.cache', 'audio');
 try {
@@ -153,34 +151,6 @@ function rememberAudio(key: string, audio: AudioPayload) {
 // Circuit-breaker timestamp: when Gemini quota is exhausted (429), pause API calls for 60s
 let ttsCooldownUntil = 0;
 
-/**
- * Fallback voice: Google Translate's text-to-speech endpoint.
- * It is an unofficial, undocumented URL, so it can change or start rejecting server requests at any time.
- */
-async function fetchFallbackRussianAudio(text: string): Promise<AudioPayload | null> {
-  try {
-    const clean = text.trim();
-    if (!clean) return null;
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ru&client=tw-ob&q=${encodeURIComponent(clean)}`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://translate.google.com/',
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-
-    if (!response.ok) return null;
-    const arrayBuffer = await response.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString('base64');
-    return { audio: base64, mimeType: 'audio/mpeg' };
-  } catch (err) {
-    console.warn('[TTS] Fallback voice fetch failed:', err);
-    return null;
-  }
-}
-
 // Russian audio synthesis endpoint: Gemini TTS when configured, otherwise (or when it fails) the fallback voice
 app.post('/api/tts', async (req, res) => {
   const { text, rate } = (req.body ?? {}) as { text?: unknown; rate?: unknown };
@@ -218,39 +188,11 @@ app.post('/api/tts', async (req, res) => {
   // 3. Gemini TTS (when a key is configured and the quota is not exhausted)
   if (process.env.GEMINI_API_KEY && Date.now() >= ttsCooldownUntil) {
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash-lite-tts',
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                text: cleanRussianText,
-                speechMetadata: {
-                  style: isSlow
-                    ? 'Slow and distinct articulation for beginner students'
-                    : 'Natural, warm native Russian speaker, friendly teacher tone',
-                },
-              },
-            ],
-          },
-        ],
-        config: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: TTS_VOICE },
-            },
-          },
-        },
-      });
-
-      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      if (base64Audio) {
-        const audioObj = { audio: base64Audio, mimeType: 'audio/wav' };
-        rememberAudio(cacheKey, audioObj);
-        saveAudioDiskCache(cacheKey, audioObj);
-        return res.json({ audio: base64Audio, mimeType: 'audio/wav', model: 'gemini-3.8-flash-lite-tts' });
+      const gemini = await synthesizeWithGemini(ai, cleanRussianText, isSlow);
+      if (gemini) {
+        rememberAudio(cacheKey, gemini);
+        saveAudioDiskCache(cacheKey, gemini);
+        return res.json({ audio: gemini.audio, mimeType: gemini.mimeType, model: TTS_MODEL });
       }
       console.warn('[TTS] Gemini returned no audio, using the fallback voice.');
     } catch (err: unknown) {
@@ -426,6 +368,10 @@ async function startServer() {
   } else {
     const distPath = path.resolve(process.cwd(), 'dist');
     app.use(express.static(distPath));
+    // A missing audio file is a 404: answering with the app's page would hand HTML to an <audio> element
+    app.use('/audio', (_req, res) => {
+      res.status(404).end();
+    });
     app.get('*', (_req, res) => {
       res.sendFile(path.resolve(distPath, 'index.html'));
     });

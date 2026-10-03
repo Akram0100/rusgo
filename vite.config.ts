@@ -47,6 +47,31 @@ export default defineConfig(() => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
           runtimeCaching: [
             {
+              // Pre-generated lesson audio (public/audio). Not precached: the app asks for the phrases a learner
+              // opens, and each file is kept for offline use. The file name is a hash of its content, so a cached
+              // file never goes stale.
+              urlPattern: /\/audio\/[0-9a-f]{12}\.mp3$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'lesson-audio',
+                expiration: {
+                  maxEntries: 600,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [200],
+                },
+              },
+            },
+            {
+              // Which phrases have a file: answered from the cache at once, refreshed in the background
+              urlPattern: /\/audio\/manifest\.json$/,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'lesson-audio-manifest',
+              },
+            },
+            {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
               options: {

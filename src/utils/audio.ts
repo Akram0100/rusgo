@@ -1,7 +1,9 @@
 import { getSavedAudio, saveAudioRecording } from './audioStorage';
+import { getStaticAudioUrl } from './staticAudio';
 
 let audioCtx: AudioContext | null = null;
 const audioCache = new Map<string, string>(); // in-memory cache base64 audio by key
+const staticAudioCache = new Map<string, string>(); // phrase -> object URL of its pre-generated MP3
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -138,10 +140,34 @@ export function playLessonComplete() {
 let activeAudioElement: HTMLAudioElement | null = null;
 
 /**
+ * The pre-generated MP3 of a phrase (see scripts/generate-audio.ts) as a URL that an <audio> can play, or null
+ * when the phrase has none or the file cannot be loaded. It is fetched as a whole and played from memory, so
+ * playback does not depend on range requests (Safari asks for them, and a service worker cache answers poorly).
+ */
+async function loadStaticAudio(text: string): Promise<string | null> {
+  const known = staticAudioCache.get(text);
+  if (known) return known;
+
+  const url = await getStaticAudioUrl(text);
+  if (!url) return null;
+  try {
+    const response = await fetch(url);
+    // A missing file can come back as the app's index.html with status 200: only real audio counts
+    if (!response.ok || !(response.headers.get('content-type') ?? '').startsWith('audio/')) return null;
+    const objectUrl = URL.createObjectURL(await response.blob());
+    staticAudioCache.set(text, objectUrl);
+    return objectUrl;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Play authentic, natural Russian audio recording.
  * 1. Checks in-memory cache.
- * 2. Checks browser IndexedDB permanent storage (plays saved recording in 0ms without server request).
- * 3. If not saved yet, generates/fetches once and saves recording permanently into storage for all future clicks.
+ * 2. Plays the pre-generated MP3 of the lesson phrase, if there is one (no server involved).
+ * 3. Checks browser IndexedDB permanent storage (plays saved recording in 0ms without server request).
+ * 4. If not saved yet, generates/fetches once and saves recording permanently into storage for all future clicks.
  */
 export async function speakRussian(
   text: string,
@@ -203,7 +229,13 @@ export async function speakRussian(
     return playAudio(inMem);
   }
 
-  // 2. Play from local persistent device storage (IndexedDB)
+  // 2. Built-in lesson phrases have a pre-generated MP3 (the slow speed plays the same file slower)
+  const staticSrc = await loadStaticAudio(cleanText);
+  if (staticSrc) {
+    return playAudio(staticSrc);
+  }
+
+  // 3. Play from local persistent device storage (IndexedDB)
   // If generated once in any past session, plays immediately without network!
   try {
     const savedRecording = await getSavedAudio(cacheKey);
@@ -215,7 +247,7 @@ export async function speakRussian(
     console.warn('[Audio Storage] IndexedDB read error:', err);
   }
 
-  // 3. Not yet generated or saved: generate once from server
+  // 4. Not yet generated or saved: generate once from server
   try {
     const res = await fetch('/api/tts', {
       method: 'POST',
@@ -259,6 +291,9 @@ export async function preloadAudioRecordings(texts: string[]) {
     const cacheKey = `v5_${clean}_normal`;
 
     if (audioCache.has(cacheKey)) continue;
+
+    // A pre-generated MP3 is simply fetched (the service worker keeps it for offline use): no /api/tts call
+    if (await loadStaticAudio(clean)) continue;
 
     const saved = await getSavedAudio(cacheKey);
     if (saved) {

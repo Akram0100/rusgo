@@ -27,6 +27,7 @@ AI Studio: https://ai.studio/apps/f9b265d3-93c0-4f6b-ac99-af6c78669bb5
 | `npm run build` | `dist/` papkasiga ishlab chiqarish build'ini yaratadi |
 | `npm start` | `dist/` ni Express orqali ishlab chiqarish rejimida xizmat qiladi (avval `npm run build`) |
 | `npm run lint` | Tiplarni tekshiradi (`tsc --noEmit`) |
+| `npm run audio:generate` | Darslardagi iboralarni `public/audio/` ga MP3 qilib yaratadi (pastda, "Audio") |
 | `npm run clean` | `dist/` ni oʻchiradi |
 
 ## Testlar
@@ -34,7 +35,7 @@ AI Studio: https://ai.studio/apps/f9b265d3-93c0-4f6b-ac99-af6c78669bb5
 | Buyruq | Nimani tekshiradi | Talab |
 |---|---|---|
 | `npm test` | `test:logic` va `test:server` | faqat `npm install` |
-| `npm run test:logic` | javoblarni aralashtirish, AI-dars validatsiyasi, XP/jon/streak/yutuq qoidalari, muloqot ssenariylari, dars maʼlumotlari yaxlitligi | — |
+| `npm run test:logic` | javoblarni aralashtirish, AI-dars validatsiyasi, XP/jon/streak/yutuq qoidalari, muloqot ssenariylari, audio (WAV/MP3, generator skripti, tayyor fayllar toʻliqligi), dars maʼlumotlari yaxlitligi | — |
 | `npm run test:server` | server: kirish tekshiruvi, tezlik cheklovi, keshlar, xatolar, `.env` (Gemini va Google xizmatlari soxta, internet kerak emas) | — |
 | `npm run test:rules` | `firestore.rules` ni Firestore emulyatorida | Java 11+ va Firebase CLI (`npm i -g firebase-tools`) |
 
@@ -61,15 +62,30 @@ Barcha raqamlar [src/utils/xp.ts](src/utils/xp.ts) da (oʻzgartirsangiz `npm run
 - **Streak:** kun foydalanuvchining mahalliy vaqti boʻyicha hisoblanadi; faqat dars tugatilgan kun sanaladi (ilovani ochish streakni uzaytirmaydi). Bir kun oʻtkazib yuborilsa streak 0 ga tushadi.
 - XP va streak brauzerda (`localStorage`) hisoblanadi va saqlanadi, serverda tekshirilmaydi: haqiqiy reyting uchun hisob serverda boʻlishi kerak.
 
+## Audio: oldindan tayyorlangan MP3
+
+Ichki darslardagi barcha ruscha iboralar (mashqlar, lugʻat, muloqot, grammatika) `public/audio/` ga MP3 qilib saqlanadi. Ilova ularni `/api/tts` ga murojaat qilmasdan oʻynaydi: serversiz, API limitisiz, tezroq; koʻrilgan iboralar oflayn ham ishlaydi (service worker saqlab qoʻyadi). AI yaratgan darslar va roʻyxatda yoʻq iboralar avvalgidek `/api/tts` orqali ketadi.
+
+```bash
+npm run audio:generate               # faqat fayli yoʻq iboralar
+npm run audio:generate -- --dry-run  # nima yaratilishini koʻrsatadi, hech narsani oʻzgartirmaydi
+npm run audio:generate -- --force    # hammasini qayta yaratadi (masalan, ovozni almashtirgach)
+```
+
+- **Ovoz:** `.env.local` da `GEMINI_API_KEY` boʻlsa Gemini (serverdagi bilan bir xil model, ovoz va uslub), boʻlmasa Google Translate'ning **rasmiy boʻlmagan** ovozi (serverning zaxira ovozi). `--source=gemini` yoki `--source=google` bilan tanlanadi.
+- **Darsni oʻzgartirsangiz** (yangi mashq, soʻz, muloqot, grammatika) skriptni qayta ishga tushiring: u faqat yangi iboralarni qoʻshadi va keraksizlarini oʻchiradi. Tayyor fayllar toʻliq boʻlmasa `npm run test:logic` buni aytadi.
+- `manifest.json` — ibora → fayl roʻyxati. Fayl nomi audioning oʻzidan olingan xesh, shuning uchun ovoz almashsa brauzer eski faylni koʻrsatmaydi. Skript har bir iboradan keyin manifestni saqlaydi, shuning uchun uzilgan ishni qayta ishga tushirsangiz davom etadi.
+- Gemini ovozni xom PCM qilib qaytaradi: server uni WAV'ga oʻraydi (brauzer xom PCM'ni oʻynay olmaydi), skript esa MP3'ga oʻgiradi (`@breezystack/lamejs`, faqat dasturlash uchun).
+
 ## Tuzilma
 
 - `src/` — React ilovasi: `components/`, `data/` (darslar, grammatika, muloqot ssenariylari), `utils/` (audio, gamifikatsiya, XP qoidalari, Firebase).
-- `server.ts` — `/api/tts` (audio), `/api/generate-lesson` (AI-dars), `/api/health` va ishlab chiqarishda `dist/` ni tarqatish.
+- `server.ts` — `/api/tts` (audio), `/api/generate-lesson` (AI-dars), `/api/health` va ishlab chiqarishda `dist/` ni tarqatish. `server/` — ovoz va audio format yordamchilari (server va `scripts/generate-audio.ts` uchun umumiy).
 - `firestore.rules`, `firebase-blueprint.json`, `firebase-applet-config.json` — Firebase sozlamalari.
 
 ## Bilish kerak
 
-- **Audio:** kalit boʻlsa Gemini TTS, boʻlmasa yoki xato boʻlsa Google Translate'ning **rasmiy boʻlmagan** TTS manzili ishlatiladi — u istalgan vaqt oʻzgarishi yoki serverdan soʻrovlarni rad etishi mumkin. Yaratilgan audio serverda (`.cache/audio`) va brauzerda (IndexedDB) saqlanadi.
+- **Audio:** kalit boʻlsa Gemini TTS, boʻlmasa yoki xato boʻlsa Google Translate'ning **rasmiy boʻlmagan** TTS manzili ishlatiladi — u istalgan vaqt oʻzgarishi yoki serverdan soʻrovlarni rad etishi mumkin. Ichki darslar uchun tayyor MP3 fayllar bor (yuqorida), qolganlari uchun yaratilgan audio serverda (`.cache/audio`) va brauzerda (IndexedDB) saqlanadi.
 - **Server himoyasi:** `/api/*` ochiq (kirish talab qilinmaydi), shuning uchun matn uzunligi, tezlik va kesh hajmi cheklangan. Cloud Run dan boshqa joyda proksi ortida joylashtirsangiz `TRUST_PROXY` ni sozlang, aks holda barcha tashrif buyuruvchilar bitta cheklovni boʻlishadi.
 - **Firebase:** Auth va Firestore alohida bundle boʻlagida yuklanadi. `firestore.rules` ni joylashtirishdan oldin emulyatorda sinang.
 - **Reyting** hozircha namunaviy (demo): raqiblar toʻqib chiqarilgan (qotirilgan roʻyxat), Firestore'ga ommaviy reyting yozuvi yuborilmaydi (`PUBLISH_LEADERBOARD` bayrogʻi, `src/utils/firebase.ts`).
