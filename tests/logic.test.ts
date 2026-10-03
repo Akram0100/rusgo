@@ -13,6 +13,7 @@ import {
   daysBetween,
   expireStreak,
   findNewAchievements,
+  getAchievementsWithProgress,
   getLocalDateString,
   loadUserStats,
   registerLessonDay,
@@ -369,7 +370,7 @@ const makeStats = (over: Partial<UserStats> = {}): UserStats => ({
   flashcardsMasteredCount: 0,
   aiLessonsCreatedCount: 0,
   completedRoleplays: [],
-  unlockedAchievements: ['first_step'],
+  unlockedAchievements: [],
   ...over,
 });
 
@@ -519,6 +520,7 @@ describe('streak days', () => {
       assert.equal(loaded.streakDays, 0);
       assert.equal(loaded.lastActiveDate, '');
       assert.deepEqual(loaded.completedRoleplays, []);
+      assert.deepEqual(loaded.unlockedAchievements, []); // nothing is unlocked before it is earned
     });
 
     it('stats saved before role-play tracking existed get an empty list instead of undefined', () => {
@@ -557,8 +559,33 @@ describe('streak days', () => {
 describe('achievement rewards', () => {
   const ids = (list: { id: string }[]) => list.map((achievement) => achievement.id).sort();
 
-  it('a fresh learner is owed nothing (the starter badge is already unlocked)', () => {
+  it('a fresh learner is owed nothing', () => {
     assert.deepEqual(findNewAchievements(makeStats()), []);
+  });
+
+  it('"Birinchi qadam" unlocks, and pays, when the first lesson is finished', () => {
+    assert.deepEqual(findNewAchievements(makeStats({ completedLessonsCount: 0 })), []);
+    const owed = findNewAchievements(makeStats({ completedLessonsCount: 1 }));
+    assert.deepEqual(ids(owed), ['first_step']);
+    assert.equal(owed[0].rewardXp, 20);
+  });
+
+  it('"Birinchi qadam" with a perfect first lesson is reported together with "Mergan oʻquvchi"', () => {
+    const owed = findNewAchievements(makeStats({ completedLessonsCount: 1, perfectLessonsCount: 1 }));
+    assert.deepEqual(ids(owed), ['first_step', 'perfect_lesson']);
+    assert.equal(owed[0].id, 'first_step'); // listed first, so the toast names it
+  });
+
+  it('saves from before it was a real goal list "Birinchi qadam" as unlocked: it shows what was really done and is not paid again', () => {
+    const legacyNoLessons = makeStats({ unlockedAchievements: ['first_step'], completedLessonsCount: 0 });
+    const shown = getAchievementsWithProgress(legacyNoLessons).find((a) => a.id === 'first_step')!;
+    assert.equal(shown.isUnlocked, false);
+    assert.equal(shown.progress, 0);
+    assert.deepEqual(findNewAchievements(legacyNoLessons), []);
+
+    const legacyWithLessons = makeStats({ unlockedAchievements: ['first_step'], completedLessonsCount: 4 });
+    assert.equal(getAchievementsWithProgress(legacyWithLessons).find((a) => a.id === 'first_step')!.isUnlocked, true);
+    assert.deepEqual(findNewAchievements(legacyWithLessons), []);
   });
 
   it('each goal unlocks exactly when its progress is reached', () => {

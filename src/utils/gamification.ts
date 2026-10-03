@@ -12,17 +12,17 @@ const DEFAULT_STATS: UserStats = {
   flashcardsMasteredCount: 0,
   aiLessonsCreatedCount: 0,
   completedRoleplays: [],
-  unlockedAchievements: ['first_step'],
+  unlockedAchievements: [],
 };
 
 export const ACHIEVEMENTS_LIST: Achievement[] = [
   {
     id: 'first_step',
     title: 'Birinchi qadam',
-    description: 'Birinchi ruscha mashqni muvaffaqiyatli bajardingiz',
+    description: 'Birinchi ruscha darsni muvaffaqiyatli tugating',
     icon: '🌟',
-    isUnlocked: true,
-    progress: 1,
+    isUnlocked: false,
+    progress: 0,
     maxProgress: 1,
     rewardXp: 20,
   },
@@ -132,8 +132,9 @@ export const getAchievementsWithProgress = (stats: UserStats): Achievement[] => 
     let unlocked = stats.unlockedAchievements.includes(ach.id);
 
     if (ach.id === 'first_step') {
-      progress = 1;
-      unlocked = true;
+      // Follows the progress alone: saves from before this was a real goal list it as unlocked from the start
+      progress = Math.min(1, stats.completedLessonsCount);
+      unlocked = progress >= 1;
     } else if (ach.id === 'streak_3') {
       progress = Math.min(3, stats.streakDays);
       if (progress >= 3) unlocked = true;
