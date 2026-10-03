@@ -13,11 +13,11 @@ import { pathToFileURL } from 'node:url';
 import { INITIAL_LESSONS } from '../src/data/lessons';
 import { SCENARIOS } from '../src/data/roleplay';
 import { GRAMMAR_RULES } from '../src/data/grammar';
-import { collectAudioTexts } from '../src/utils/audioTexts';
+import { collectAudioTexts, collectAudioTextsInLessonOrder } from '../src/utils/audioTexts';
 import { getStaticAudioUrl, resetAudioManifest } from '../src/utils/staticAudio';
 import { normalizeGeminiAudio, parsePcmMimeType, parseWav, pcmToWav } from '../server/audioFormat';
 import { encodeMp3, inspectMp3 } from '../scripts/lib/mp3';
-import { isDailyQuota, isQuotaError, retryAfterSeconds } from '../scripts/lib/quota';
+import { describeQuota, isDailyQuota, isQuotaError, retryAfterSeconds } from '../scripts/lib/quota';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 
@@ -221,6 +221,26 @@ describe('quota errors (scripts/lib/quota.ts)', () => {
     assert.equal(retryAfterSeconds(perDay), null);
     assert.equal(retryAfterSeconds(new Error('429')), null);
   });
+
+  // What the Gemini API really answered to the free-tier key when the day's 100 requests were used up
+  const realDailyError =
+    'ApiError: {"error":{"code":429,"message":"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 100, model: gemini-3.8-flash-lite-tts\\nPlease retry in 19h1m8.430387596s.","status":"RESOURCE_EXHAUSTED","details":[{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Learn more about Gemini API quotas","url":"https://ai.google.dev/gemini-api/docs/rate-limits"}]},{"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[{"quotaMetric":"generativelanguage.googleapis.com/generate_requests_per_model_per_day","quotaId":"GenerateRequestsPerDayPerProjectPerModel","quotaDimensions":{"location":"global","model":"gemini-3.8-flash-lite-tts"},"quotaValue":"100"}]},{"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"68468s"}]}}';
+
+  it('handles the real Gemini daily-limit answer: a daily quota, a retry delay of 19 hours, a short readable summary', () => {
+    assert.equal(isQuotaError(realDailyError), true);
+    assert.equal(isDailyQuota(realDailyError), true);
+    assert.equal(retryAfterSeconds(realDailyError), 68468);
+    assert.equal(
+      describeQuota(realDailyError),
+      'limit 100 (generate requests per model per day) for gemini-3.8-flash-lite-tts; the service says to retry in 19h1m8s',
+    );
+  });
+
+  it('describeQuota copes with partial or unknown messages', () => {
+    assert.equal(describeQuota(perMinute), 'the service says to retry in 35s');
+    assert.equal(describeQuota(new Error('429 Quota exceeded')), 'Error: 429 Quota exceeded');
+    assert.ok(describeQuota(new Error('x'.repeat(1000))).length <= 200);
+  });
 });
 
 describe('phrases to pre-generate (src/utils/audioTexts.ts)', () => {
@@ -235,6 +255,19 @@ describe('phrases to pre-generate (src/utils/audioTexts.ts)', () => {
       assert.ok(/[А-Яа-яЁё]/.test(text), text);
       assert.ok(text.length <= 200, text); // the limit of /api/tts and of the fallback voice
     }
+  });
+
+  it('can also be taken in the order a learner meets them: lessons, then role-plays, then grammar', () => {
+    const ordered = collectAudioTextsInLessonOrder();
+    assert.deepEqual([...ordered].sort(), texts, 'the same phrases');
+    assert.equal(ordered[0], INITIAL_LESSONS[0].exercises[0].target_audio_text.trim());
+
+    const lastLesson = INITIAL_LESSONS[INITIAL_LESSONS.length - 1];
+    const lastLessonPhrase = lastLesson.exercises[lastLesson.exercises.length - 1].target_audio_text.trim();
+    const roleplayLine = SCENARIOS[0].steps[0].ru.trim();
+    const grammarExample = GRAMMAR_RULES[0].sections[0].examples[0].audio_text.trim();
+    assert.ok(ordered.indexOf(lastLessonPhrase) < ordered.indexOf(roleplayLine), 'lessons before role-plays');
+    assert.ok(ordered.indexOf(roleplayLine) < ordered.indexOf(grammarExample), 'role-plays before grammar');
   });
 
   it('include exercises, vocabulary, role-play lines (both sides) and grammar examples', () => {
@@ -332,7 +365,7 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
   const scriptFile = path.join(projectRoot, 'scripts', 'generate-audio.ts');
   const mockPreload = pathToFileURL(path.join(projectRoot, 'tests', 'server-mock-fetch.mjs')).href;
   const tsxPreload = import.meta.resolve('tsx');
-  const phrases = collectAudioTexts();
+  const phrases = collectAudioTextsInLessonOrder(); // the order the script works in
 
   let workDir = '';
   let voiceFile = '';
@@ -353,7 +386,7 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
   let runs = 0;
   const run = (args: string[], env: Record<string, string> = {}) => {
     const childEnv: Record<string, string | undefined> = { ...process.env };
-    for (const name of ['GEMINI_API_KEY', 'MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_MP3_FILE']) delete childEnv[name];
+    for (const name of ['GEMINI_API_KEY', 'MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_MP3_FILE', 'MOCK_GEMINI_DAILY_AFTER']) delete childEnv[name];
     const mockLog = path.join(workDir, `mock-${++runs}.log`);
     const result = spawnSync(process.execPath, ['--import', tsxPreload, '--import', mockPreload, scriptFile, ...args], {
       cwd: workDir,
@@ -366,7 +399,8 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
   };
   const freshOut = () => fs.mkdtempSync(path.join(workDir, 'out-'));
   const fast = ['--delay=0', '--retry-wait=0'];
-  const readManifest = (out: string) => JSON.parse(fs.readFileSync(path.join(out, 'manifest.json'), 'utf8')) as { version: number; files: Record<string, string> };
+  const readManifest = (out: string) =>
+    JSON.parse(fs.readFileSync(path.join(out, 'manifest.json'), 'utf8')) as { version: number; complete: boolean; files: Record<string, string> };
   const mp3Files = (out: string) => fs.readdirSync(out).filter((name) => name.endsWith('.mp3'));
 
   it('generates MP3s named after their content and lists them in the manifest', () => {
@@ -376,6 +410,7 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
 
     const manifest = readManifest(out);
     assert.equal(manifest.version, 1);
+    assert.equal(manifest.complete, false, 'three phrases are not the whole set');
     assert.deepEqual(Object.keys(manifest.files).sort(), phrases.slice(0, 3).sort());
     for (const file of Object.values(manifest.files)) {
       assert.match(file, /^[0-9a-f]{12}\.mp3$/);
@@ -432,6 +467,7 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
     assert.match(result.output, new RegExp(`${phrases.length}/${phrases.length} phrases have audio`));
 
     const manifest = readManifest(out);
+    assert.equal(manifest.complete, true, 'every phrase has its file now');
     assert.deepEqual(Object.keys(manifest.files).sort(), [...phrases].sort());
     assert.ok(!('Старая фраза' in manifest.files));
     assert.ok(!fs.existsSync(path.join(out, 'bbbbbbbbbbbb.mp3')));
@@ -455,10 +491,35 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
     const result = run([`--out=${out}`, '--source=gemini', '--limit=8', ...fast], { GEMINI_API_KEY: 'test-key', MOCK_GEMINI_TTS: 'daily' });
     assert.equal(result.status, 1);
     assert.match(result.output, /daily quota of the voice service is used up/);
+    assert.match(result.output, /limit 10 \(generate requests per model per day\) for gemini-3\.8-flash-lite-tts/);
+    assert.match(result.output, /the service says to retry in 5h30m1s/);
     assert.match(result.output, /run the command again after the quota resets/);
     assert.equal(result.calls.length, 1, 'no retries and no further phrases');
     assert.equal((result.output.match(/FAILED/g) ?? []).length, 0, 'a daily quota is not counted as a failed phrase');
     assert.deepEqual(mp3Files(out), []);
+  });
+
+  it('a daily quota in the middle of a run keeps what was done, and the next run carries on with the rest', () => {
+    const out = freshOut();
+    const first = run([`--out=${out}`, '--source=gemini', ...fast], {
+      GEMINI_API_KEY: 'test-key',
+      MOCK_GEMINI_TTS: 'pcm',
+      MOCK_GEMINI_DAILY_AFTER: '4',
+    });
+    assert.equal(first.status, 1);
+    assert.match(first.output, /daily quota of the voice service is used up/);
+    assert.equal(first.calls.length, 5, 'four phrases, then the request that was refused');
+    let manifest = readManifest(out);
+    assert.deepEqual(Object.keys(manifest.files).sort(), phrases.slice(0, 4).sort(), 'the first lessons come first');
+    assert.equal(manifest.complete, false);
+
+    // The next day the quota is back
+    const second = run([`--out=${out}`, '--source=gemini', ...fast], { GEMINI_API_KEY: 'test-key', MOCK_GEMINI_TTS: 'pcm' });
+    assert.equal(second.status, 0, second.output);
+    assert.match(second.output, new RegExp(`4 already have audio, ${phrases.length - 4} to generate`));
+    manifest = readManifest(out);
+    assert.equal(manifest.complete, true);
+    assert.deepEqual(Object.keys(manifest.files).sort(), [...phrases].sort());
   });
 
   it('a per-minute quota is retried, then counts as a failure; five of them in a row stop the run', () => {
@@ -532,13 +593,28 @@ const shippedManifest = path.join(audioDir, 'manifest.json');
 
 describe('shipped audio (public/audio)', { skip: !fs.existsSync(shippedManifest) && 'not generated yet: run npm run audio:generate' }, () => {
   // Read inside the tests: a skipped suite must not fail on a manifest that does not exist
-  const shippedFiles = () => (JSON.parse(fs.readFileSync(shippedManifest, 'utf8')) as { files: Record<string, string> }).files;
+  const shipped = () => JSON.parse(fs.readFileSync(shippedManifest, 'utf8')) as { complete?: boolean; files: Record<string, string> };
+  const shippedFiles = () => shipped().files;
   const phrases = collectAudioTexts();
-
-  it('has a file for every phrase of the lessons (after changing a lesson, run npm run audio:generate)', () => {
+  const missingPhrases = () => {
     const files = shippedFiles();
-    const missing = phrases.filter((phrase) => !files[phrase] || !fs.existsSync(path.join(audioDir, files[phrase])));
+    return phrases.filter((phrase) => !files[phrase] || !fs.existsSync(path.join(audioDir, files[phrase])));
+  };
+
+  it('has a file for every phrase of the lessons once generation is complete (after changing a lesson, run npm run audio:generate)', (t) => {
+    const missing = missingPhrases();
+    if (!shipped().complete) {
+      // A small daily quota can spread the generation over several days: that is not a failure
+      t.diagnostic(`generation is still in progress: ${phrases.length - missing.length}/${phrases.length} phrases have audio`);
+      return;
+    }
     assert.deepEqual(missing, []);
+  });
+
+  it('says "complete" as soon as it is: the flag is what turns the full-coverage check on', () => {
+    if (!shipped().complete) {
+      assert.ok(missingPhrases().length > 0, 'every phrase has a file but the manifest does not say so: run npm run audio:generate again');
+    }
   });
 
   it('every file is a valid MP3 of a plausible length, named after its content', () => {

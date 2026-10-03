@@ -18,6 +18,7 @@ const sinePcm = () => {
 };
 // MOCK_MP3_FILE: a real MP3 for the voices to hand out (the generator script refuses audio that is not valid MP3)
 const mockMp3 = () => fs.readFileSync(process.env.MOCK_MP3_FILE);
+let geminiTtsRequests = 0;
 
 globalThis.fetch = async (input, init) => {
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -37,13 +38,19 @@ globalThis.fetch = async (input, init) => {
 
     if (model.endsWith('-tts')) {
       const mode = process.env.MOCK_GEMINI_TTS || 'ok';
+      // The free tier's daily limit, in the words the real API uses
+      const dailyLimit = () => {
+        const message =
+          'You exceeded your current quota. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 10, model: gemini-3.8-flash-lite-tts\nPlease retry in 5h30m1.5s.';
+        return json({ error: { code: 429, message, status: 'RESOURCE_EXHAUSTED' } }, 429);
+      };
+      // MOCK_GEMINI_DAILY_AFTER=N: the first N requests of this process work, then the daily limit is reached
+      geminiTtsRequests++;
+      if (Number(process.env.MOCK_GEMINI_DAILY_AFTER) > 0 && geminiTtsRequests > Number(process.env.MOCK_GEMINI_DAILY_AFTER)) return dailyLimit();
+
       if (mode === 'quota') return json({ error: { code: 429, message: 'Quota exceeded', status: 'RESOURCE_EXHAUSTED' } }, 429);
       if (mode === 'error') return json({ error: { code: 500, message: 'secret-internal-detail', status: 'INTERNAL' } }, 500);
-      if (mode === 'daily') {
-        const message =
-          'You exceeded your current quota. Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 10. quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier';
-        return json({ error: { code: 429, message, status: 'RESOURCE_EXHAUSTED' } }, 429);
-      }
+      if (mode === 'daily') return dailyLimit();
       if (mode === 'empty') return json({ candidates: [{ content: { parts: [{ text: 'no audio here' }] } }] });
       if (mode === 'pcm') {
         const inlineData = { mimeType: 'audio/L16;codec=pcm;rate=24000', data: sinePcm().toString('base64') };

@@ -3,12 +3,15 @@ import { SCENARIOS } from '../data/roleplay';
 import { GRAMMAR_RULES } from '../data/grammar';
 
 /**
- * Every Russian phrase the app plays from its built-in content, trimmed, without duplicates and in a stable
- * order. These are the phrases scripts/generate-audio.ts turns into MP3 files. Keep it in step with what the
- * components pass to speakRussian: exercises (target_audio_text), vocabulary and grammar examples (audio_text)
- * and every line of the role-play dialogues.
+ * Every Russian phrase the app plays from its built-in content, trimmed and without duplicates, in the order a
+ * learner meets them: the lessons first (exercises and vocabulary lesson by lesson), then the role-play
+ * dialogues, then the grammar examples. This is the order scripts/generate-audio.ts works in, so when a quota
+ * only covers part of the phrases it is the first lessons that get their audio first.
+ *
+ * Keep it in step with what the components pass to speakRussian: exercises (target_audio_text), vocabulary and
+ * grammar examples (audio_text) and every line of the role-play dialogues.
  */
-export function collectAudioTexts(): string[] {
+export function collectAudioTextsInLessonOrder(): string[] {
   const texts: string[] = [];
 
   for (const lesson of INITIAL_LESSONS) {
@@ -24,5 +27,8 @@ export function collectAudioTexts(): string[] {
     }
   }
 
-  return Array.from(new Set(texts.map((text) => text.trim()).filter(Boolean))).sort();
+  return Array.from(new Set(texts.map((text) => text.trim()).filter(Boolean)));
 }
+
+/** The same phrases in a stable, sorted order. */
+export const collectAudioTexts = (): string[] => collectAudioTextsInLessonOrder().sort();

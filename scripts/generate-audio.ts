@@ -5,19 +5,21 @@
 //   npm run audio:generate -- --dry-run         show what would be generated
 //   npm run audio:generate -- --force           regenerate everything (e.g. after switching the voice)
 //
-// Voice: Gemini (the same model, voice and style as the server) when GEMINI_API_KEY is set in .env.local,
-// otherwise the Google Translate voice that the server uses as its fallback. The run can be repeated at any
-// time: files that exist are kept, and the manifest is saved after every phrase.
+// Voice: Gemini (the same model, voice and style as the server) when GEMINI_API_KEY is set in .env.local or
+// .env, otherwise the Google Translate voice that the server uses as its fallback. The run can be repeated at
+// any time: files that exist are kept, and the manifest is saved after every phrase. The phrases are done in
+// the order a learner meets them, and a daily quota ends the run cleanly: run it again after the reset (the
+// free Gemini tier allows 100 requests a day for this model, the lessons need 272).
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
-import { collectAudioTexts } from '../src/utils/audioTexts';
+import { collectAudioTextsInLessonOrder } from '../src/utils/audioTexts';
 import { fetchFallbackRussianAudio, synthesizeWithGemini, TTS_MODEL, TTS_VOICE } from '../server/tts';
 import { parseWav } from '../server/audioFormat';
 import { encodeMp3, inspectMp3 } from './lib/mp3';
-import { isDailyQuota, isQuotaError, retryAfterSeconds } from './lib/quota';
+import { describeQuota, isDailyQuota, isQuotaError, retryAfterSeconds } from './lib/quota';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 dotenv.config({ path: [path.join(projectRoot, '.env.local'), path.join(projectRoot, '.env')], quiet: true });
@@ -131,12 +133,15 @@ function readManifest(): Record<string, string> {
 
 function writeManifest(files: Record<string, string>) {
   const sorted = Object.fromEntries(Object.entries(files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+  // True once every phrase of the lessons has its file. Generation can take several days on a small daily
+  // quota, so the tests only insist on full coverage after this has become true (and then keep it true).
+  const complete = texts.every((text) => Boolean(files[text]) && fs.existsSync(path.join(outDir, files[text])));
   const temporary = `${manifestPath}.tmp`;
-  fs.writeFileSync(temporary, JSON.stringify({ version: 1, files: sorted }, null, 1) + '\n');
+  fs.writeFileSync(temporary, JSON.stringify({ version: 1, complete, files: sorted }, null, 1) + '\n');
   fs.renameSync(temporary, manifestPath); // never leaves a half-written manifest behind
 }
 
-const texts = collectAudioTexts();
+const texts = collectAudioTextsInLessonOrder();
 const files = readManifest();
 const hasFile = (text: string) => Boolean(files[text]) && fs.existsSync(path.join(outDir, files[text]));
 const missing = force ? texts : texts.filter((text) => !hasFile(text));
@@ -188,7 +193,7 @@ for (const [index, text] of queue.entries()) {
     if (error instanceof DailyQuotaError) {
       aborted = true;
       console.error(
-        `${label} The daily quota of the voice service is used up (${error.message.replace(/\s+/g, ' ').slice(0, 300)}).\n` +
+        `${label} The daily quota of the voice service is used up: ${describeQuota(error)}.\n` +
           'What was generated is saved: run the command again after the quota resets (usually the next day), or with a key that has a higher limit.',
       );
       break;
@@ -223,6 +228,9 @@ if (limit === 0 && !aborted) {
     if (FILE_NAME.test(name) && !used.has(name)) fs.rmSync(path.join(outDir, name), { force: true });
   }
 }
+
+// Whatever happened above, leave the manifest saying whether the set is complete now
+if (Object.keys(files).length > 0) writeManifest(files);
 
 const totalBytes = fs
   .readdirSync(outDir)
