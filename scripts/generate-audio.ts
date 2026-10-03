@@ -17,6 +17,7 @@ import { collectAudioTexts } from '../src/utils/audioTexts';
 import { fetchFallbackRussianAudio, synthesizeWithGemini, TTS_MODEL, TTS_VOICE } from '../server/tts';
 import { parseWav } from '../server/audioFormat';
 import { encodeMp3, inspectMp3 } from './lib/mp3';
+import { isDailyQuota, isQuotaError, retryAfterSeconds } from './lib/quota';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 dotenv.config({ path: [path.join(projectRoot, '.env.local'), path.join(projectRoot, '.env')], quiet: true });
@@ -93,14 +94,25 @@ async function synthesizeMp3(text: string): Promise<Buffer> {
   return Buffer.from(audio.audio, 'base64');
 }
 
+/** The voice service's daily quota is used up: nothing more can be generated until it resets. */
+class DailyQuotaError extends Error {}
+
 async function withRetries<T>(task: () => Promise<T>): Promise<T> {
   for (let attempt = 1; ; attempt++) {
     try {
       return await task();
     } catch (error) {
+      // A daily quota does not come back within this run: stop at once, the progress is saved
+      if (isDailyQuota(error)) throw new DailyQuotaError(String(error));
       if (attempt >= MAX_ATTEMPTS) throw error;
-      const quota = /429|RESOURCE_EXHAUSTED|Quota exceeded|rate-limit/i.test(String(error));
-      await sleep(quota ? (retryWait === 0 ? 0 : 65_000) : retryWait * attempt);
+
+      let wait = retryWait * attempt;
+      if (isQuotaError(error)) {
+        // A per-minute limit: wait as long as the service says (65 s when it does not)
+        wait = retryWait === 0 ? 0 : Math.min(120, (retryAfterSeconds(error) ?? 60) + 5) * 1000;
+        console.log(`  rate limit reached, waiting ${Math.round(wait / 1000)} s before trying again`);
+      }
+      await sleep(wait);
     }
   }
 }
@@ -173,6 +185,14 @@ for (const [index, text] of queue.entries()) {
     consecutiveFailures = 0;
     console.log(`${label} ${text}  ->  ${file}  (${(mp3.length / 1024).toFixed(1)} KB, ${info.durationSeconds.toFixed(1)} s)`);
   } catch (error) {
+    if (error instanceof DailyQuotaError) {
+      aborted = true;
+      console.error(
+        `${label} The daily quota of the voice service is used up (${error.message.replace(/\s+/g, ' ').slice(0, 300)}).\n` +
+          'What was generated is saved: run the command again after the quota resets (usually the next day), or with a key that has a higher limit.',
+      );
+      break;
+    }
     failed.push(text);
     consecutiveFailures++;
     console.error(`${label} FAILED ${text}: ${error instanceof Error ? error.message : String(error)}`);
@@ -212,7 +232,6 @@ const covered = texts.filter(hasFile).length;
 console.log(
   `Done: ${generated} generated, ${failed.length} failed. ${covered}/${texts.length} phrases have audio (${(totalBytes / 1024 / 1024).toFixed(2)} MB).`,
 );
-if (failed.length > 0) {
-  console.error('Failed phrases:\n' + failed.map((text) => `  ${text}`).join('\n'));
-  process.exit(1);
-}
+if (failed.length > 0) console.error('Failed phrases:\n' + failed.map((text) => `  ${text}`).join('\n'));
+// A run that gave up early is not a success, even when nothing failed before it stopped
+if (failed.length > 0 || aborted) process.exit(1);

@@ -17,6 +17,7 @@ import { collectAudioTexts } from '../src/utils/audioTexts';
 import { getStaticAudioUrl, resetAudioManifest } from '../src/utils/staticAudio';
 import { normalizeGeminiAudio, parsePcmMimeType, parseWav, pcmToWav } from '../server/audioFormat';
 import { encodeMp3, inspectMp3 } from '../scripts/lib/mp3';
+import { isDailyQuota, isQuotaError, retryAfterSeconds } from '../scripts/lib/quota';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 
@@ -192,6 +193,36 @@ describe('MP3 encoder and reader (scripts/lib/mp3.ts)', () => {
   });
 });
 
+describe('quota errors (scripts/lib/quota.ts)', () => {
+  const perMinute = new Error('429 RESOURCE_EXHAUSTED: Quota exceeded for metric generate_requests_per_model_per_minute. Please retry in 35.2s.');
+  const perDay = new Error('429 RESOURCE_EXHAUSTED: Quota exceeded. quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier');
+
+  it('recognises "too many requests" errors, and only those', () => {
+    for (const error of [perMinute, perDay, new Error('{"error":{"code":429}}'), 'Quota exceeded', 'rate-limit hit']) {
+      assert.equal(isQuotaError(error), true, String(error));
+    }
+    for (const error of [new Error('fetch failed'), new Error('500 INTERNAL'), new Error('Gemini returned no audio'), null, undefined]) {
+      assert.equal(isQuotaError(error), false, String(error));
+    }
+  });
+
+  it('tells a daily quota (do not wait) from a per-minute one (wait and retry)', () => {
+    assert.equal(isDailyQuota(perDay), true);
+    assert.equal(isDailyQuota(new Error('429 Quota exceeded for generate_requests_per_model_per_day')), true);
+    assert.equal(isDailyQuota(perMinute), false);
+    assert.equal(isDailyQuota(new Error('500 INTERNAL, try again later today')), false);
+    assert.equal(isDailyQuota(new Error('fetch failed (daily build)')), false, 'it must be a quota error first');
+  });
+
+  it('reads how long the service asked us to wait', () => {
+    assert.equal(retryAfterSeconds(perMinute), 35.2);
+    assert.equal(retryAfterSeconds(new Error('{"details":[{"retryDelay":"17s"}]}')), 17);
+    assert.equal(retryAfterSeconds(new Error('Please retry in 4s')), 4);
+    assert.equal(retryAfterSeconds(perDay), null);
+    assert.equal(retryAfterSeconds(new Error('429')), null);
+  });
+});
+
 describe('phrases to pre-generate (src/utils/audioTexts.ts)', () => {
   const texts = collectAudioTexts();
 
@@ -315,17 +346,23 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
   });
   after(() => fs.rmSync(workDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
 
-  /** Runs the script in a child process. The output directory is always a temporary one, never public/audio. */
+  /**
+   * Runs the script in a child process. The output directory is always a temporary one, never public/audio.
+   * `calls` lists the requests that reached the (mocked) voice services during this run.
+   */
+  let runs = 0;
   const run = (args: string[], env: Record<string, string> = {}) => {
     const childEnv: Record<string, string | undefined> = { ...process.env };
     for (const name of ['GEMINI_API_KEY', 'MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_MP3_FILE']) delete childEnv[name];
+    const mockLog = path.join(workDir, `mock-${++runs}.log`);
     const result = spawnSync(process.execPath, ['--import', tsxPreload, '--import', mockPreload, scriptFile, ...args], {
       cwd: workDir,
-      env: { ...childEnv, MOCK_LOG: path.join(workDir, 'mock.log'), MOCK_MP3_FILE: voiceFile, ...env },
+      env: { ...childEnv, MOCK_LOG: mockLog, MOCK_MP3_FILE: voiceFile, ...env },
       encoding: 'utf8',
       timeout: 120_000,
     });
-    return { status: result.status, output: `${result.stdout}${result.stderr}` };
+    const calls = fs.existsSync(mockLog) ? fs.readFileSync(mockLog, 'utf8').split('\n').filter(Boolean) : [];
+    return { status: result.status, output: `${result.stdout}${result.stderr}`, calls };
   };
   const freshOut = () => fs.mkdtempSync(path.join(workDir, 'out-'));
   const fast = ['--delay=0', '--retry-wait=0'];
@@ -411,6 +448,26 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
     assert.equal((result.output.match(/FAILED/g) ?? []).length, 5, 'it does not hammer the service after giving up');
     assert.deepEqual(mp3Files(out), []);
     assert.ok(!fs.existsSync(path.join(out, 'manifest.json')));
+  });
+
+  it('a daily quota stops the run at once (waiting would not help) and keeps the progress', () => {
+    const out = freshOut();
+    const result = run([`--out=${out}`, '--source=gemini', '--limit=8', ...fast], { GEMINI_API_KEY: 'test-key', MOCK_GEMINI_TTS: 'daily' });
+    assert.equal(result.status, 1);
+    assert.match(result.output, /daily quota of the voice service is used up/);
+    assert.match(result.output, /run the command again after the quota resets/);
+    assert.equal(result.calls.length, 1, 'no retries and no further phrases');
+    assert.equal((result.output.match(/FAILED/g) ?? []).length, 0, 'a daily quota is not counted as a failed phrase');
+    assert.deepEqual(mp3Files(out), []);
+  });
+
+  it('a per-minute quota is retried, then counts as a failure; five of them in a row stop the run', () => {
+    const out = freshOut();
+    const result = run([`--out=${out}`, '--source=gemini', '--limit=8', ...fast], { GEMINI_API_KEY: 'test-key', MOCK_GEMINI_TTS: 'quota' });
+    assert.equal(result.status, 1);
+    assert.match(result.output, /rate limit reached, waiting/);
+    assert.match(result.output, /5 failures in a row/);
+    assert.equal(result.calls.length, 5 * 3, 'three attempts per phrase');
   });
 
   it('refuses audio that is not valid MP3 instead of shipping it', () => {

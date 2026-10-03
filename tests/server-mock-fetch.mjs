@@ -39,6 +39,11 @@ globalThis.fetch = async (input, init) => {
       const mode = process.env.MOCK_GEMINI_TTS || 'ok';
       if (mode === 'quota') return json({ error: { code: 429, message: 'Quota exceeded', status: 'RESOURCE_EXHAUSTED' } }, 429);
       if (mode === 'error') return json({ error: { code: 500, message: 'secret-internal-detail', status: 'INTERNAL' } }, 500);
+      if (mode === 'daily') {
+        const message =
+          'You exceeded your current quota. Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 10. quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier';
+        return json({ error: { code: 429, message, status: 'RESOURCE_EXHAUSTED' } }, 429);
+      }
       if (mode === 'empty') return json({ candidates: [{ content: { parts: [{ text: 'no audio here' }] } }] });
       if (mode === 'pcm') {
         const inlineData = { mimeType: 'audio/L16;codec=pcm;rate=24000', data: sinePcm().toString('base64') };

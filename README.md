@@ -75,6 +75,7 @@ npm run audio:generate -- --force    # hammasini qayta yaratadi (masalan, ovozni
 - **Ovoz:** `.env.local` da `GEMINI_API_KEY` boʻlsa Gemini (serverdagi bilan bir xil model, ovoz va uslub), boʻlmasa Google Translate'ning **rasmiy boʻlmagan** ovozi (serverning zaxira ovozi). `--source=gemini` yoki `--source=google` bilan tanlanadi.
 - **Darsni oʻzgartirsangiz** (yangi mashq, soʻz, muloqot, grammatika) skriptni qayta ishga tushiring: u faqat yangi iboralarni qoʻshadi va keraksizlarini oʻchiradi. Tayyor fayllar toʻliq boʻlmasa `npm run test:logic` buni aytadi.
 - `manifest.json` — ibora → fayl roʻyxati. Fayl nomi audioning oʻzidan olingan xesh, shuning uchun ovoz almashsa brauzer eski faylni koʻrsatmaydi. Skript har bir iboradan keyin manifestni saqlaydi, shuning uchun uzilgan ishni qayta ishga tushirsangiz davom etadi.
+- **Limitlar:** Gemini'ning bepul tarifida kunlik limit boʻlishi mumkin. Limit tugasa skript darhol toʻxtaydi (saqlanganlar yoʻqolmaydi): limit yangilangach (odatda ertasi kuni) yoki boshqa kalit bilan qayta ishga tushiring, u qolgan iboralardan davom etadi. Daqiqalik limitda esa servis aytgan vaqt kutib, qayta urinadi.
 - Gemini ovozni xom PCM qilib qaytaradi: server uni WAV'ga oʻraydi (brauzer xom PCM'ni oʻynay olmaydi), skript esa MP3'ga oʻgiradi (`@breezystack/lamejs`, faqat dasturlash uchun).
 
 ## Tuzilma
