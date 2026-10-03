@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Loader2, Lightbulb } from 'lucide-react';
 import { LessonPackage } from '../types/lesson';
+import { sanitizeGeneratedLesson } from '../utils/validateLesson';
 
 interface AiLessonModalProps {
   isOpen: boolean;
@@ -49,7 +50,8 @@ export const AiLessonModal: React.FC<AiLessonModalProps> = ({
       }
 
       if (data.lesson) {
-        onLessonGenerated(data.lesson);
+        // Never trust the model's JSON as-is: repair what can be repaired, drop the rest
+        onLessonGenerated(sanitizeGeneratedLesson(data.lesson, { topic: topic.trim(), level }));
         onClose();
       } else {
         throw new Error('Notoʻgʻri format qaytarildi');

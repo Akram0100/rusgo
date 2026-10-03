@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface RusGoLogoProps {
   className?: string;
@@ -15,6 +15,13 @@ export const RusGoLogo: React.FC<RusGoLogoProps> = ({
   textColor = 'text-slate-900',
   subtitle = 'Rus Tili A1',
 }) => {
+  // The logo is rendered several times (header, menu). SVG ids must be unique per copy: a gradient
+  // looked up in a hidden copy (display: none) is not drawn, which blanks the visible logo.
+  const uid = useId();
+  const baseId = `${uid}-rusgo-grad`;
+  const wingId = `${uid}-wing-grad`;
+  const sparkId = `${uid}-spark-grad`;
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {/* Dynamic Brand Logo Symbol (Emerald Wing + Letter R + Golden Spark) */}
@@ -28,30 +35,30 @@ export const RusGoLogo: React.FC<RusGoLogoProps> = ({
         aria-label="RusGo logotipi"
       >
         <defs>
-          <linearGradient id="rusgo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={baseId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#10B981" />
             <stop offset="50%" stopColor="#059669" />
             <stop offset="100%" stopColor="#047857" />
           </linearGradient>
-          <linearGradient id="wing-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={wingId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#6EE7B7" />
             <stop offset="50%" stopColor="#10B981" />
             <stop offset="100%" stopColor="#047857" />
           </linearGradient>
-          <linearGradient id="spark-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={sparkId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FDE047" />
             <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
         </defs>
 
         {/* 3D App Squircle Base */}
-        <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#rusgo-grad)" />
+        <rect x="2" y="2" width="44" height="44" rx="13" fill={`url(#${baseId})`} />
         <rect x="2" y="42" width="44" height="4" rx="2" fill="#064E3B" opacity="0.6" />
 
         {/* Dynamic Flying Wing Symbol behind/beside R */}
         <path
           d="M23 9C29 7 37 9 40 14C36 15 32 17 30 20C34 20 37 23 38 27C34 27 30 28 27 30C28 23 27 15 23 9Z"
-          fill="url(#wing-grad)"
+          fill={`url(#${wingId})`}
           opacity="0.95"
         />
 
@@ -64,7 +71,7 @@ export const RusGoLogo: React.FC<RusGoLogoProps> = ({
         {/* Energetic Golden Spark / Star Accent */}
         <path
           d="M39 6.5L40 9.5L43 10.5L40 11.5L39 14.5L38 11.5L35 10.5L38 9.5L39 6.5Z"
-          fill="url(#spark-grad)"
+          fill={`url(#${sparkId})`}
         />
       </svg>
 

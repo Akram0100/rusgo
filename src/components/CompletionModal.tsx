@@ -5,6 +5,8 @@ import { speakRussian } from '../utils/audio';
 
 interface CompletionModalProps {
   lessonData: LessonPackage;
+  lessonNumber?: number;
+  xpEarned?: number;
   mistakesCount: number;
   onRestart: () => void;
   onViewJson: () => void;
@@ -14,13 +16,19 @@ interface CompletionModalProps {
 
 export const CompletionModal: React.FC<CompletionModalProps> = ({
   lessonData,
+  lessonNumber,
+  xpEarned = 50,
   mistakesCount,
   onRestart,
   onViewJson,
   onNextLesson,
   hasNextLesson,
 }) => {
-  const accuracy = Math.max(0, Math.round(((lessonData.exercises.length - mistakesCount) / lessonData.exercises.length) * 100));
+  const totalExercises = lessonData.exercises.length;
+  const accuracy =
+    totalExercises > 0
+      ? Math.max(0, Math.round(((totalExercises - mistakesCount) / totalExercises) * 100))
+      : 100;
 
   return (
     <div className="w-full max-w-xl mx-auto py-8 text-center animate-in fade-in zoom-in-95 duration-300">
@@ -30,10 +38,11 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
       </div>
 
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
-        Tabriklaymiz! 1-dars yakunlandi!
+        Tabriklaymiz! {lessonNumber ? `${lessonNumber}-dars` : 'Dars'} yakunlandi!
       </h1>
       <p className="text-slate-600 text-sm max-w-md mx-auto mb-6">
-        Siz rus tilida tanishuv va salomlashish boʻyicha 5 ta asosiy mikro-mashqni muvaffaqiyatli tamomladingiz.
+        Siz <b className="text-slate-800">{lessonData.topic}</b> mavzusidagi {totalExercises} ta mikro-mashqni
+        muvaffaqiyatli tamomladingiz.
       </p>
 
       {/* Metrics Row */}
@@ -48,14 +57,14 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
           <p className="text-xs text-slate-500 font-semibold">Oʻrganildi</p>
           <p className="text-2xl font-black text-blue-600 mt-0.5 tabular-nums">
-            5 ta ibora
+            {totalExercises} ta ibora
           </p>
         </div>
 
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
           <p className="text-xs text-slate-500 font-semibold">Tajriba (XP)</p>
           <p className="text-2xl font-black text-amber-500 mt-0.5 tabular-nums">
-            +50 XP
+            +{xpEarned} XP
           </p>
         </div>
       </div>

@@ -39,7 +39,7 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
     <div className="w-full max-w-2xl mx-auto px-1 sm:px-0">
       {/* Exercise instruction & audio prompt header */}
       <div className="mb-4 sm:mb-6">
-        <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
           <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
             {exercise.type === 'multiple_choice' && 'Variantli test'}
             {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}

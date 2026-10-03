@@ -226,7 +226,10 @@ Asosiy talablar:
 2. Barcha koʻrsatmalar (instruction) va grammatik tushuntirishlar (explanation) faqat oʻzbek tilida (lotin alifbosida) boʻlsin.
 3. 10 ta mashqdan 4 tasi 'multiple_choice' (4 ta variant), 3 tasi 'translate_order' (soʻzlar hovuzidan toʻgʻri tartibda terish) va 3 tasi 'fill_blank' (tushib qolgan soʻzni qoʻyish) boʻlsin.
 4. target_audio_text faqat sof ruscha jumla boʻlsin (hech qanday boshqa tildagi soʻz yoki belgilar boʻlmasin).
-5. 6-10 ta eng muhim yangi soʻz/iborani 'vocabulary' roʻyxatida keltiring.`;
+5. 6-10 ta eng muhim yangi soʻz/iborani 'vocabulary' roʻyxatida keltiring.
+6. 'fill_blank' mashqlarida 'sentence_with_blank' ichida tushib qolgan soʻz oʻrniga aynan "___" (3 ta pastki chiziq) yozing; 'blank_answer' hamda unga 3 ta notoʻgʻri variantni qoʻshib, jami 4 ta 'options' bering.
+7. 'multiple_choice' uchun 'options' (4 ta) va ularning birortasiga aynan teng 'correct_answer' majburiy; 'translate_order' uchun 'correct_order' va uni oʻz ichiga olgan 'words_pool' (1-2 ta ortiqcha soʻz bilan) majburiy.
+8. Toʻgʻri javob variantlar orasida tasodifiy oʻrinda boʻlsin.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',

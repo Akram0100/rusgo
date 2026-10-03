@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# TTS audio cache written by server.ts at runtime
+.cache/

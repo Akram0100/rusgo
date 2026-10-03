@@ -46,7 +46,7 @@ export const DailyGoalToast: React.FC<DailyGoalToastProps> = ({
 
   return (
     <div
-      className={`fixed bottom-24 right-4 sm:right-6 z-40 max-w-sm w-full transition-all duration-500 ease-out transform ${
+      className={`fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 z-40 sm:max-w-sm sm:w-full transition-all duration-500 ease-out transform ${
         isVisible
           ? 'translate-y-0 opacity-100 scale-100'
           : 'translate-y-8 opacity-0 scale-95 pointer-events-none'

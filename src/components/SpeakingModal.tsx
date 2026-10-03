@@ -25,9 +25,12 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+  // Identifies the current listening attempt: events from older attempts (or after closing) are ignored
+  const sessionRef = useRef<number>(0);
 
   useEffect(() => {
     if (!isOpen) {
+      sessionRef.current += 1; // late events from the attempt being aborted must not touch the reset state
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
@@ -42,7 +45,8 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
   if (!isOpen) return null;
 
   // Clean words helper
-  const cleanWord = (w: string) => w.toLowerCase().replace(/[^а-яёa-z0-9]/gi, '');
+  // "ё" is usually written (and recognised) as "е", so treat them as one letter
+  const cleanWord = (w: string) => w.toLowerCase().replace(/ё/g, 'е').replace(/[^а-яa-z0-9]/gi, '');
 
   const targetWords = targetText.split(/\s+/).map(cleanWord).filter(Boolean);
 
@@ -75,7 +79,13 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
       recognition.continuous = false;
       recognition.interimResults = true;
 
+      // React state is stale inside these callbacks, so keep this attempt's data in local variables
+      const session = ++sessionRef.current;
+      let heard = '';
+      let failed = false;
+
       recognition.onstart = () => {
+        if (sessionRef.current !== session) return;
         setIsListening(true);
         setStatus('listening');
         setTranscript('');
@@ -84,15 +94,19 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onresult = (event: any) => {
+        if (sessionRef.current !== session) return;
         let currentTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           currentTranscript += event.results[i][0].transcript;
         }
+        heard = currentTranscript;
         setTranscript(currentTranscript);
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onerror = (event: any) => {
+        if (sessionRef.current !== session) return;
+        failed = true;
         setIsListening(false);
         if (event.error === 'not-allowed') {
           setErrorMsg('Mikrofon ruxsati berilmadi. Iltimos, brauzer sozlamalarida mikrofonga ruxsat bering.');
@@ -103,8 +117,10 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
       };
 
       recognition.onend = () => {
+        if (sessionRef.current !== session) return;
         setIsListening(false);
-        evaluateSpokenText();
+        // Judge what was heard in THIS attempt; the `transcript` state is stale inside this closure
+        if (!failed) evaluateSpokenText(heard);
       };
 
       recognitionRef.current = recognition;
@@ -123,13 +139,13 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
     setIsListening(false);
   };
 
-  const evaluateSpokenText = () => {
-    if (!transcript.trim()) {
+  const evaluateSpokenText = (spoken: string) => {
+    if (!spoken.trim()) {
       setStatus('retry');
       return;
     }
 
-    const sim = calculateSimilarity(transcript);
+    const sim = calculateSimilarity(spoken);
     setSimilarity(sim);
 
     if (sim >= 70) {

@@ -77,9 +77,9 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full max-w-full">
       <div className="max-w-4xl mx-auto px-2.5 sm:px-4 py-2 sm:py-2.5">
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3">
           {/* Zone 1: Hamburger Menu (☰) + Logo + Active Lesson Selector */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="contents lg:flex lg:items-center lg:gap-2 lg:shrink-0">
             {/* Hamburger Button */}
             <button
               onClick={onOpenDrawer}
@@ -91,18 +91,23 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
             </button>
 
             {/* RusGo Brand Logo */}
-            <RusGoLogo size={32} showText={true} />
+            <span className="sm:hidden">
+              <RusGoLogo size={32} />
+            </span>
+            <span className="hidden sm:block">
+              <RusGoLogo size={32} showText={true} />
+            </span>
 
             {/* Current Lesson Pill (Clickable -> Opens Drawer) */}
             <button
               onClick={onOpenDrawer}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100/90 hover:bg-slate-200/80 text-slate-800 transition-colors cursor-pointer border border-slate-200/70 max-w-[130px] sm:max-w-[210px]"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100/90 hover:bg-slate-200/80 text-slate-800 transition-colors cursor-pointer border border-slate-200/70 order-last max-w-[60%] lg:order-none lg:max-w-[210px]"
               title="Barcha darslarni koʻrish uchun bosing"
             >
               <span className="text-emerald-700 font-black shrink-0">
                 {currentLevel} • {activeLessonNumber}-dars
               </span>
-              <span className="text-slate-500 font-normal truncate hidden sm:inline">
+              <span className="text-slate-500 font-normal truncate">
                 {activeLessonTopic}
               </span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -110,7 +115,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
           </div>
 
           {/* Zone 2: Focused Duolingo Progress Bar */}
-          <div className="flex-1 max-w-xs sm:max-w-sm mx-1 sm:mx-3">
+          <div className="order-last flex-1 min-w-[88px] lg:order-none lg:max-w-sm lg:mx-3">
             <div className="flex items-center gap-2">
               <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden p-0.5">
                 <div
@@ -125,7 +130,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
           </div>
 
           {/* Zone 3: Gamification (Streak, XP, Hearts) & User Account */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="ml-auto flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Streak */}
             <button
               onClick={onOpenAchievements}

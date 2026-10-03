@@ -83,20 +83,23 @@ export const FlashcardsModal: React.FC<FlashcardsModalProps> = ({
   };
 
   const handleNext = (mastered: boolean) => {
+    // A card marked "repeat" goes to the end of the queue
+    const queue = mastered ? cards : [...cards, currentCard];
+
     if (mastered) {
       setKnownCount((prev) => prev + 1);
       playSuccessChime();
     } else {
       setReviewCount((prev) => prev + 1);
-      // Re-queue card to end of review list
-      setCards((prev) => [...prev, currentCard]);
+      setCards(queue);
     }
 
-    if (currentIndex + 1 < cards.length) {
+    // Check against the updated queue, otherwise repeating the last card would end the session
+    if (currentIndex + 1 < queue.length) {
       setIsFlipped(false);
       setCurrentIndex((prev) => prev + 1);
       // Auto-pronounce next card
-      speakRussian(cards[currentIndex + 1].audio_text, 0.95);
+      speakRussian(queue[currentIndex + 1].audio_text, 0.95);
     } else {
       setIsFinished(true);
       playSuccessChime();

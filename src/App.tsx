@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { INITIAL_LESSONS } from './data/lessons';
 import { LessonPackage } from './types/lesson';
 import { LessonHeader } from './components/LessonHeader';
@@ -30,6 +30,16 @@ import {
   speakRussian,
   preloadAudioRecordings,
 } from './utils/audio';
+import { withShuffledChoices } from './utils/shuffle';
+
+// XP awarded for finishing a lesson
+const LESSON_COMPLETE_XP = 50;
+
+// Lesson levels are free-form strings (AI lessons too); map them onto the three known levels.
+const toLevel = (value?: string): 'A1' | 'A2' | 'B1' | null => {
+  const level = (value || 'A1').toUpperCase();
+  return level === 'A1' || level === 'A2' || level === 'B1' ? level : null;
+};
 
 export default function App() {
   const [lessons, setLessons] = useState<LessonPackage[]>(INITIAL_LESSONS);
@@ -148,6 +158,8 @@ export default function App() {
   const [hearts, setHearts] = useState<number>(3);
   const [mistakesCount, setMistakesCount] = useState<number>(0);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  // Bumped whenever a lesson is (re)started so its answer choices get reshuffled
+  const [shuffleSeed, setShuffleSeed] = useState<number>(0);
 
   // Exercise interaction state
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -158,7 +170,20 @@ export default function App() {
 
   const activeLesson = lessons.find((l) => l.lesson_id === activeLessonId) || lessons[0];
   const activeLessonIndex = lessons.findIndex((l) => l.lesson_id === activeLessonId);
-  const currentExercise = activeLesson.exercises[currentIndex];
+  const activeLessonLevel = toLevel(activeLesson.level) ?? currentLevel;
+  // Number shown to the learner: position inside the lesson's own level, as in the lessons menu
+  const activeLessonNumber =
+    lessons
+      .filter((l) => (l.level || 'A1').toUpperCase() === (activeLesson.level || 'A1').toUpperCase())
+      .findIndex((l) => l.lesson_id === activeLesson.lesson_id) + 1;
+
+  const rawExercise = activeLesson.exercises[currentIndex];
+  // Choices are shuffled for display only; answers are graded by value, so grading is unaffected.
+  // shuffleSeed forces a fresh shuffle when the lesson is restarted.
+  const currentExercise = useMemo(
+    () => (rawExercise ? withShuffledChoices(rawExercise) : rawExercise),
+    [rawExercise, shuffleSeed]
+  );
 
   // Preload and save audio recordings permanently in local storage for this lesson
   useEffect(() => {
@@ -186,16 +211,22 @@ export default function App() {
     setHearts(3);
     setMistakesCount(0);
     setIsCompleted(false);
+    setShuffleSeed((seed) => seed + 1);
     resetExerciseState();
   };
 
   // Switch to another lesson
   const handleSelectLesson = (lessonId: string) => {
     setActiveLessonId(lessonId);
+    // Keep the level tab in sync with the opened lesson (e.g. "next lesson" crossing from A1 to A2)
+    const target = lessons.find((l) => l.lesson_id === lessonId);
+    const targetLevel = target && toLevel(target.level);
+    if (targetLevel) setCurrentLevel(targetLevel);
     setCurrentIndex(0);
     setHearts(3);
     setMistakesCount(0);
     setIsCompleted(false);
+    setShuffleSeed((seed) => seed + 1);
     resetExerciseState();
   };
 
@@ -252,6 +283,9 @@ export default function App() {
     setLessons((prev) => [...prev, newLesson]);
     setUnlockedLessons((prev) => [...prev, newLesson.lesson_id]);
     handleSelectLesson(newLesson.lesson_id);
+    // The new lesson is not in `lessons` yet, so handleSelectLesson cannot look its level up
+    const newLevel = toLevel(newLesson.level);
+    if (newLevel) setCurrentLevel(newLevel);
   };
 
   // Multiple choice selection
@@ -349,7 +383,7 @@ export default function App() {
             currentLevel,
             unlockedLessons: nextLessons,
             completedLessons: Array.from(new Set([...completedLessons, activeLessonId])),
-            xp: stats.xp + 50,
+            xp: stats.xp + LESSON_COMPLETE_XP,
             streakDays: stats.streakDays,
             hearts,
           });
@@ -362,7 +396,7 @@ export default function App() {
       setStats((prev) => {
         const next = {
           ...prev,
-          xp: prev.xp + 50,
+          xp: prev.xp + LESSON_COMPLETE_XP,
           completedLessonsCount: prev.completedLessonsCount + 1,
           perfectLessonsCount:
             mistakesCount === 0 ? prev.perfectLessonsCount + 1 : prev.perfectLessonsCount,
@@ -387,11 +421,24 @@ export default function App() {
     mistakesCount,
   ]);
 
+  // While any modal or the lessons menu is open, Enter belongs to it and must not reach the lesson below
+  const isOverlayOpen =
+    isDrawerOpen ||
+    isAuthModalOpen ||
+    isAiModalOpen ||
+    isVocabularyOpen ||
+    isSpeakingModalOpen ||
+    isFlashcardsOpen ||
+    isSpeedMatchOpen ||
+    isRoleplayOpen ||
+    isGrammarOpen ||
+    isAchievementsOpen ||
+    isLeaderboardOpen;
+
   // Keyboard shortcut listener for Enter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (activeTab !== 'trainer' || isCompleted || isAiModalOpen || isVocabularyOpen || isAuthModalOpen)
-        return;
+      if (activeTab !== 'trainer' || isCompleted || isOverlayOpen) return;
 
       if (e.key === 'Enter') {
         if (!isChecked && hasAnswer) {
@@ -411,9 +458,7 @@ export default function App() {
     isCompleted,
     isChecked,
     hasAnswer,
-    isAiModalOpen,
-    isVocabularyOpen,
-    isAuthModalOpen,
+    isOverlayOpen,
     handleCheck,
     handleContinue,
   ]);
@@ -445,13 +490,13 @@ export default function App() {
         onResetLesson={handleResetLesson}
         streakDays={stats.streakDays}
         xp={stats.xp}
-        currentLevel={currentLevel}
+        currentLevel={activeLessonLevel}
         user={user}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenAchievements={() => setIsAchievementsOpen(true)}
         onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
         onOpenDrawer={() => setIsDrawerOpen(true)}
-        activeLessonNumber={activeLessonIndex + 1}
+        activeLessonNumber={activeLessonNumber}
         activeLessonTopic={activeLesson.topic}
       />
 
@@ -489,6 +534,8 @@ export default function App() {
           isCompleted ? (
             <CompletionModal
               lessonData={activeLesson}
+              lessonNumber={activeLessonNumber}
+              xpEarned={LESSON_COMPLETE_XP}
               mistakesCount={mistakesCount}
               onRestart={handleResetLesson}
               onViewJson={() => setActiveTab('json')}
