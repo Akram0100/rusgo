@@ -1,0 +1,48 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Foydalanuvchi hisobi va o'quv jarayoni",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "currentLevel": { "type": "string", "enum": ["A1", "A2", "B1"] },
+        "unlockedLessons": { "type": "array" },
+        "completedLessons": { "type": "array" },
+        "xp": { "type": "integer" },
+        "streakDays": { "type": "integer" },
+        "hearts": { "type": "integer" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "currentLevel", "unlockedLessons", "xp", "streakDays"]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Haftalik liga reyting ma'lumoti",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "xp": { "type": "integer" },
+        "league": { "type": "string" },
+        "streakDays": { "type": "integer" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "displayName", "xp", "league"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Foydalanuvchining shaxsiy profili va dars o'zlashtirish progressi"
+    },
+    "/leaderboard/{userId}": {
+      "schema": "LeaderboardEntry",
+      "description": "Umumiy ochiq reyting yozuvi"
+    }
+  }
+}

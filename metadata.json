@@ -1,0 +1,6 @@
+{
+  "name": "Rus Tili A1 — Duolingo Metodikasi",
+  "description": "Oʻzbek tilida soʻzlashuvchilar uchun rus tili A1 1-dars mikro-mashqlari: interaktiv trenajyor, audio talaffuz va JSON eksport.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

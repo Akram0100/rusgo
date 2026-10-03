@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="50%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7" />
+      <stop offset="50%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+    <filter id="shadow3d" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#064E3B" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Base 3D Squircle -->
+  <rect width="512" height="512" rx="136" fill="url(#bgGrad)" />
+  <rect y="470" width="512" height="42" rx="20" fill="#064E3B" opacity="0.5" />
+
+  <g filter="url(#shadow3d)">
+    <!-- Dynamic Wing Feather Behind R -->
+    <path
+      d="M260 100 C340 70 420 100 450 160 C400 170 350 195 330 230 C370 230 410 260 420 310 C370 310 330 320 290 350 C310 270 290 170 260 100 Z"
+      fill="url(#wingGrad)"
+      opacity="0.95"
+    />
+
+    <!-- Stylized Modern Letter 'R' in Crisp Pure White -->
+    <path
+      d="M140 130 C140 118 150 108 162 108 H250 C298 108 338 148 338 196 C338 238 308 274 268 282 L342 400 C348 409 342 422 331 422 H285 C277 422 270 417 265 410 L204 304 H196 V408 C196 416 189 422 181 422 H160 C149 422 140 413 140 402 V130 Z M196 164 V252 H248 C280 252 292 232 292 203 C292 174 280 164 248 164 H196 Z"
+      fill="#FFFFFF"
+    />
+
+    <!-- Golden Spark Star Accent -->
+    <path
+      d="M430 70 L442 104 L476 116 L442 128 L430 162 L418 128 L384 116 L418 104 Z"
+      fill="url(#sparkGrad)"
+    />
+  </g>
+</svg>
