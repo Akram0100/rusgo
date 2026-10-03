@@ -4,13 +4,14 @@ const STATS_STORAGE_KEY = 'duo_rus_user_stats';
 
 const DEFAULT_STATS: UserStats = {
   xp: 40,
-  streakDays: 1,
-  lastActiveDate: new Date().toISOString().slice(0, 10),
+  streakDays: 0,
+  lastActiveDate: '',
   completedLessonsCount: 0,
   perfectLessonsCount: 0,
   speakingAttemptsCount: 0,
   flashcardsMasteredCount: 0,
   aiLessonsCreatedCount: 0,
+  completedRoleplays: [],
   unlockedAchievements: ['first_step'],
 };
 
@@ -77,29 +78,41 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
   },
 ];
 
+/**
+ * The learner's calendar day as YYYY-MM-DD, in local time. UTC would be wrong here: in Uzbekistan
+ * (UTC+5) the UTC date changes at 05:00, so a late-night lesson and an early-morning one would
+ * count as the same day.
+ */
+export const getLocalDateString = (date: Date = new Date()): string => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+const dayNumber = (day: string): number => {
+  // String(): stored stats may hold anything, and this runs while a lesson is being completed
+  const [year, month, date] = String(day).split('-').map(Number);
+  return Math.round(Date.UTC(year, month - 1, date) / 86_400_000);
+};
+
+/** Whole calendar days from `from` to `to` (both YYYY-MM-DD). NaN when either is not a date. */
+export const daysBetween = (from: string, to: string): number => dayNumber(to) - dayNumber(from);
+
+/** At app start: a streak whose last lesson day is older than yesterday is over. Opening the app does not extend it. */
+export const expireStreak = (stats: UserStats, today: string): UserStats =>
+  daysBetween(stats.lastActiveDate, today) > 1 && stats.streakDays !== 0 ? { ...stats, streakDays: 0 } : stats;
+
+/** A lesson was completed today: extends the streak (once per day) or starts a new one. */
+export const registerLessonDay = (stats: UserStats, today: string): UserStats => {
+  const gap = daysBetween(stats.lastActiveDate, today);
+  if (gap === 0) return stats; // today already counted
+  return { ...stats, streakDays: gap === 1 ? stats.streakDays + 1 : 1, lastActiveDate: today };
+};
+
 export const loadUserStats = (): UserStats => {
   try {
     const raw = localStorage.getItem(STATS_STORAGE_KEY);
     if (!raw) return DEFAULT_STATS;
-    const parsed = JSON.parse(raw);
-    const today = new Date().toISOString().slice(0, 10);
-
-    // Calculate streak
-    if (parsed.lastActiveDate !== today) {
-      const lastDate = new Date(parsed.lastActiveDate);
-      const currentDate = new Date(today);
-      const diffDays = Math.round((currentDate.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
-
-      if (diffDays === 1) {
-        parsed.streakDays = (parsed.streakDays || 1) + 1;
-      } else if (diffDays > 1) {
-        parsed.streakDays = 1; // reset streak if missed a day
-      }
-      parsed.lastActiveDate = today;
-      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(parsed));
-    }
-
-    return { ...DEFAULT_STATS, ...parsed };
+    return expireStreak({ ...DEFAULT_STATS, ...JSON.parse(raw) }, getLocalDateString());
   } catch {
     return DEFAULT_STATS;
   }
@@ -145,3 +158,9 @@ export const getAchievementsWithProgress = (stats: UserStats): Achievement[] => 
     };
   });
 };
+
+/** Achievements that the current progress has unlocked but that have not paid their XP yet. */
+export const findNewAchievements = (stats: UserStats): Achievement[] =>
+  getAchievementsWithProgress(stats).filter(
+    (achievement) => achievement.isUnlocked && !stats.unlockedAchievements.includes(achievement.id)
+  );

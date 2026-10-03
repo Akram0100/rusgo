@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Zap, Trophy, RotateCcw, Volume2, Timer, Flame, CheckCircle2 } from 'lucide-react';
 import { speakRussian, playTileClick, playSuccessChime, playErrorTone } from '../utils/audio';
+import { SPEED_MATCH_ROUND_MAX_XP, addSpeedMatchXp, getSpeedMatchPairXp } from '../utils/xp';
 
 interface VocabularyItem {
   term: string;
@@ -54,9 +55,25 @@ export const SpeedMatchModal: React.FC<SpeedMatchModalProps> = ({
   // Timer interval ref
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // The round's XP is tracked in a ref as well, so it can be paid out from the timer and from closing the
+  // modal without depending on a render's state. It is paid once per round, whichever of the two comes first.
+  const scoreRef = useRef(0);
+  const awardedRef = useRef(true);
+  const onAddXpRef = useRef(onAddXp);
+  onAddXpRef.current = onAddXp;
+
+  const awardRound = () => {
+    if (awardedRef.current) return;
+    awardedRef.current = true;
+    if (scoreRef.current > 0) onAddXpRef.current?.(scoreRef.current);
+  };
+
   // Reset & start game
   const initGame = () => {
     if (pool.length < 2) return;
+
+    scoreRef.current = 0;
+    awardedRef.current = false;
 
     // Pick 5 random items from pool
     const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
@@ -102,8 +119,14 @@ export const SpeedMatchModal: React.FC<SpeedMatchModalProps> = ({
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      awardRound(); // closing in the middle of a round (or unmounting) still pays what was earned
     };
   }, [isOpen]);
+
+  // The timer ran out: pay the round's XP automatically
+  useEffect(() => {
+    if (isGameOver) awardRound();
+  }, [isGameOver]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -160,8 +183,8 @@ export const SpeedMatchModal: React.FC<SpeedMatchModalProps> = ({
       const newCombo = combo + 1;
       setCombo(newCombo);
       setMaxCombo((prev) => Math.max(prev, newCombo));
-      const points = 10 + newCombo * 2;
-      setScore((prev) => prev + points);
+      scoreRef.current = addSpeedMatchXp(scoreRef.current, getSpeedMatchPairXp(newCombo));
+      setScore(scoreRef.current);
       setMatchedPairsCount((prev) => prev + 1);
 
       // Mark items as matched
@@ -225,13 +248,6 @@ export const SpeedMatchModal: React.FC<SpeedMatchModalProps> = ({
     setUzItems(uzList);
   };
 
-  const handleFinish = () => {
-    if (score > 0 && onAddXp) {
-      onAddXp(score);
-    }
-    onClose();
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -277,9 +293,14 @@ export const SpeedMatchModal: React.FC<SpeedMatchModalProps> = ({
           </div>
 
           {/* Score XP */}
-          <div className="flex items-center gap-1.5 font-black text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+          <div
+            className="flex items-center gap-1.5 font-black text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl"
+            title={`Bir raundda koʻpi bilan ${SPEED_MATCH_ROUND_MAX_XP} XP olinadi`}
+          >
             <Zap className="w-4 h-4 fill-emerald-500 text-emerald-500" />
-            <span>+{score} XP</span>
+            <span>
+              +{score} XP{score >= SPEED_MATCH_ROUND_MAX_XP ? ' (maks.)' : ''}
+            </span>
           </div>
         </div>
 
@@ -320,10 +341,10 @@ export const SpeedMatchModal: React.FC<SpeedMatchModalProps> = ({
                   <span>Qaytadan oʻynash</span>
                 </button>
                 <button
-                  onClick={handleFinish}
+                  onClick={onClose}
                   className="px-5 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-colors"
                 >
-                  XPni qabul qilish
+                  Yopish
                 </button>
               </div>
             </div>

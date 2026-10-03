@@ -19,8 +19,23 @@ import { DailyGoalToast } from './components/DailyGoalToast';
 import { GrammarModal } from './components/GrammarModal';
 import { LeaderboardModal } from './components/LeaderboardModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
-import { loadUserStats, saveUserStats } from './utils/gamification';
-import { UserStats } from './types/gamification';
+import { OutOfHearts } from './components/OutOfHearts';
+import { AchievementToast } from './components/AchievementToast';
+import {
+  findNewAchievements,
+  getLocalDateString,
+  loadUserStats,
+  registerLessonDay,
+  saveUserStats,
+} from './utils/gamification';
+import {
+  MAX_HEARTS,
+  LESSON_FIRST_XP,
+  LESSON_REPLAY_XP,
+  ROLEPLAY_FIRST_XP,
+  ROLEPLAY_REPEAT_XP,
+} from './utils/xp';
+import { Achievement, UserStats } from './types/gamification';
 import { watchAuthState, loadUserProfile, syncUserProfile, signOutUser } from './utils/cloud';
 import {
   playSuccessChime,
@@ -30,9 +45,6 @@ import {
   preloadAudioRecordings,
 } from './utils/audio';
 import { withShuffledChoices } from './utils/shuffle';
-
-// XP awarded for finishing a lesson
-const LESSON_COMPLETE_XP = 50;
 
 // Lesson levels are free-form strings (AI lessons too); map them onto the three known levels.
 const toLevel = (value?: string): 'A1' | 'A2' | 'B1' | null => {
@@ -74,6 +86,8 @@ export default function App() {
 
   // Gamification state
   const [stats, setStats] = useState<UserStats>(loadUserStats);
+  // Achievements unlocked a moment ago, shown in the toast until it closes
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
   const [isAchievementsOpen, setIsAchievementsOpen] = useState<boolean>(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
 
@@ -158,7 +172,7 @@ export default function App() {
           completedLessons,
           xp: next.xp,
           streakDays: next.streakDays,
-          hearts: 3,
+          hearts: MAX_HEARTS,
         });
       }
       return next;
@@ -167,9 +181,13 @@ export default function App() {
 
   // Lesson progression state
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [hearts, setHearts] = useState<number>(3);
+  const [hearts, setHearts] = useState<number>(MAX_HEARTS);
+  // The attempt ended because the last heart was spent; the lesson has to be started again
+  const [isOutOfHearts, setIsOutOfHearts] = useState<boolean>(false);
   const [mistakesCount, setMistakesCount] = useState<number>(0);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  // XP the last completed lesson paid (first completion vs. repeat), for the completion screen
+  const [lessonXpEarned, setLessonXpEarned] = useState<number>(LESSON_FIRST_XP);
   // Bumped whenever a lesson is (re)started so its answer choices get reshuffled
   const [shuffleSeed, setShuffleSeed] = useState<number>(0);
 
@@ -220,7 +238,8 @@ export default function App() {
   // Full reset for restarting current lesson
   const handleResetLesson = () => {
     setCurrentIndex(0);
-    setHearts(3);
+    setHearts(MAX_HEARTS);
+    setIsOutOfHearts(false);
     setMistakesCount(0);
     setIsCompleted(false);
     setShuffleSeed((seed) => seed + 1);
@@ -235,7 +254,8 @@ export default function App() {
     const targetLevel = target && toLevel(target.level);
     if (targetLevel) setCurrentLevel(targetLevel);
     setCurrentIndex(0);
-    setHearts(3);
+    setHearts(MAX_HEARTS);
+    setIsOutOfHearts(false);
     setMistakesCount(0);
     setIsCompleted(false);
     setShuffleSeed((seed) => seed + 1);
@@ -369,10 +389,22 @@ export default function App() {
 
   // Proceed to next exercise or complete lesson with unlock & cloud sync
   const handleContinue = useCallback(() => {
+    // The answer that was just shown cost the last heart: the attempt ends here
+    if (hearts === 0) {
+      setIsOutOfHearts(true);
+      return;
+    }
+
     if (currentIndex + 1 < activeLesson.exercises.length) {
       setCurrentIndex((prev) => prev + 1);
       resetExerciseState();
     } else {
+      // A lesson pays full XP the first time and a smaller amount when it is repeated
+      const isFirstCompletion = !completedLessons.includes(activeLessonId);
+      const lessonXp = isFirstCompletion ? LESSON_FIRST_XP : LESSON_REPLAY_XP;
+      const today = getLocalDateString();
+
+      setLessonXpEarned(lessonXp);
       setIsCompleted(true);
       playLessonComplete();
 
@@ -405,8 +437,8 @@ export default function App() {
             currentLevel,
             unlockedLessons: nextLessons,
             completedLessons: Array.from(new Set([...completedLessons, activeLessonId])),
-            xp: stats.xp + LESSON_COMPLETE_XP,
-            streakDays: stats.streakDays,
+            xp: stats.xp + lessonXp,
+            streakDays: registerLessonDay(stats, today).streakDays,
             hearts,
           });
         }
@@ -414,12 +446,12 @@ export default function App() {
         return nextLessons;
       });
 
-      // Update XP & achievements
+      // Update XP, the streak (a completed lesson is what counts a day) & achievements
       setStats((prev) => {
         const next = {
-          ...prev,
-          xp: prev.xp + LESSON_COMPLETE_XP,
-          completedLessonsCount: prev.completedLessonsCount + 1,
+          ...registerLessonDay(prev, today),
+          xp: prev.xp + lessonXp,
+          completedLessonsCount: prev.completedLessonsCount + (isFirstCompletion ? 1 : 0),
           perfectLessonsCount:
             mistakesCount === 0 ? prev.perfectLessonsCount + 1 : prev.perfectLessonsCount,
         };
@@ -437,8 +469,7 @@ export default function App() {
     user,
     currentLevel,
     completedLessons,
-    stats.xp,
-    stats.streakDays,
+    stats,
     hearts,
     mistakesCount,
   ]);
@@ -460,7 +491,7 @@ export default function App() {
   // Keyboard shortcut listener for Enter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (activeTab !== 'trainer' || isCompleted || isOverlayOpen) return;
+      if (activeTab !== 'trainer' || isCompleted || isOutOfHearts || isOverlayOpen) return;
 
       if (e.key === 'Enter') {
         if (!isChecked && hasAnswer) {
@@ -478,12 +509,49 @@ export default function App() {
   }, [
     activeTab,
     isCompleted,
+    isOutOfHearts,
     isChecked,
     hasAnswer,
     isOverlayOpen,
     handleCheck,
     handleContinue,
   ]);
+
+  // Pay each newly unlocked achievement's XP exactly once, and tell the learner about it
+  useEffect(() => {
+    const fresh = findNewAchievements(stats);
+    if (fresh.length === 0) return;
+
+    setNewAchievements((shown) => [...shown, ...fresh.filter((a) => !shown.some((s) => s.id === a.id))]);
+    setStats((prev) => {
+      // Re-checked against the latest stats, so running twice for the same stats cannot pay twice
+      const due = findNewAchievements(prev);
+      if (due.length === 0) return prev;
+      const next = {
+        ...prev,
+        xp: prev.xp + due.reduce((sum, achievement) => sum + achievement.rewardXp, 0),
+        unlockedAchievements: [...prev.unlockedAchievements, ...due.map((achievement) => achievement.id)],
+      };
+      saveUserStats(next);
+      return next;
+    });
+  }, [stats]);
+
+  // A finished role-play pays more the first time than on repeats
+  const handleRoleplayComplete = (scenarioId: string) => {
+    const firstTime = !stats.completedRoleplays.includes(scenarioId);
+    const xp = firstTime ? ROLEPLAY_FIRST_XP : ROLEPLAY_REPEAT_XP;
+    handleAddXp(xp);
+    if (firstTime) {
+      setStats((prev) => {
+        if (prev.completedRoleplays.includes(scenarioId)) return prev;
+        const next = { ...prev, completedRoleplays: [...prev.completedRoleplays, scenarioId] };
+        saveUserStats(next);
+        return next;
+      });
+    }
+    return { xp, firstTime };
+  };
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -506,7 +574,7 @@ export default function App() {
         currentStep={currentIndex + (isCompleted ? 1 : 0)}
         totalSteps={activeLesson.exercises.length}
         hearts={hearts}
-        maxHearts={3}
+        maxHearts={MAX_HEARTS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onResetLesson={handleResetLesson}
@@ -557,12 +625,20 @@ export default function App() {
             <CompletionModal
               lessonData={activeLesson}
               lessonNumber={activeLessonNumber}
-              xpEarned={LESSON_COMPLETE_XP}
+              xpEarned={lessonXpEarned}
               mistakesCount={mistakesCount}
               onRestart={handleResetLesson}
               onViewJson={() => setActiveTab('json')}
               onNextLesson={handleNextLesson}
               hasNextLesson={activeLessonIndex + 1 < lessons.length}
+            />
+          ) : isOutOfHearts ? (
+            <OutOfHearts
+              answered={currentIndex + 1}
+              total={activeLesson.exercises.length}
+              maxHearts={MAX_HEARTS}
+              onRestart={handleResetLesson}
+              onOpenLessons={() => setIsDrawerOpen(true)}
             />
           ) : (
             currentExercise && (
@@ -586,7 +662,7 @@ export default function App() {
       </main>
 
       {/* Bottom Sticky Action / Feedback Footer */}
-      {activeTab === 'trainer' && !isCompleted && currentExercise && (
+      {activeTab === 'trainer' && !isCompleted && !isOutOfHearts && currentExercise && (
         <FeedbackBanner
           isChecked={isChecked}
           isCorrect={isCorrect}
@@ -665,7 +741,7 @@ export default function App() {
       <RoleplayModal
         isOpen={isRoleplayOpen}
         onClose={() => setIsRoleplayOpen(false)}
-        onAddXp={handleAddXp}
+        onComplete={handleRoleplayComplete}
         onOpenSpeaking={handleOpenSpeaking}
       />
 
@@ -691,11 +767,15 @@ export default function App() {
       {/* Daily Goal Encouragement Toast Notification */}
       <DailyGoalToast
         streakDays={stats.streakDays}
+        goalDone={stats.lastActiveDate === getLocalDateString()}
         onStartClick={() => {
           setActiveTab('trainer');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
+
+      {/* Achievement unlocked notification (the XP is already paid when this shows) */}
+      <AchievementToast unlocked={newAchievements} onClose={() => setNewAchievements([])} />
 
       {/* PWA Offline Network Connectivity Indicator */}
       <OfflineIndicator />

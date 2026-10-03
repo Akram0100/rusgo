@@ -39,6 +39,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
   currentStep,
   totalSteps,
   hearts,
+  maxHearts,
   activeTab,
   onTabChange,
   onResetLesson,
@@ -156,7 +157,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
             {/* Hearts */}
             <div
               className="flex items-center gap-0.5 sm:gap-1 text-rose-500 font-extrabold text-xs bg-rose-50 px-2 sm:px-2.5 py-1.5 rounded-xl border border-rose-100"
-              title="Qolgan jonlar soni"
+              title={`Qolgan jonlar: ${hearts} / ${maxHearts}`}
               aria-label="Jonlar"
             >
               <Heart className="w-3.5 h-3.5 fill-rose-500" />

@@ -93,7 +93,7 @@ export async function syncUserProfile(profile: UserCloudProfile): Promise<boolea
           photoURL: profile.photoURL || null,
           xp: profile.xp || 0,
           league: getUserLeague(profile.xp || 0).nameUz,
-          streakDays: profile.streakDays || 1,
+          streakDays: profile.streakDays || 0,
           updatedAt: new Date().toISOString(),
         },
         { merge: true }

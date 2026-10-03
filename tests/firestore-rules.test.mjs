@@ -71,6 +71,8 @@ describe('what the app really writes keeps working', () => {
     for (const level of ['A1', 'A2', 'B1']) await write(google('alice'), 'users/alice', profile('alice', { currentLevel: level }));
   });
   allowed('zero hearts', () => write(google('alice'), 'users/alice', profile('alice', { hearts: 0 })));
+  allowed('a learner with no streak yet (0 days) and the 5 hearts of a fresh lesson attempt', () =>
+    write(google('alice'), 'users/alice', profile('alice', { streakDays: 0, hearts: 5 })));
 });
 
 describe('optional and unusual but legitimate payloads', () => {

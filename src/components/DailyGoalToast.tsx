@@ -3,11 +3,14 @@ import { Flame, X, ArrowRight, Sparkles } from 'lucide-react';
 
 interface DailyGoalToastProps {
   streakDays: number;
+  /** A lesson was already completed today, so there is nothing left to remind about. */
+  goalDone?: boolean;
   onStartClick?: () => void;
 }
 
 export const DailyGoalToast: React.FC<DailyGoalToastProps> = ({
   streakDays,
+  goalDone = false,
   onStartClick,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -42,7 +45,7 @@ export const DailyGoalToast: React.FC<DailyGoalToastProps> = ({
     }
   };
 
-  if (!isVisible && isDismissed) return null;
+  if (goalDone || (!isVisible && isDismissed)) return null;
 
   return (
     <div
@@ -77,7 +80,7 @@ export const DailyGoalToast: React.FC<DailyGoalToastProps> = ({
             Bugungi darsingizni boshlang!
           </h4>
           <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-            Kunlik olovingizni saqlab qolish va 50 XP toʻplash vaqti keldi.
+            Kunlik olovingizni saqlab qolish uchun bugun kamida bitta darsni tugating.
           </p>
 
           <button

@@ -1,12 +1,35 @@
 // Run with: npm run test:logic
-// Pure logic only (no browser, no network): answer shuffling, validation of AI-generated lessons
-// and the integrity of the lesson data that ships with the app.
-import { describe, it } from 'node:test';
+// Pure logic only (no browser, no network): answer shuffling, validation of AI-generated lessons,
+// the integrity of the lesson data that ships with the app, and the XP / streak / achievement rules.
+import { afterEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { INITIAL_LESSONS } from '../src/data/lessons';
 import { shuffle, withShuffledChoices } from '../src/utils/shuffle';
 import { sanitizeGeneratedLesson } from '../src/utils/validateLesson';
+import { SCENARIOS } from '../src/data/roleplay';
+import { afterCorrectAnswer } from '../src/utils/roleplay';
+import {
+  ACHIEVEMENTS_LIST,
+  daysBetween,
+  expireStreak,
+  findNewAchievements,
+  getLocalDateString,
+  loadUserStats,
+  registerLessonDay,
+  saveUserStats,
+} from '../src/utils/gamification';
+import {
+  LESSON_FIRST_XP,
+  LESSON_REPLAY_XP,
+  MAX_HEARTS,
+  ROLEPLAY_FIRST_XP,
+  ROLEPLAY_REPEAT_XP,
+  SPEED_MATCH_ROUND_MAX_XP,
+  addSpeedMatchXp,
+  getSpeedMatchPairXp,
+} from '../src/utils/xp';
 import type { Exercise } from '../src/types/lesson';
+import type { UserStats } from '../src/types/gamification';
 
 const HAS_CYRILLIC = /[А-Яа-яЁё]/;
 const normalize = (text: string) =>
@@ -261,6 +284,316 @@ describe('sanitizeGeneratedLesson (AI lessons are validated before they reach th
       if (shuffled.type === 'translate_order') {
         assert.equal(sorted(shuffled.words_pool.filter((word) => shuffled.correct_order.includes(word))), sorted(shuffled.correct_order));
       }
+    }
+  });
+});
+
+describe('role-play dialogues', () => {
+  it('scenario ids are unique', () => {
+    const ids = SCENARIOS.map((scenario) => scenario.id);
+    assert.equal(new Set(ids).size, ids.length);
+  });
+
+  it('every dialogue starts with the other person and alternates with the learner', () => {
+    for (const scenario of SCENARIOS) {
+      scenario.steps.forEach((step, index) => {
+        assert.equal(step.speaker, index % 2 === 0 ? 'npc' : 'user', `${scenario.id}#${index}`);
+      });
+    }
+  });
+
+  it('every learner line has options with exactly one correct one, and it is the line itself', () => {
+    for (const scenario of SCENARIOS) {
+      for (const step of scenario.steps.filter((s) => s.speaker === 'user')) {
+        const tag = `${scenario.id}: ${step.ru}`;
+        const options = step.options ?? [];
+        assert.ok(options.length >= 2, tag);
+        assert.equal(options.filter((option) => option.isCorrect).length, 1, tag);
+        assert.equal(options.find((option) => option.isCorrect)?.text, step.ru, tag);
+        assert.equal(new Set(options.map((option) => option.text)).size, options.length, tag);
+      }
+    }
+  });
+
+  it('every dialogue can be played to its end, and the learner is never left without options', () => {
+    for (const scenario of SCENARIOS) {
+      let shownIndex = 0; // index of the last line on screen: the other person's opening line
+      let answers = 0;
+      let finished = false;
+      while (!finished) {
+        const learnerLine = scenario.steps[shownIndex + 1];
+        assert.ok(learnerLine?.options?.length, `${scenario.id}: nothing to pick after line ${shownIndex}`);
+        const result = afterCorrectAnswer(scenario.steps, shownIndex + 1);
+        answers++;
+        if (result.reply) shownIndex += 2;
+        finished = result.finished;
+        assert.ok(answers <= scenario.steps.length, `${scenario.id}: never finishes`);
+      }
+      assert.equal(answers, scenario.steps.filter((s) => s.speaker === 'user').length, scenario.id);
+    }
+  });
+
+  it('a dialogue that ends on the other person\'s closing line finishes after the last answer (it used to hang)', () => {
+    const endsOnReply = SCENARIOS.filter((scenario) => scenario.steps[scenario.steps.length - 1].speaker === 'npc');
+    assert.ok(endsOnReply.length > 0, 'the bundled scenarios include one that ends on a reply');
+    for (const scenario of endsOnReply) {
+      const lastLearnerIndex = scenario.steps.length - 2;
+      const result = afterCorrectAnswer(scenario.steps, lastLearnerIndex);
+      assert.equal(result.reply, scenario.steps[scenario.steps.length - 1], scenario.id);
+      assert.equal(result.finished, true, scenario.id);
+    }
+  });
+
+  it('afterCorrectAnswer: in the middle of a dialogue the reply comes and the dialogue goes on', () => {
+    const steps = SCENARIOS[0].steps;
+    assert.ok(steps.length >= 5);
+    const result = afterCorrectAnswer(steps, 1);
+    assert.equal(result.reply, steps[2]);
+    assert.equal(result.finished, false);
+  });
+
+  it('afterCorrectAnswer: a dialogue that ends on the learner has no reply and is finished', () => {
+    const steps = SCENARIOS.find((scenario) => scenario.steps[scenario.steps.length - 1].speaker === 'user')?.steps;
+    assert.ok(steps, 'the bundled scenarios include one that ends on the learner');
+    assert.deepEqual(afterCorrectAnswer(steps, steps.length - 1), { reply: null, finished: true });
+  });
+});
+
+const makeStats = (over: Partial<UserStats> = {}): UserStats => ({
+  xp: 40,
+  streakDays: 0,
+  lastActiveDate: '',
+  completedLessonsCount: 0,
+  perfectLessonsCount: 0,
+  speakingAttemptsCount: 0,
+  flashcardsMasteredCount: 0,
+  aiLessonsCreatedCount: 0,
+  completedRoleplays: [],
+  unlockedAchievements: ['first_step'],
+  ...over,
+});
+
+describe('XP rules', () => {
+  it('a repeat pays less than the first time, so lessons and role-plays cannot be farmed for full XP', () => {
+    assert.ok(LESSON_REPLAY_XP > 0 && LESSON_REPLAY_XP < LESSON_FIRST_XP);
+    assert.ok(ROLEPLAY_REPEAT_XP > 0 && ROLEPLAY_REPEAT_XP < ROLEPLAY_FIRST_XP);
+  });
+
+  it('the hearts of one attempt fit what firestore.rules accepts (at most 10)', () => {
+    assert.ok(Number.isInteger(MAX_HEARTS) && MAX_HEARTS >= 1 && MAX_HEARTS <= 10);
+  });
+
+  it('Speed Match: 3 XP per pair, plus one per pair already in the streak, at most +3', () => {
+    assert.deepEqual([1, 2, 3, 4, 5, 10, 50].map(getSpeedMatchPairXp), [3, 4, 5, 6, 6, 6, 6]);
+    assert.equal(getSpeedMatchPairXp(0), 3); // never below the base
+    assert.equal(getSpeedMatchPairXp(-4), 3);
+  });
+
+  it('Speed Match: a round never pays more than the cap, however well it goes', () => {
+    let total = 0;
+    for (let combo = 1; combo <= 200; combo++) {
+      total = addSpeedMatchXp(total, getSpeedMatchPairXp(combo));
+      assert.ok(total <= SPEED_MATCH_ROUND_MAX_XP, `combo ${combo}: ${total}`);
+    }
+    assert.equal(total, SPEED_MATCH_ROUND_MAX_XP);
+    assert.equal(addSpeedMatchXp(SPEED_MATCH_ROUND_MAX_XP - 1, 6), SPEED_MATCH_ROUND_MAX_XP);
+    assert.equal(addSpeedMatchXp(SPEED_MATCH_ROUND_MAX_XP, 6), SPEED_MATCH_ROUND_MAX_XP);
+  });
+
+  it('Speed Match: a few pairs add up exactly (no cap involved)', () => {
+    let total = 0;
+    for (const combo of [1, 2, 3]) total = addSpeedMatchXp(total, getSpeedMatchPairXp(combo));
+    assert.equal(total, 3 + 4 + 5);
+    // a mistake resets the streak, so the next pair is worth the base again
+    total = addSpeedMatchXp(total, getSpeedMatchPairXp(1));
+    assert.equal(total, 3 + 4 + 5 + 3);
+  });
+});
+
+describe('streak days', () => {
+  it("the day is the learner's local calendar day (built from local parts, so the test is timezone independent)", () => {
+    assert.equal(getLocalDateString(new Date(2026, 0, 5, 12)), '2026-01-05');
+    assert.equal(getLocalDateString(new Date(2026, 2, 1, 23, 59, 59)), '2026-03-01'); // late evening stays that day
+    assert.equal(getLocalDateString(new Date(2026, 2, 2, 0, 0, 1)), '2026-03-02');
+    assert.equal(getLocalDateString(new Date(2026, 11, 31, 8)), '2026-12-31');
+    assert.match(getLocalDateString(), /^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('daysBetween counts calendar days across month, year and leap-year boundaries', () => {
+    assert.equal(daysBetween('2026-05-10', '2026-05-10'), 0);
+    assert.equal(daysBetween('2026-05-10', '2026-05-11'), 1);
+    assert.equal(daysBetween('2026-01-31', '2026-02-01'), 1);
+    assert.equal(daysBetween('2025-12-31', '2026-01-01'), 1);
+    assert.equal(daysBetween('2026-02-28', '2026-03-01'), 1); // not a leap year
+    assert.equal(daysBetween('2024-02-28', '2024-03-01'), 2); // leap year: there is a 29th
+    assert.equal(daysBetween('2026-03-28', '2026-03-29'), 1); // a daylight-saving switch is still one day
+    assert.equal(daysBetween('2026-05-11', '2026-05-10'), -1);
+    assert.equal(daysBetween('2026-01-01', '2026-12-31'), 364);
+  });
+
+  it('daysBetween gives NaN for anything that is not a date, and never throws', () => {
+    for (const bad of ['', 'abc', 'x-y-z']) assert.ok(Number.isNaN(daysBetween(bad, '2026-05-10')), bad);
+    for (const bad of [null, undefined, 5, {}]) {
+      assert.ok(Number.isNaN(daysBetween(bad as unknown as string, '2026-05-10')), String(bad));
+    }
+  });
+
+  it('the first completed lesson starts the streak at 1', () => {
+    const result = registerLessonDay(makeStats(), '2026-05-10');
+    assert.equal(result.streakDays, 1);
+    assert.equal(result.lastActiveDate, '2026-05-10');
+  });
+
+  it('a second lesson on the same day changes nothing', () => {
+    const afterFirst = registerLessonDay(makeStats({ streakDays: 4, lastActiveDate: '2026-05-09' }), '2026-05-10');
+    assert.equal(afterFirst.streakDays, 5);
+    assert.equal(registerLessonDay(afterFirst, '2026-05-10'), afterFirst);
+  });
+
+  it('a lesson the day after extends the streak, including across a month boundary', () => {
+    assert.equal(registerLessonDay(makeStats({ streakDays: 2, lastActiveDate: '2026-05-09' }), '2026-05-10').streakDays, 3);
+    assert.equal(registerLessonDay(makeStats({ streakDays: 6, lastActiveDate: '2026-01-31' }), '2026-02-01').streakDays, 7);
+  });
+
+  it('a missed day starts over at 1, and so does a date in the future (clock set back)', () => {
+    assert.equal(registerLessonDay(makeStats({ streakDays: 9, lastActiveDate: '2026-05-08' }), '2026-05-10').streakDays, 1);
+    assert.equal(registerLessonDay(makeStats({ streakDays: 9, lastActiveDate: '2026-05-20' }), '2026-05-10').streakDays, 1);
+    assert.equal(registerLessonDay(makeStats({ streakDays: 9, lastActiveDate: 'garbage' }), '2026-05-10').streakDays, 1);
+  });
+
+  it('registerLessonDay changes only the streak fields and does not edit its input', () => {
+    const before = makeStats({ xp: 123, streakDays: 1, lastActiveDate: '2026-05-09', completedRoleplays: ['cafe'] });
+    const copy = JSON.stringify(before);
+    const after = registerLessonDay(before, '2026-05-10');
+    assert.equal(JSON.stringify(before), copy);
+    assert.deepEqual({ ...after, streakDays: 0, lastActiveDate: '' }, { ...before, streakDays: 0, lastActiveDate: '' });
+  });
+
+  it('expireStreak: a streak survives today and yesterday, and ends after a missed day', () => {
+    const base = makeStats({ streakDays: 5 });
+    assert.equal(expireStreak({ ...base, lastActiveDate: '2026-05-10' }, '2026-05-10').streakDays, 5);
+    assert.equal(expireStreak({ ...base, lastActiveDate: '2026-05-09' }, '2026-05-10').streakDays, 5);
+    assert.equal(expireStreak({ ...base, lastActiveDate: '2026-05-08' }, '2026-05-10').streakDays, 0);
+    assert.equal(expireStreak({ ...base, lastActiveDate: '2025-05-10' }, '2026-05-10').streakDays, 0);
+  });
+
+  it('expireStreak: opening the app never extends a streak, and odd data is left alone', () => {
+    const base = makeStats({ streakDays: 5, lastActiveDate: '2026-05-09' });
+    const result = expireStreak(base, '2026-05-10');
+    assert.equal(result.streakDays, 5);
+    assert.equal(result.lastActiveDate, '2026-05-09');
+    for (const lastActiveDate of ['', 'garbage', '2026-06-01']) {
+      assert.equal(expireStreak({ ...base, lastActiveDate }, '2026-05-10').streakDays, 5, lastActiveDate);
+    }
+    const nothingToExpire = makeStats({ streakDays: 0, lastActiveDate: '2020-01-01' });
+    assert.equal(expireStreak(nothingToExpire, '2026-05-10'), nothingToExpire);
+  });
+
+  describe('loadUserStats (reads what an older version of the app saved)', () => {
+    const realStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+    // A tiny in-memory localStorage; `raw` makes every read return that text instead (for corrupt data)
+    const useStorage = (raw: string | null) => {
+      const store = new Map<string, string>();
+      Object.defineProperty(globalThis, 'localStorage', {
+        configurable: true,
+        writable: true,
+        value: {
+          getItem: (key: string) => (raw !== null ? raw : (store.get(key) ?? null)),
+          setItem: (key: string, value: string) => void store.set(key, value),
+        },
+      });
+    };
+    afterEach(() => {
+      if (realStorage) Object.defineProperty(globalThis, 'localStorage', realStorage);
+      else delete (globalThis as { localStorage?: unknown }).localStorage;
+    });
+    const daysAgo = (days: number) => {
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      return getLocalDateString(date);
+    };
+
+    it('a new learner starts with no streak and no completed role-plays', () => {
+      useStorage(null);
+      const loaded = loadUserStats();
+      assert.equal(loaded.streakDays, 0);
+      assert.equal(loaded.lastActiveDate, '');
+      assert.deepEqual(loaded.completedRoleplays, []);
+    });
+
+    it('stats saved before role-play tracking existed get an empty list instead of undefined', () => {
+      useStorage(null);
+      const { completedRoleplays: _dropped, ...legacy } = makeStats({ streakDays: 2, lastActiveDate: daysAgo(1) });
+      saveUserStats(legacy as UserStats);
+      assert.deepEqual(loadUserStats().completedRoleplays, []);
+    });
+
+    it('a streak that is still alive is kept as it was, and loading does not count today', () => {
+      useStorage(null);
+      saveUserStats(makeStats({ streakDays: 4, lastActiveDate: daysAgo(1), xp: 777 }));
+      const loaded = loadUserStats();
+      assert.equal(loaded.streakDays, 4);
+      assert.equal(loaded.lastActiveDate, daysAgo(1));
+      assert.equal(loaded.xp, 777);
+    });
+
+    it('a streak that has been broken is reset when the app opens', () => {
+      useStorage(null);
+      saveUserStats(makeStats({ streakDays: 7, lastActiveDate: daysAgo(3), xp: 500 }));
+      const loaded = loadUserStats();
+      assert.equal(loaded.streakDays, 0);
+      assert.equal(loaded.xp, 500);
+    });
+
+    it('unreadable storage falls back to the defaults instead of crashing the app', () => {
+      useStorage('{not json');
+      assert.equal(loadUserStats().streakDays, 0);
+      useStorage('null');
+      assert.equal(loadUserStats().streakDays, 0);
+    });
+  });
+});
+
+describe('achievement rewards', () => {
+  const ids = (list: { id: string }[]) => list.map((achievement) => achievement.id).sort();
+
+  it('a fresh learner is owed nothing (the starter badge is already unlocked)', () => {
+    assert.deepEqual(findNewAchievements(makeStats()), []);
+  });
+
+  it('each goal unlocks exactly when its progress is reached', () => {
+    assert.deepEqual(ids(findNewAchievements(makeStats({ perfectLessonsCount: 1 }))), ['perfect_lesson']);
+    assert.deepEqual(ids(findNewAchievements(makeStats({ aiLessonsCreatedCount: 1 }))), ['ai_explorer']);
+    assert.deepEqual(findNewAchievements(makeStats({ streakDays: 2 })), []);
+    assert.deepEqual(ids(findNewAchievements(makeStats({ streakDays: 3 }))), ['streak_3']);
+    assert.deepEqual(findNewAchievements(makeStats({ speakingAttemptsCount: 2 })), []);
+    assert.deepEqual(ids(findNewAchievements(makeStats({ speakingAttemptsCount: 3 }))), ['speaking_master']);
+    assert.deepEqual(findNewAchievements(makeStats({ flashcardsMasteredCount: 4 })), []);
+    assert.deepEqual(ids(findNewAchievements(makeStats({ flashcardsMasteredCount: 5 }))), ['flashcard_pro']);
+  });
+
+  it('several goals reached together are all reported, with their rewards', () => {
+    const owed = findNewAchievements(makeStats({ streakDays: 3, perfectLessonsCount: 2, flashcardsMasteredCount: 9 }));
+    assert.deepEqual(ids(owed), ['flashcard_pro', 'perfect_lesson', 'streak_3']);
+    const reward = (id: string) => ACHIEVEMENTS_LIST.find((achievement) => achievement.id === id)!.rewardXp;
+    assert.equal(
+      owed.reduce((sum, achievement) => sum + achievement.rewardXp, 0),
+      reward('flashcard_pro') + reward('perfect_lesson') + reward('streak_3'),
+    );
+  });
+
+  it('once recorded as unlocked, an achievement is not owed again (it pays only once)', () => {
+    const reached = makeStats({ perfectLessonsCount: 3, streakDays: 5 });
+    const owed = findNewAchievements(reached);
+    assert.equal(owed.length, 2);
+    const paid = { ...reached, unlockedAchievements: [...reached.unlockedAchievements, ...owed.map((a) => a.id)] };
+    assert.deepEqual(findNewAchievements(paid), []);
+  });
+
+  it('every reward is a positive whole number of XP and every id is unique', () => {
+    assert.equal(new Set(ACHIEVEMENTS_LIST.map((a) => a.id)).size, ACHIEVEMENTS_LIST.length);
+    for (const achievement of ACHIEVEMENTS_LIST) {
+      assert.ok(Number.isInteger(achievement.rewardXp) && achievement.rewardXp > 0, achievement.id);
     }
   });
 });
