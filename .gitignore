@@ -9,3 +9,5 @@ coverage/
 
 # TTS audio cache written by server.ts at runtime
 .cache/
+
+.vercel

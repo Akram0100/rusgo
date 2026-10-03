@@ -1,9 +1,9 @@
 // Russian text-to-speech voices, shared by server.ts (answers /api/tts) and scripts/generate-audio.ts
 // (pre-generated MP3s), so both use the same model, voice and style.
 import type { GoogleGenAI } from '@google/genai';
-import { normalizeGeminiAudio, type AudioPayload } from './audioFormat';
+import { normalizeGeminiAudio, type AudioPayload } from './audioFormat.js';
 
-export type { AudioPayload } from './audioFormat';
+export type { AudioPayload } from './audioFormat.js';
 
 export const TTS_MODEL = 'gemini-3.8-flash-lite-tts';
 export const TTS_VOICE = 'Kore';

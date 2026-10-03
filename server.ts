@@ -1,11 +1,10 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { GoogleGenAI, Type } from '@google/genai';
-import { TTS_MODEL, synthesizeWithGemini, fetchFallbackRussianAudio, type AudioPayload } from './server/tts';
+import { TTS_MODEL, synthesizeWithGemini, fetchFallbackRussianAudio, type AudioPayload } from './server/tts.js';
 
 // .env.local is read before .env (the same precedence Vite uses), so the README instructions work
 dotenv.config({ path: ['.env.local', '.env'] });
@@ -35,7 +34,7 @@ app.disable('x-powered-by');
 // hops to skip when it reads req.ip. Cloud Run (it hosts AI Studio apps) always sits behind Google's
 // front end, so 1 is the default there; elsewhere set TRUST_PROXY (nginx, a load balancer: 1).
 // Trusting a proxy that is not there would let visitors fake their address, so the default is 0.
-const defaultProxyHops = process.env.K_SERVICE ? 1 : 0;
+const defaultProxyHops = process.env.K_SERVICE || process.env.VERCEL ? 1 : 0;
 const configuredProxyHops = process.env.TRUST_PROXY ? Number(process.env.TRUST_PROXY) : defaultProxyHops;
 const trustProxyHops = Number.isInteger(configuredProxyHops) && configuredProxyHops >= 0 ? configuredProxyHops : defaultProxyHops;
 if (trustProxyHops > 0) app.set('trust proxy', trustProxyHops);
@@ -89,7 +88,9 @@ function sendTooManyRequests(res: express.Response, retryAfterSeconds: number) {
 }
 
 // Persistent Disk Audio Recording Cache directory
-const AUDIO_CACHE_DIR = path.join(process.cwd(), '.cache', 'audio');
+const AUDIO_CACHE_DIR = process.env.VERCEL
+  ? path.join('/tmp', 'rusgo-audio')
+  : path.join(process.cwd(), '.cache', 'audio');
 try {
   if (!fs.existsSync(AUDIO_CACHE_DIR)) {
     fs.mkdirSync(AUDIO_CACHE_DIR, { recursive: true });
@@ -360,6 +361,8 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 
 async function startServer() {
   if (!isProduction) {
+    // Loaded only for local development: the production bundle (and the Vercel function) never needs Vite
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true, hmr: false },
       appType: 'spa',
@@ -382,4 +385,7 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel the app is exported as a serverless function (api/index.ts); nothing listens on a port
+if (!process.env.VERCEL) startServer();
+
+export default app;
