@@ -25,6 +25,7 @@ interface FlashcardsModalProps {
   topic: string;
   vocabulary: VocabularyItem[];
   onOpenSpeaking?: (text: string) => void;
+  onMastered?: () => void; // called every time a card is marked as known
 }
 
 export const FlashcardsModal: React.FC<FlashcardsModalProps> = ({
@@ -33,6 +34,7 @@ export const FlashcardsModal: React.FC<FlashcardsModalProps> = ({
   topic,
   vocabulary,
   onOpenSpeaking,
+  onMastered,
 }) => {
   const [cards, setCards] = useState<VocabularyItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -88,6 +90,7 @@ export const FlashcardsModal: React.FC<FlashcardsModalProps> = ({
 
     if (mastered) {
       setKnownCount((prev) => prev + 1);
+      onMastered?.();
       playSuccessChime();
     } else {
       setReviewCount((prev) => prev + 1);

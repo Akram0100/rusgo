@@ -21,8 +21,7 @@ import { LeaderboardModal } from './components/LeaderboardModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { loadUserStats, saveUserStats } from './utils/gamification';
 import { UserStats } from './types/gamification';
-import { auth, loadUserProfile, syncUserProfile } from './utils/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { watchAuthState, loadUserProfile, syncUserProfile, signOutUser } from './utils/cloud';
 import {
   playSuccessChime,
   playErrorTone,
@@ -90,7 +89,11 @@ export default function App() {
 
   // Listen to Firebase Auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+
+    // Firebase is a separate chunk: it starts loading right after the first render
+    watchAuthState(async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         // Load cloud profile
@@ -122,8 +125,17 @@ export default function App() {
           }
         }
       }
-    });
-    return () => unsubscribe();
+    })
+      .then((stop) => {
+        if (cancelled) stop();
+        else unsubscribe = stop;
+      })
+      .catch((error) => console.error('Could not start Firebase auth:', error));
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, []);
 
   const handleOpenSpeaking = (text: string) => {
@@ -269,6 +281,15 @@ export default function App() {
     }
   };
 
+  // Progress counters behind the achievements that have no other trigger (see getAchievementsWithProgress)
+  const bumpCounter = (key: 'speakingAttemptsCount' | 'flashcardsMasteredCount' | 'aiLessonsCreatedCount') => {
+    setStats((prev) => {
+      const next = { ...prev, [key]: prev[key] + 1 };
+      saveUserStats(next);
+      return next;
+    });
+  };
+
   // Speaking success handler
   const handleSpeakingSuccess = () => {
     setStats((prev) => {
@@ -286,6 +307,7 @@ export default function App() {
     // The new lesson is not in `lessons` yet, so handleSelectLesson cannot look its level up
     const newLevel = toLevel(newLesson.level);
     if (newLevel) setCurrentLevel(newLevel);
+    bumpCounter('aiLessonsCreatedCount');
   };
 
   // Multiple choice selection
@@ -464,7 +486,7 @@ export default function App() {
   ]);
 
   const handleSignOut = async () => {
-    await signOut(auth);
+    await signOutUser();
     setUser(null);
   };
 
@@ -578,7 +600,7 @@ export default function App() {
         />
       )}
 
-      {/* User Auth Modal (Google / Telegram) */}
+      {/* User Auth Modal (Google / guest) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
@@ -609,12 +631,14 @@ export default function App() {
         onClose={() => setIsSpeakingModalOpen(false)}
         targetText={speakingTargetText}
         onSuccess={handleSpeakingSuccess}
+        onAttempt={() => bumpCounter('speakingAttemptsCount')}
       />
 
       {/* 3D Flip Flashcards Modal for Vocabulary Practice */}
       <FlashcardsModal
         isOpen={isFlashcardsOpen}
         onClose={() => setIsFlashcardsOpen(false)}
+        onMastered={() => bumpCounter('flashcardsMasteredCount')}
         topic={activeLesson.topic}
         vocabulary={activeLesson.vocabulary || []}
         onOpenSpeaking={handleOpenSpeaking}

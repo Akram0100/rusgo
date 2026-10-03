@@ -11,23 +11,76 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Value checks shared by the profile and the leaderboard entry
+    function isShortString(value, maxLength) {
+      return value is string && value.size() <= maxLength;
+    }
+
+    // Photo URLs come from Google sign-in; anything but an https URL (or nothing at all) is refused
+    function isOptionalHttpsUrl(value) {
+      return value == null || (value is string && value.size() <= 1000 && value.matches('https://.*'));
+    }
+
+    function isCount(value, max) {
+      return value is int && value >= 0 && value <= max;
+    }
+
+    // The app writes these exact fields (see syncUserProfile in src/utils/firebase.ts). Anything else is
+    // refused, so a signed-in visitor cannot park arbitrary data in their own documents.
+    //
+    // NOTE: the rules cannot tell a real XP value from an invented one - the app computes XP in the
+    // browser. They only keep the data well-formed, tied to its owner, and stop XP from being lowered.
+    // A leaderboard that people compete on needs XP to be awarded on a server.
+
     // User profile and learning progress
     match /users/{userId} {
+      function isValidProfile(data) {
+        return data.keys().hasOnly(['uid', 'displayName', 'email', 'photoURL', 'currentLevel',
+                                    'unlockedLessons', 'completedLessons', 'xp', 'streakDays', 'hearts', 'updatedAt'])
+          && data.keys().hasAll(['uid', 'displayName', 'currentLevel', 'unlockedLessons',
+                                 'completedLessons', 'xp', 'streakDays'])
+          && data.uid == userId
+          && isShortString(data.displayName, 100)
+          && (data.get('email', null) == null || isShortString(data.email, 320))
+          && isOptionalHttpsUrl(data.get('photoURL', null))
+          && data.currentLevel in ['A1', 'A2', 'B1']
+          && data.unlockedLessons is list && data.unlockedLessons.size() <= 500
+          && data.completedLessons is list && data.completedLessons.size() <= 500
+          && isCount(data.xp, 10000000)
+          && isCount(data.streakDays, 100000)
+          && isCount(data.get('hearts', 0), 10)
+          && isShortString(data.get('updatedAt', ''), 40);
+      }
+
       allow read: if isOwner(userId);
-      allow create, update: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidProfile(request.resource.data);
+      allow update: if isOwner(userId)
+        && isValidProfile(request.resource.data)
+        && request.resource.data.xp >= resource.data.xp;
       allow delete: if isOwner(userId);
     }
 
-    // Leaderboard entries (public view, user-editable for their own score)
+    // Leaderboard entries (public view). The app does not publish here yet (the league screen is a
+    // demo); the rules are ready for the day it does. Entries must not contain an e-mail address.
     match /leaderboard/{userId} {
-      allow read: if true;
-      allow create, update: if isOwner(userId);
-      allow delete: if isOwner(userId);
-    }
+      function isValidEntry(data) {
+        return data.keys().hasOnly(['userId', 'displayName', 'photoURL', 'xp', 'league', 'streakDays', 'updatedAt'])
+          && data.keys().hasAll(['userId', 'displayName', 'xp', 'league'])
+          && data.userId == userId
+          && isShortString(data.displayName, 100)
+          && isOptionalHttpsUrl(data.get('photoURL', null))
+          && isCount(data.xp, 10000000)
+          && isShortString(data.league, 40)
+          && isCount(data.get('streakDays', 0), 100000)
+          && isShortString(data.get('updatedAt', ''), 40);
+      }
 
-    // Connection test document
-    match /test/{docId} {
       allow read: if true;
+      allow create: if isOwner(userId) && isValidEntry(request.resource.data);
+      allow update: if isOwner(userId)
+        && isValidEntry(request.resource.data)
+        && request.resource.data.xp >= resource.data.xp;
+      allow delete: if isOwner(userId);
     }
   }
 }

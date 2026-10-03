@@ -63,7 +63,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               </div>
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-white/80 flex items-center gap-1">
-                  <span>Haftalik Liga</span>
+                  <span>Liga</span>
                   <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
                 </span>
                 <h3 className="text-xl font-black">{currentLeague.nameUz}</h3>
@@ -84,7 +84,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs text-white/90">
             <div className="flex items-center gap-1.5 font-semibold">
               <Clock className="w-3.5 h-3.5 text-yellow-300" />
-              <span>Hafta yakuniga: <b>3 kun 8 soat</b></span>
+              <span>Demo reyting: raqiblar namunaviy</span>
             </div>
             <div className="font-bold bg-white/20 px-2.5 py-0.5 rounded-full text-[11px]">
               Oʻrningiz: #{userRank}

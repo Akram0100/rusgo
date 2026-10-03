@@ -154,11 +154,15 @@ export const LessonDrawer: React.FC<LessonDrawerProps> = ({
                   <div className="min-w-0">
                     <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1.5">
                       <span>{user.displayName || 'Oʻquvchi'}</span>
-                      <span title="Bulutda saqlanmoqda">
-                        <Cloud className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      </span>
+                      {!user.isAnonymous && (
+                        <span title="Bulutda saqlanmoqda">
+                          <Cloud className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        </span>
+                      )}
                     </div>
-                    <div className="text-[10px] text-slate-400">Bulutda sinxronlangan</div>
+                    <div className="text-[10px] text-slate-400">
+                      {user.isAnonymous ? 'Mehmon hisobi: faqat shu brauzerda' : 'Bulutda sinxronlangan'}
+                    </div>
                   </div>
                 </div>
 
@@ -184,10 +188,10 @@ export const LessonDrawer: React.FC<LessonDrawerProps> = ({
                   </div>
                   <div>
                     <div className="text-xs font-bold text-emerald-950 group-hover:text-emerald-700 transition-colors">
-                      Hisobga kirish (Google / Telegram)
+                      Hisobga kirish (Google / mehmon)
                     </div>
                     <div className="text-[10px] text-emerald-700/80">
-                      Natijalar va darslar saqlanib qoladi
+                      Google bilan kirsangiz natijalar saqlanadi
                     </div>
                   </div>
                 </div>

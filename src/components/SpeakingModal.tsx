@@ -8,6 +8,7 @@ interface SpeakingModalProps {
   targetText: string;
   instructionText?: string;
   onSuccess?: () => void;
+  onAttempt?: () => void; // called for every evaluated attempt (something was heard), pass or not
 }
 
 export const SpeakingModal: React.FC<SpeakingModalProps> = ({
@@ -16,6 +17,7 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
   targetText,
   instructionText = 'Jumlani eshiting va mikrofonga rus tilida aniq ayting',
   onSuccess,
+  onAttempt,
 }) => {
   const [isListening, setIsListening] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string>('');
@@ -145,6 +147,7 @@ export const SpeakingModal: React.FC<SpeakingModalProps> = ({
       return;
     }
 
+    onAttempt?.();
     const sim = calculateSimilarity(spoken);
     setSimilarity(sim);
 

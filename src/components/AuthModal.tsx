@@ -1,23 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
-  LogIn,
   CheckCircle2,
   ShieldCheck,
-  Sparkles,
   Loader2,
   User,
-  Send,
 } from 'lucide-react';
-import {
-  auth,
-  googleProvider,
-} from '../utils/firebase';
-import {
-  signInWithPopup,
-  signInAnonymously,
-  updateProfile,
-} from 'firebase/auth';
+import { getLoadedCloud, loadCloud } from '../utils/cloud';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -25,14 +14,37 @@ interface AuthModalProps {
   onLoginSuccess: (user: any) => void;
 }
 
+// Firebase reports failures as codes: show something the learner can act on, in Uzbek
+const describeAuthError = (err: unknown): string => {
+  switch ((err as { code?: string })?.code) {
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'Kirish oynasi yopildi. Qayta urinib koʻring.';
+    case 'auth/popup-blocked':
+      return 'Brauzer kirish oynasini blokladi. Qalqib chiquvchi oynalarga ruxsat bering.';
+    case 'auth/network-request-failed':
+      return 'Internet aloqasi yoʻq. Ulanishni tekshirib, qayta urinib koʻring.';
+    case 'auth/unauthorized-domain':
+      return 'Bu sayt manzili Firebase sozlamalarida ruxsat etilmagan.';
+    default:
+      return 'Kirishda xatolik yuz berdi. Qayta urinib koʻring.';
+  }
+};
+
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   onLoginSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [telegramUsername, setTelegramUsername] = useState<string>('');
+  const [guestName, setGuestName] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Make sure the Firebase code is on its way as soon as the dialog opens, so that the click
+  // handlers below can run synchronously (popups opened after an await get blocked by browsers)
+  useEffect(() => {
+    if (isOpen) loadCloud().catch(() => {});
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -41,39 +53,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      onLoginSuccess(result.user);
+      const cloud = getLoadedCloud() ?? (await loadCloud());
+      const signedInUser = await cloud.signInWithGoogle();
+      onLoginSuccess(signedInUser);
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Google Sign-In Error:', err);
-      setErrorMsg(err.message || 'Google orqali kirishda xatolik yuz berdi');
+      setErrorMsg(describeAuthError(err));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 2. Telegram / Quick Name Login
-  const handleTelegramOrNameLogin = async (e: React.FormEvent) => {
+  // 2. Guest sign-in: an anonymous account with a nickname (nothing is verified, nothing leaves this browser)
+  const handleGuestLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!telegramUsername.trim()) return;
+    const cleanName = guestName
+      .replace(/[\u0000-\u001f\u007f]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 30);
+    if (!cleanName) return;
 
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      // Use Firebase Anonymous Auth or custom token
-      const cred = await signInAnonymously(auth);
-      const cleanName = telegramUsername.trim().replace(/^@/, '');
-      await updateProfile(cred.user, {
-        displayName: `@${cleanName}`,
-      });
+      const cloud = getLoadedCloud() ?? (await loadCloud());
+      const guest = await cloud.signInAsGuest(cleanName);
       onLoginSuccess({
-        ...cred.user,
-        displayName: `@${cleanName}`,
+        ...guest,
+        displayName: cleanName,
       });
       onClose();
-    } catch (err: any) {
-      console.error('Quick Sign-In Error:', err);
-      setErrorMsg('Kirishda xatolik yuz berdi. Qayta urinib koʻring.');
+    } catch (err) {
+      console.error('Guest Sign-In Error:', err);
+      setErrorMsg(describeAuthError(err));
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +99,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onClose}
+          aria-label="Yopish"
           className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
@@ -99,7 +114,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             Hisobingizga kiring
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Natijalaringiz, ochiq darslaringiz va XP ballaringiz doim bulutda saqlanadi
+            Google bilan kirsangiz natijalaringiz, ochiq darslaringiz va XP ballaringiz bulutda saqlanadi
           </p>
         </div>
 
@@ -146,32 +161,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           <div className="flex items-center my-3 text-xs text-slate-400">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="px-3">yoki Telegram orqali</span>
+            <span className="px-3">yoki mehmon sifatida</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
-          {/* Telegram / Custom Username quick sign-in */}
-          <form onSubmit={handleTelegramOrNameLogin} className="space-y-2">
+          {/* Guest sign-in with a nickname */}
+          <form onSubmit={handleGuestLogin} className="space-y-2">
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-bold text-sm">
-                @
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                <User className="w-4 h-4" />
               </span>
               <input
                 type="text"
-                value={telegramUsername}
-                onChange={(e) => setTelegramUsername(e.target.value)}
-                placeholder="Telegram foydalanuvchi nomingiz"
-                className="w-full pl-8 pr-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                maxLength={30}
+                placeholder="Ismingiz"
+                className="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
             <button
               type="submit"
-              disabled={isLoading || !telegramUsername.trim()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white font-bold text-sm shadow-xs transition-all cursor-pointer"
+              disabled={isLoading || !guestName.trim()}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white font-bold text-sm shadow-xs transition-all cursor-pointer"
             >
-              <Send className="w-4 h-4" />
-              <span>Telegram orqali tezkor kirish</span>
+              <User className="w-4 h-4" />
+              <span>Mehmon sifatida kirish</span>
             </button>
+            <p className="text-[11px] leading-snug text-slate-400">
+              Mehmon hisobi faqat shu brauzerda saqlanadi: sayt maʼlumotlari tozalansa yoki boshqa qurilmaga
+              oʻtsangiz, natijalar yoʻqoladi.
+            </p>
           </form>
         </div>
 
@@ -179,15 +199,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="mt-6 pt-5 border-t border-slate-100 space-y-2 text-xs text-slate-600 font-medium">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Duolingo kabi darslar ochilishi (A1 → A2 → B1)</span>
+            <span>Google bilan: XP va ochilgan darslar qurilmalar orasida saqlanadi</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Haftalik Liganing real reyting jadvali</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Streak (ketma-ketlik) va XP ballarining yoʻqolmasligi</span>
+            <span>Liga reytingi hozircha namunaviy (demo) koʻrinishda</span>
           </div>
         </div>
       </div>

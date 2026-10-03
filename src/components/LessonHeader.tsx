@@ -182,7 +182,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
               <button
                 onClick={onOpenAuth}
                 className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200 transition-colors cursor-pointer"
-                title="Google yoki Telegram orqali hisobga kirish"
+                title="Google yoki mehmon sifatida kirish"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Kirish</span>
@@ -212,7 +212,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
                     >
                       <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
                       <div>
-                        <div className="font-bold text-slate-800">Haftalik Liga</div>
+                        <div className="font-bold text-slate-800">Liga</div>
                         <div className="text-[11px] text-slate-400">{currentLeague.nameUz}</div>
                       </div>
                     </button>

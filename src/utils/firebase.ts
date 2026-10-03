@@ -6,17 +6,15 @@ import {
   signInAnonymously,
   signOut,
   onAuthStateChanged,
+  updateProfile,
   User as FirebaseUser,
 } from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  getDocFromServer,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
+import { getUserLeague } from '../types/leaderboard';
+
+// Firebase is more than half of the app bundle, so this module is never imported directly:
+// everything goes through ./cloud, which loads it as a separate chunk on demand.
 
 // Initialize Firebase App singleton
 export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
@@ -27,17 +25,20 @@ export const db = firebaseConfig.firestoreDatabaseId
   : getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Validate Firestore connection on boot (per skill requirement)
-async function testConnection() {
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn('Firebase client is offline, using local cached store.');
-    }
-  }
+/** Calls `onChange` with the signed-in user (or null) now and on every change; returns the unsubscribe function. */
+export const watchAuth = (onChange: (user: FirebaseUser | null) => void) => onAuthStateChanged(auth, onChange);
+
+export const signOutUser = () => signOut(auth);
+
+// Not wrapped in extra awaits: the popup has to open inside the click that started the sign-in
+export const signInWithGoogle = async (): Promise<FirebaseUser> => (await signInWithPopup(auth, googleProvider)).user;
+
+/** Guest account: an anonymous Firebase user with a nickname. It lives only in this browser. */
+export async function signInAsGuest(displayName: string): Promise<FirebaseUser> {
+  const { user } = await signInAnonymously(auth);
+  await updateProfile(user, { displayName });
+  return user;
 }
-testConnection();
 
 export interface UserCloudProfile {
   uid: string;
@@ -52,6 +53,10 @@ export interface UserCloudProfile {
   hearts: number;
   updatedAt?: any;
 }
+
+// The league screen is a demo for now and nothing reads the public `leaderboard` collection, so
+// profiles are not published there. Switch this on together with a real leaderboard.
+const PUBLISH_LEADERBOARD = false;
 
 // Load user profile from Firestore
 export async function loadUserProfile(uid: string): Promise<UserCloudProfile | null> {
@@ -77,21 +82,23 @@ export async function syncUserProfile(profile: UserCloudProfile): Promise<boolea
     };
     await setDoc(userRef, payload, { merge: true });
 
-    // Also update public leaderboard entry
-    const leadRef = doc(db, 'leaderboard', profile.uid);
-    await setDoc(
-      leadRef,
-      {
-        userId: profile.uid,
-        displayName: profile.displayName || 'Oʻquvchi',
-        photoURL: profile.photoURL || null,
-        xp: profile.xp || 0,
-        league: profile.xp > 1000 ? 'Zumrad ligasi' : profile.xp > 500 ? 'Oltin ligasi' : 'Bronza ligasi',
-        streakDays: profile.streakDays || 1,
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
+    if (PUBLISH_LEADERBOARD) {
+      // Public leaderboard entry (no e-mail)
+      const leadRef = doc(db, 'leaderboard', profile.uid);
+      await setDoc(
+        leadRef,
+        {
+          userId: profile.uid,
+          displayName: profile.displayName || 'Oʻquvchi',
+          photoURL: profile.photoURL || null,
+          xp: profile.xp || 0,
+          league: getUserLeague(profile.xp || 0).nameUz,
+          streakDays: profile.streakDays || 1,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+    }
     return true;
   } catch (error) {
     console.error('Error syncing user profile to Firebase:', error);
