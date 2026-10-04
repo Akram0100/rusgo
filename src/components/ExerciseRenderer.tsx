@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Exercise,
   MultipleChoiceExercise,
   TranslateOrderExercise,
-  FillBlankExercise
+  FillBlankExercise,
+  LearnWordExercise,
 } from '../types/lesson';
 import { AudioButton } from './AudioButton';
 import { HighlightedText } from './HighlightedText';
-import { playTileClick } from '../utils/audio';
-import { CheckCircle2, XCircle, HelpCircle, Mic } from 'lucide-react';
+import { playTileClick, speakRussian } from '../utils/audio';
+import { CheckCircle2, XCircle, HelpCircle, Mic, Sparkles } from 'lucide-react';
 
 interface ExerciseRendererProps {
   exercise: Exercise;
@@ -21,6 +22,12 @@ interface ExerciseRendererProps {
   onRemoveWord: (indexInSelected: number) => void;
   usedWordIndices: number[];
   onOpenSpeaking?: (text: string) => void;
+  vocabulary?: {
+    term: string;
+    translation: string;
+    audio_text?: string;
+  }[];
+  onOpenVocabulary?: () => void;
 }
 
 export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
@@ -34,17 +41,33 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
   onRemoveWord,
   usedWordIndices,
   onOpenSpeaking,
+  vocabulary = [],
+  onOpenVocabulary,
 }) => {
   return (
     <div className="w-full max-w-2xl mx-auto px-1 sm:px-0">
       {/* Exercise instruction & audio prompt header */}
       <div className="mb-4 sm:mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-          <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-            {exercise.type === 'multiple_choice' && 'Variantli test'}
-            {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}
-            {exercise.type === 'fill_blank' && 'Boʻsh joyni toʻldirish'}
-          </span>
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+              {exercise.type === 'learn_word' && '✨ Oʻrganamiz'}
+              {exercise.type === 'multiple_choice' && 'Variantli test'}
+              {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}
+              {exercise.type === 'fill_blank' && 'Boʻsh joyni toʻldirish'}
+            </span>
+
+            {onOpenVocabulary && vocabulary.length > 0 && exercise.type !== 'learn_word' && (
+              <button
+                onClick={onOpenVocabulary}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors cursor-pointer"
+                title="Dars soʻzlarini koʻrish va eshitish"
+              >
+                <span>💡 Soʻzlar yordami</span>
+              </button>
+            )}
+          </div>
+
           <div className="flex items-center gap-1.5 sm:gap-2">
             <AudioButton text={exercise.target_audio_text} />
             {onOpenSpeaking && (
@@ -62,11 +85,18 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
         </div>
 
         <h2 className="text-lg sm:text-2xl font-black text-slate-800 leading-snug break-words">
-          <HighlightedText text={exercise.instruction} />
+          <HighlightedText text={exercise.instruction} vocabulary={vocabulary} />
         </h2>
       </div>
 
       {/* RENDER BY TYPE */}
+      {exercise.type === 'learn_word' && (
+        <LearnWordView
+          exercise={exercise}
+          onOpenSpeaking={onOpenSpeaking}
+        />
+      )}
+
       {exercise.type === 'multiple_choice' && (
         <MultipleChoiceView
           exercise={exercise}
@@ -312,6 +342,80 @@ const FillBlankView: React.FC<{
               </button>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* =========================================================================
+   DUOLINGO STEP: LEARN WORD VIEW
+   Presents a single new word / phrase with audio, translation, and tips
+   before immediately testing it in the following step.
+   ========================================================================= */
+const LearnWordView: React.FC<{
+  exercise: LearnWordExercise;
+  onOpenSpeaking?: (text: string) => void;
+}> = ({ exercise, onOpenSpeaking }) => {
+  useEffect(() => {
+    // Softly play pronunciation once on mount
+    const timer = setTimeout(() => {
+      speakRussian(exercise.target_audio_text);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [exercise.id, exercise.target_audio_text]);
+
+  return (
+    <div className="mt-2 flex flex-col items-center animate-in fade-in zoom-in-95 duration-250">
+      <div className="w-full bg-gradient-to-br from-emerald-50 via-teal-50/40 to-white rounded-3xl border-2 border-emerald-300 p-6 sm:p-8 shadow-xl shadow-emerald-600/5 text-center relative overflow-hidden">
+        {/* Top Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider mb-3 border border-emerald-200">
+          <Sparkles className="w-3.5 h-3.5 fill-emerald-600" />
+          Yangi soʻz bilan tanishamiz
+        </div>
+
+        {/* Big Russian Word */}
+        <div className="my-2 sm:my-3">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            {exercise.term}
+          </h1>
+        </div>
+
+        {/* Audio control & Speaking Button */}
+        <div className="flex flex-wrap items-center justify-center gap-3 my-4">
+          <AudioButton text={exercise.target_audio_text} />
+          {onOpenSpeaking && (
+            <button
+              onClick={() => onOpenSpeaking(exercise.target_audio_text)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors shadow-2xs active:scale-95 cursor-pointer"
+              title="Talaffuzingizni mikrofonda aytib koʻring"
+            >
+              <Mic className="w-4 h-4 text-rose-600" />
+              <span>Talaffuzni sinash</span>
+            </button>
+          )}
+        </div>
+
+        {/* Uzbek Translation Card */}
+        <div className="mt-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs max-w-md mx-auto">
+          <p className="text-[11px] uppercase font-extrabold text-slate-400 tracking-wider mb-1">
+            Oʻzbekcha maʼnosi:
+          </p>
+          <p className="text-lg sm:text-xl font-extrabold text-emerald-800">
+            {exercise.translation}
+          </p>
+        </div>
+
+        {/* Context / Tip Note */}
+        {exercise.context_note && (
+          <div className="mt-3.5 p-3 rounded-xl bg-amber-50/90 border border-amber-200/80 text-amber-900 text-xs sm:text-sm font-medium max-w-md mx-auto flex items-center justify-center gap-2">
+            <span className="text-base shrink-0">💡</span>
+            <span>{exercise.context_note}</span>
+          </div>
+        )}
+
+        <div className="mt-4 text-[11px] font-bold text-slate-400">
+          Ushbu soʻzni eslab qoling — keyingi qadamda aynan shu soʻz boʻyicha sinov boʻladi!
         </div>
       </div>
     </div>

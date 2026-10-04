@@ -16,6 +16,10 @@ export function shuffle<T>(items: readonly T[]): T[] {
  * Answers are graded by value, never by position, so the lesson data stays as authored.
  */
 export function withShuffledChoices(exercise: Exercise): Exercise {
+  if (exercise.type === 'learn_word') {
+    return exercise;
+  }
+
   if (exercise.type === 'translate_order') {
     const { words_pool, correct_order } = exercise;
     // A pool that already reads as the answer would give it away, so reshuffle a few times.

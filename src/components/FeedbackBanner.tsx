@@ -1,4 +1,5 @@
-import { CheckCircle2, XCircle, Volume2, Mic } from 'lucide-react';
+import React from 'react';
+import { CheckCircle2, XCircle, Volume2, Mic, ArrowRight } from 'lucide-react';
 import { speakRussian } from '../utils/audio';
 import { HighlightedText } from './HighlightedText';
 
@@ -12,6 +13,7 @@ interface FeedbackBannerProps {
   onCheck: () => void;
   onContinue: () => void;
   onOpenSpeaking?: (text: string) => void;
+  isLearnWord?: boolean;
 }
 
 export const FeedbackBanner: React.FC<FeedbackBannerProps> = ({
@@ -24,7 +26,27 @@ export const FeedbackBanner: React.FC<FeedbackBannerProps> = ({
   onCheck,
   onContinue,
   onOpenSpeaking,
+  isLearnWord = false,
 }) => {
+  if (isLearnWord) {
+    return (
+      <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 sm:py-4 px-4 z-40 shadow-lg pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <span className="text-xs text-slate-500 hidden sm:inline font-semibold">
+            💡 Soʻz va uning talaffuzini eslab qoling
+          </span>
+          <button
+            onClick={onContinue}
+            className="w-full sm:w-auto sm:ml-auto px-8 py-3 rounded-2xl font-black text-base transition-all active:translate-y-0.5 shadow-md bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer hover:shadow-emerald-200 flex items-center justify-center gap-2"
+          >
+            <span>Tushundim, davom etamiz</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
+      </footer>
+    );
+  }
+
   if (!isChecked) {
     return (
       <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 sm:py-4 px-4 z-40 shadow-lg pb-[max(0.75rem,env(safe-area-inset-bottom))]">

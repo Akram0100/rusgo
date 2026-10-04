@@ -11,6 +11,7 @@ import {
   ChevronDown,
   User,
   LogIn,
+  BookOpen,
 } from 'lucide-react';
 import { getUserLeague } from '../types/leaderboard';
 import { RusGoLogo } from './RusGoLogo';
@@ -33,6 +34,7 @@ interface LessonHeaderProps {
   onOpenDrawer: () => void;
   activeLessonNumber?: number;
   activeLessonTopic?: string;
+  onToggleIntro?: () => void;
 }
 
 export const LessonHeader: React.FC<LessonHeaderProps> = ({
@@ -53,6 +55,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
   onOpenDrawer,
   activeLessonNumber = 1,
   activeLessonTopic = 'Tanishuv',
+  onToggleIntro,
 }) => {
   const currentLeague = getUserLeague(xp);
   const progressPercent = Math.min(100, Math.round((currentStep / totalSteps) * 100));
@@ -127,6 +130,17 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
               <span className="text-[11px] sm:text-xs font-bold text-slate-500 tabular-nums shrink-0">
                 {currentStep}/{totalSteps}
               </span>
+
+              {onToggleIntro && (
+                <button
+                  onClick={onToggleIntro}
+                  className="hidden md:flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-emerald-700 px-1.5 py-0.5 rounded-md hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                  title="Dars soʻzlarini qayta koʻrish"
+                >
+                  <BookOpen className="w-3 h-3" />
+                  <span>Soʻzlar</span>
+                </button>
+              )}
             </div>
           </div>
 

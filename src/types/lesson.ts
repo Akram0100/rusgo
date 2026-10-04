@@ -1,4 +1,4 @@
-export type ExerciseType = 'multiple_choice' | 'translate_order' | 'fill_blank';
+export type ExerciseType = 'multiple_choice' | 'translate_order' | 'fill_blank' | 'learn_word';
 
 export interface BaseExercise {
   id: number;
@@ -6,6 +6,13 @@ export interface BaseExercise {
   instruction: string;
   target_audio_text: string;
   explanation: string;
+}
+
+export interface LearnWordExercise extends BaseExercise {
+  type: 'learn_word';
+  term: string;
+  translation: string;
+  context_note?: string;
 }
 
 export interface MultipleChoiceExercise extends BaseExercise {
@@ -28,7 +35,11 @@ export interface FillBlankExercise extends BaseExercise {
   options: string[];
 }
 
-export type Exercise = MultipleChoiceExercise | TranslateOrderExercise | FillBlankExercise;
+export type Exercise =
+  | MultipleChoiceExercise
+  | TranslateOrderExercise
+  | FillBlankExercise
+  | LearnWordExercise;
 
 export interface LessonPackage {
   lesson_id: string;

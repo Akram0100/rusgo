@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { INITIAL_LESSONS } from './data/lessons';
 import { LessonPackage } from './types/lesson';
+import { buildDuolingoProgression } from './utils/duolingoFlow';
 import { LessonHeader } from './components/LessonHeader';
 import { LessonDrawer } from './components/LessonDrawer';
 import { AuthModal } from './components/AuthModal';
@@ -207,13 +208,19 @@ export default function App() {
       .filter((l) => (l.level || 'A1').toUpperCase() === (activeLesson.level || 'A1').toUpperCase())
       .findIndex((l) => l.lesson_id === activeLesson.lesson_id) + 1;
 
-  const rawExercise = activeLesson.exercises[currentIndex];
+  // Duolingo step-by-step progression: teach 1 word first, then test it right away!
+  const activeSteps = useMemo(() => {
+    return buildDuolingoProgression(activeLesson);
+  }, [activeLesson]);
+
+  const rawExercise = activeSteps[currentIndex] || activeSteps[0];
   // Choices are shuffled for display only; answers are graded by value, so grading is unaffected.
   // shuffleSeed forces a fresh shuffle when the lesson is restarted.
   const currentExercise = useMemo(
-    () => (rawExercise ? withShuffledChoices(rawExercise) : rawExercise),
+    () => (rawExercise && rawExercise.type !== 'learn_word' ? withShuffledChoices(rawExercise) : rawExercise),
     [rawExercise, shuffleSeed]
   );
+  const totalSteps = activeSteps.length;
 
   // Preload and save audio recordings permanently in local storage for this lesson
   useEffect(() => {
@@ -351,51 +358,27 @@ export default function App() {
     setUsedWordIndices((prev) => prev.filter((idx) => idx !== poolIndexToRemove));
   };
 
+  const isLearnStep = currentExercise?.type === 'learn_word';
   const hasAnswer =
+    isLearnStep ||
     (currentExercise?.type === 'multiple_choice' && selectedOption !== null) ||
     (currentExercise?.type === 'fill_blank' && selectedOption !== null) ||
     (currentExercise?.type === 'translate_order' && selectedWords.length > 0);
 
-  // Check user answer
-  const handleCheck = useCallback(() => {
-    if (!currentExercise || !hasAnswer || isChecked) return;
-
-    let correct = false;
-
-    if (currentExercise.type === 'multiple_choice') {
-      correct = selectedOption === currentExercise.correct_answer;
-    } else if (currentExercise.type === 'fill_blank') {
-      correct =
-        selectedOption?.trim().toLowerCase() ===
-        currentExercise.blank_answer.trim().toLowerCase();
-    } else if (currentExercise.type === 'translate_order') {
-      const userSentence = selectedWords.join(' ').trim();
-      const targetSentence = currentExercise.correct_order.join(' ').trim();
-      correct = userSentence === targetSentence;
-    }
-
-    setIsCorrect(correct);
-    setIsChecked(true);
-
-    if (correct) {
-      playSuccessChime();
-      speakRussian(currentExercise.target_audio_text);
-    } else {
-      playErrorTone();
-      setMistakesCount((prev) => prev + 1);
-      setHearts((prev) => Math.max(0, prev - 1));
-    }
-  }, [currentExercise, hasAnswer, isChecked, selectedOption, selectedWords]);
-
   // Proceed to next exercise or complete lesson with unlock & cloud sync
   const handleContinue = useCallback(() => {
+    // If moving forward from a learn step, reward user with +5 XP
+    if (currentExercise?.type === 'learn_word') {
+      handleAddXp(5);
+    }
+
     // The answer that was just shown cost the last heart: the attempt ends here
     if (hearts === 0) {
       setIsOutOfHearts(true);
       return;
     }
 
-    if (currentIndex + 1 < activeLesson.exercises.length) {
+    if (currentIndex + 1 < activeSteps.length) {
       setCurrentIndex((prev) => prev + 1);
       resetExerciseState();
     } else {
@@ -460,8 +443,9 @@ export default function App() {
       });
     }
   }, [
+    currentExercise?.type,
     currentIndex,
-    activeLesson.exercises.length,
+    activeSteps.length,
     resetExerciseState,
     activeLessonId,
     activeLessonIndex,
@@ -473,6 +457,42 @@ export default function App() {
     hearts,
     mistakesCount,
   ]);
+
+  // Check user answer
+  const handleCheck = useCallback(() => {
+    if (!currentExercise || !hasAnswer || isChecked) return;
+
+    if (currentExercise.type === 'learn_word') {
+      handleContinue();
+      return;
+    }
+
+    let correct = false;
+
+    if (currentExercise.type === 'multiple_choice') {
+      correct = selectedOption === currentExercise.correct_answer;
+    } else if (currentExercise.type === 'fill_blank') {
+      correct =
+        selectedOption?.trim().toLowerCase() ===
+        currentExercise.blank_answer.trim().toLowerCase();
+    } else if (currentExercise.type === 'translate_order') {
+      const userSentence = selectedWords.join(' ').trim();
+      const targetSentence = currentExercise.correct_order.join(' ').trim();
+      correct = userSentence === targetSentence;
+    }
+
+    setIsCorrect(correct);
+    setIsChecked(true);
+
+    if (correct) {
+      playSuccessChime();
+      speakRussian(currentExercise.target_audio_text);
+    } else {
+      playErrorTone();
+      setMistakesCount((prev) => prev + 1);
+      setHearts((prev) => Math.max(0, prev - 1));
+    }
+  }, [currentExercise, hasAnswer, isChecked, selectedOption, selectedWords, handleContinue]);
 
   // While any modal or the lessons menu is open, Enter belongs to it and must not reach the lesson below
   const isOverlayOpen =
@@ -572,7 +592,7 @@ export default function App() {
       {/* Top Bar Header with Hamburger (☰) Menu and User Profile */}
       <LessonHeader
         currentStep={currentIndex + (isCompleted ? 1 : 0)}
-        totalSteps={activeLesson.exercises.length}
+        totalSteps={totalSteps}
         hearts={hearts}
         maxHearts={MAX_HEARTS}
         activeTab={activeTab}
@@ -588,6 +608,7 @@ export default function App() {
         onOpenDrawer={() => setIsDrawerOpen(true)}
         activeLessonNumber={activeLessonNumber}
         activeLessonTopic={activeLesson.topic}
+        onToggleIntro={() => setIsVocabularyOpen(true)}
       />
 
       {/* Gamburger Darslar Menyusi (Side Drawer with Level Switcher & Progressive Lock) */}
@@ -635,7 +656,7 @@ export default function App() {
           ) : isOutOfHearts ? (
             <OutOfHearts
               answered={currentIndex + 1}
-              total={activeLesson.exercises.length}
+              total={totalSteps}
               maxHearts={MAX_HEARTS}
               onRestart={handleResetLesson}
               onOpenLessons={() => setIsDrawerOpen(true)}
@@ -653,6 +674,8 @@ export default function App() {
                 onAddWord={handleAddWord}
                 onRemoveWord={handleRemoveWord}
                 onOpenSpeaking={handleOpenSpeaking}
+                vocabulary={activeLesson.vocabulary}
+                onOpenVocabulary={() => setIsVocabularyOpen(true)}
               />
             )
           )
@@ -673,6 +696,7 @@ export default function App() {
           onContinue={handleContinue}
           targetAudioText={currentExercise.target_audio_text}
           onOpenSpeaking={handleOpenSpeaking}
+          isLearnWord={currentExercise.type === 'learn_word'}
         />
       )}
 
