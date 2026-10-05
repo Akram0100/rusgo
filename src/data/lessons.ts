@@ -1518,6 +1518,7 @@ import { A1_UNIT_3_LESSONS } from './a1Unit3';
 import { A1_UNIT_4_LESSONS } from './a1Unit4';
 import { A1_UNIT_5_LESSONS } from './a1Unit5';
 import { A1_UNIT_6_LESSONS } from './a1Unit6';
+import { A1_UNIT_7_LESSONS } from './a1Unit7';
 
 export const INITIAL_A1_LESSONS: LessonPackage[] = [
   LESSON_1_DATA,
@@ -1535,6 +1536,7 @@ export const INITIAL_A1_LESSONS: LessonPackage[] = [
   ...A1_UNIT_4_LESSONS,
   ...A1_UNIT_5_LESSONS,
   ...A1_UNIT_6_LESSONS,
+  ...A1_UNIT_7_LESSONS,
 ];
 
 export const INITIAL_LESSONS: LessonPackage[] = [
