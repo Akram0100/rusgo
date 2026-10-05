@@ -31,7 +31,7 @@ import {
   getLessonXp,
   getSpeedMatchPairXp,
 } from '../src/utils/xp';
-import { buildDuolingoProgression } from '../src/utils/duolingoFlow';
+import { addRetry, buildDuolingoProgression, lessonStepsDone } from '../src/utils/duolingoFlow';
 import { collectAudioTexts } from '../src/utils/audioTexts';
 import type { Exercise, LearnWordExercise } from '../src/types/lesson';
 import type { UserStats } from '../src/types/gamification';
@@ -333,6 +333,76 @@ describe('learning progression (src/utils/duolingoFlow.ts: a card teaches a word
   it('a lesson without vocabulary (an AI lesson may have none) gets no cards at all', () => {
     const lesson = { ...INITIAL_LESSONS[0], vocabulary: undefined };
     assert.deepEqual(buildDuolingoProgression(lesson), lesson.exercises);
+  });
+});
+
+describe('mistakes come back at the end of the lesson (src/utils/duolingoFlow.ts)', () => {
+  const lessonSteps = buildDuolingoProgression(INITIAL_LESSONS[0]);
+  const exerciseIds = lessonSteps.filter((step) => step.type !== 'learn_word').map((step) => step.id);
+
+  /**
+   * Plays the lesson the way the trainer does. `answers` says, exercise by exercise (cards need no answer), whether
+   * the answer is right; answers left out are right. Returns the exercises in the order they were asked, the progress
+   * bar just before and just after every answer, the hearts left, and whether the lesson was finished.
+   */
+  const play = (answers: boolean[]) => {
+    let retries: Exercise[] = [];
+    let hearts = MAX_HEARTS;
+    let index = 0;
+    const asked: number[] = [];
+    const progress: { before: number; after: number; right: boolean }[] = [];
+    while (hearts > 0 && index < lessonSteps.length + retries.length) {
+      const step = index < lessonSteps.length ? lessonSteps[index] : retries[index - lessonSteps.length];
+      if (step.type !== 'learn_word') {
+        const right = answers[asked.length] ?? true;
+        const before = lessonStepsDone(lessonSteps.length, index, false, retries.length);
+        asked.push(step.id);
+        if (!right) {
+          hearts--;
+          retries = addRetry(retries, step);
+        }
+        progress.push({ before, after: lessonStepsDone(lessonSteps.length, index, true, retries.length), right });
+      }
+      index++;
+    }
+    return { asked, progress, hearts, finished: hearts > 0 };
+  };
+
+  it('a wrong answer is asked again after the rest of the lesson, and the lesson ends once it is right', () => {
+    const run = play([false]);
+    assert.deepEqual(run.asked, [...exerciseIds, exerciseIds[0]]);
+    assert.equal(run.finished, true);
+    assert.equal(run.hearts, MAX_HEARTS - 1, 'the wrong answer still costs its heart');
+  });
+
+  it('a retry answered wrongly comes back once more; every wrong answer costs a heart, so it always ends', () => {
+    const wrongTwice = play([false, ...exerciseIds.slice(1).map(() => true), false]);
+    assert.deepEqual(wrongTwice.asked, [...exerciseIds, exerciseIds[0], exerciseIds[0]]);
+    assert.equal(wrongTwice.finished, true);
+
+    const allWrong = play(exerciseIds.map(() => false));
+    assert.equal(allWrong.finished, false, 'the hearts run out');
+    assert.equal(allWrong.asked.length, MAX_HEARTS);
+  });
+
+  it('the progress bar moves only on a right answer, never back, and is full at the end', () => {
+    const run = play([true, false, true, false, true]);
+    run.progress.forEach(({ before, after, right }, i) => {
+      assert.equal(after, before + (right ? 1 : 0), `answer ${i + 1} (${right ? 'right' : 'wrong'})`);
+      if (i > 0) assert.ok(before >= run.progress[i - 1].after, `answer ${i + 1}: the bar went back`);
+    });
+    assert.equal(run.progress.at(-1)?.after, lessonSteps.length);
+  });
+
+  it('a new-word card is never sent back, and a retry is a copy, so its choices are shuffled afresh', () => {
+    const card = lessonSteps.find((step) => step.type === 'learn_word');
+    assert.ok(card, 'the first lesson teaches words');
+    assert.deepEqual(addRetry([], card), []);
+
+    const exercise = lessonSteps.find((step) => step.type !== 'learn_word')!;
+    const [retry] = addRetry([], exercise);
+    assert.deepEqual(retry, exercise);
+    assert.notEqual(retry, exercise);
   });
 });
 

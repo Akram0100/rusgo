@@ -13,6 +13,7 @@ import { CheckCircle2, XCircle, HelpCircle, Mic, Sparkles } from 'lucide-react';
 
 interface ExerciseRendererProps {
   exercise: Exercise;
+  isRetry?: boolean; // asked again at the end of the lesson because it was answered wrongly
   selectedAnswer: string | null;
   selectedWords: string[];
   isChecked: boolean;
@@ -32,6 +33,7 @@ interface ExerciseRendererProps {
 
 export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
   exercise,
+  isRetry = false,
   selectedAnswer,
   selectedWords,
   isChecked,
@@ -50,12 +52,18 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
       <div className="mb-4 sm:mb-6">
         <div className="flex items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-              {exercise.type === 'learn_word' && '✨ Oʻrganamiz'}
-              {exercise.type === 'multiple_choice' && 'Variantli test'}
-              {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}
-              {exercise.type === 'fill_blank' && 'Boʻsh joyni toʻldirish'}
-            </span>
+            {isRetry ? (
+              <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                🔁 Xatoni tuzatamiz
+              </span>
+            ) : (
+              <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                {exercise.type === 'learn_word' && '✨ Oʻrganamiz'}
+                {exercise.type === 'multiple_choice' && 'Variantli test'}
+                {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}
+                {exercise.type === 'fill_blank' && 'Boʻsh joyni toʻldirish'}
+              </span>
+            )}
 
             {onOpenVocabulary && vocabulary.length > 0 && exercise.type !== 'learn_word' && (
               <button

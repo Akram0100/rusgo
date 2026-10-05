@@ -2,7 +2,7 @@ import React from 'react';
 import { RotateCcw, BookOpen } from 'lucide-react';
 
 interface OutOfHeartsProps {
-  answered: number; // exercises answered when the last heart was lost
+  answered: number; // steps done (answered right) when the last heart was lost
   total: number;
   maxHearts: number;
   onRestart: () => void;

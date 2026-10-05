@@ -83,3 +83,21 @@ export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
 
   return result;
 }
+
+/**
+ * A wrong answer sends the exercise to the end of the lesson, to be asked again once the rest is done (as Duolingo
+ * does), and a retry answered wrongly comes back once more. This always ends: every wrong answer costs a heart.
+ * Returns the new list of retries. The exercise is copied, so its choices are shuffled afresh when it comes back.
+ */
+export function addRetry(retries: Exercise[], exercise: Exercise): Exercise[] {
+  return exercise.type === 'learn_word' ? retries : [...retries, { ...exercise }];
+}
+
+/**
+ * How many of the lesson's own steps are done, for the progress bar. Every wrong answer so far (`retries`) added a
+ * step at the end of the lesson, so a wrong answer does not move the bar; its retry moves it once it is right.
+ * `isChecked`: the step at `currentIndex` has been answered.
+ */
+export function lessonStepsDone(lessonSteps: number, currentIndex: number, isChecked: boolean, retries: number): number {
+  return Math.min(lessonSteps, Math.max(0, currentIndex + (isChecked ? 1 : 0) - retries));
+}

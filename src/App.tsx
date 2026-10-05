@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { INITIAL_LESSONS } from './data/lessons';
-import { LessonPackage } from './types/lesson';
-import { buildDuolingoProgression } from './utils/duolingoFlow';
+import { Exercise, LessonPackage } from './types/lesson';
+import { addRetry, buildDuolingoProgression, lessonStepsDone } from './utils/duolingoFlow';
 import { LessonHeader } from './components/LessonHeader';
 import { LessonDrawer } from './components/LessonDrawer';
 import { AuthModal } from './components/AuthModal';
@@ -186,6 +186,8 @@ export default function App() {
   // The attempt ended because the last heart was spent; the lesson has to be started again
   const [isOutOfHearts, setIsOutOfHearts] = useState<boolean>(false);
   const [mistakesCount, setMistakesCount] = useState<number>(0);
+  // Exercises answered wrongly: they come back at the end of the lesson until they are answered right
+  const [retrySteps, setRetrySteps] = useState<Exercise[]>([]);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   // XP the last completed lesson paid (first completion vs. repeat), for the completion screen
   const [lessonXpEarned, setLessonXpEarned] = useState<number>(LESSON_FIRST_XP);
@@ -209,9 +211,12 @@ export default function App() {
       .findIndex((l) => l.lesson_id === activeLesson.lesson_id) + 1;
 
   // Duolingo step-by-step progression: teach 1 word first, then test it right away!
-  const activeSteps = useMemo(() => {
+  const lessonSteps = useMemo(() => {
     return buildDuolingoProgression(activeLesson);
   }, [activeLesson]);
+  // ...then the exercises that were answered wrongly, asked again
+  const activeSteps = useMemo(() => [...lessonSteps, ...retrySteps], [lessonSteps, retrySteps]);
+  const isRetryStep = currentIndex >= lessonSteps.length;
 
   const rawExercise = activeSteps[currentIndex] || activeSteps[0];
   // Choices are shuffled for display only; answers are graded by value, so grading is unaffected.
@@ -220,7 +225,10 @@ export default function App() {
     () => (rawExercise && rawExercise.type !== 'learn_word' ? withShuffledChoices(rawExercise) : rawExercise),
     [rawExercise, shuffleSeed]
   );
-  const totalSteps = activeSteps.length;
+  // Progress counts the lesson's own steps: a wrong answer does not move it, its retry does once it is right
+  const stepsDone = isCompleted
+    ? lessonSteps.length
+    : lessonStepsDone(lessonSteps.length, currentIndex, isChecked, retrySteps.length);
 
   // Preload and save audio recordings permanently in local storage for this lesson
   useEffect(() => {
@@ -248,6 +256,7 @@ export default function App() {
     setHearts(MAX_HEARTS);
     setIsOutOfHearts(false);
     setMistakesCount(0);
+    setRetrySteps([]);
     setIsCompleted(false);
     setShuffleSeed((seed) => seed + 1);
     resetExerciseState();
@@ -264,6 +273,7 @@ export default function App() {
     setHearts(MAX_HEARTS);
     setIsOutOfHearts(false);
     setMistakesCount(0);
+    setRetrySteps([]);
     setIsCompleted(false);
     setShuffleSeed((seed) => seed + 1);
     resetExerciseState();
@@ -380,7 +390,7 @@ export default function App() {
       // A lesson pays full XP (plus a little for each new-word card it taught) the first time and a smaller
       // amount when it is repeated. The cards pay nothing on their own: a failed or repeated attempt cannot farm them.
       const isFirstCompletion = !completedLessons.includes(activeLessonId);
-      const learnCards = activeSteps.filter((step) => step.type === 'learn_word').length;
+      const learnCards = lessonSteps.filter((step) => step.type === 'learn_word').length;
       const lessonXp = getLessonXp(isFirstCompletion, learnCards);
       const today = getLocalDateString();
 
@@ -442,6 +452,7 @@ export default function App() {
   }, [
     currentIndex,
     activeSteps,
+    lessonSteps,
     resetExerciseState,
     activeLessonId,
     activeLessonIndex,
@@ -487,8 +498,10 @@ export default function App() {
       playErrorTone();
       setMistakesCount((prev) => prev + 1);
       setHearts((prev) => Math.max(0, prev - 1));
+      // Asked again at the end of the lesson (as authored: its choices are shuffled afresh then)
+      setRetrySteps((prev) => addRetry(prev, rawExercise));
     }
-  }, [currentExercise, hasAnswer, isChecked, selectedOption, selectedWords, handleContinue]);
+  }, [currentExercise, rawExercise, hasAnswer, isChecked, selectedOption, selectedWords, handleContinue]);
 
   // While any modal or the lessons menu is open, Enter belongs to it and must not reach the lesson below
   const isOverlayOpen =
@@ -587,8 +600,8 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden w-full max-w-full">
       {/* Top Bar Header with Hamburger (☰) Menu and User Profile */}
       <LessonHeader
-        currentStep={currentIndex + (isCompleted ? 1 : 0)}
-        totalSteps={totalSteps}
+        currentStep={stepsDone}
+        totalSteps={lessonSteps.length}
         hearts={hearts}
         maxHearts={MAX_HEARTS}
         activeTab={activeTab}
@@ -651,8 +664,8 @@ export default function App() {
             />
           ) : isOutOfHearts ? (
             <OutOfHearts
-              answered={currentIndex + 1}
-              total={totalSteps}
+              answered={stepsDone}
+              total={lessonSteps.length}
               maxHearts={MAX_HEARTS}
               onRestart={handleResetLesson}
               onOpenLessons={() => setIsDrawerOpen(true)}
@@ -661,6 +674,7 @@ export default function App() {
             currentExercise && (
               <ExerciseRenderer
                 exercise={currentExercise}
+                isRetry={isRetryStep}
                 selectedAnswer={selectedOption}
                 selectedWords={selectedWords}
                 usedWordIndices={usedWordIndices}
