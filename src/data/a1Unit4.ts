@@ -668,7 +668,7 @@ export const LESSON_28_DATA: LessonPackage = {
     {
       id: 5,
       type: "translate_order",
-      instruction: "Tilak bildiring: 'Sizga baxt va omad tilayman!'",
+      instruction: "Tilak bildiring: 'Baxt va omad tilayman!'",
       target_audio_text: "Желаю счастья и удачи!",
       accepted_orders: ["Желаю удачи и счастья!"],
       words_pool: ["Желаю", "счастья", "и", "удачи!", "счастье", "удача"],

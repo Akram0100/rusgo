@@ -30,7 +30,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     topicUz: 'Rus tilida 3 ta jins: Erkak (Мужской), Ayol (Женский) va Oʻrta (Средний)',
     icon: '🚻',
     level: 'A1 Asos',
-    summary: 'Oʻzbek tilida otlarning jinsi yoʻq, ammo rus tilida har bir soʻz erkak, ayol yoki oʻrta jinsga tegishli boʻladi. Buni soʻzning oxirgi harfiga qarab oson aniqlash mumkin.',
+    summary: 'Oʻzbek tilida otlarning jinsi yoʻq, ammo rus tilida har bir ot erkak, ayol yoki oʻrta jinsda boʻladi. Koʻpincha buni soʻzning oxirgi harfiga qarab aniqlash mumkin.',
     sections: [
       {
         heading: '1. Soʻz oxirgi harfiga qarab jinsni aniqlash qoidasi',
@@ -51,11 +51,19 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       },
       {
         heading: '2. Muhim istisno: Erkak kishini bildiruvchi -а/-я soʻzlar',
-        explanation: 'Garchi oxiri -а yoki -я bilan tugasa ham, maʼnosi erkak kishiga tegishli boʻlsa, u Muzhskoy rod hisoblanadi:',
+        explanation: 'Oxiri -а yoki -я bilan tugasa ham, erkak kishini bildiradigan soʻz erkak jinsida (мужской род) boʻladi:',
         examples: [
-          { ru: 'Мой папа', uz: 'Mening dadam (Muzhskoy rod)', audio_text: 'Мой папа' },
-          { ru: 'Мой дедушка', uz: 'Mening bobom (Muzhskoy rod)', audio_text: 'Мой дедушка' },
-          { ru: 'Мой дядя', uz: 'Mening togʻam/amakim (Muzhskoy rod)', audio_text: 'Мой дядя' },
+          { ru: 'Мой папа', uz: 'Mening dadam (erkak jinsi)', audio_text: 'Мой папа' },
+          { ru: 'Мой дедушка', uz: 'Mening bobom (erkak jinsi)', audio_text: 'Мой дедушка' },
+          { ru: 'Мой дядя', uz: 'Mening amakim / togʻam (erkak jinsi)', audio_text: 'Мой дядя' },
+        ],
+      },
+      {
+        heading: '3. ‘-ь’ bilan tugaydigan soʻzlar',
+        explanation: 'Yumshatish belgisi (ь) bilan tugaydigan soʻz erkak jinsida ham, ayol jinsida ham boʻlishi mumkin, shuning uchun uni jinsi bilan birga yodlang:',
+        examples: [
+          { ru: 'Новый день', uz: 'Yangi kun (erkak jinsi)', audio_text: 'Новый день' },
+          { ru: 'Большая кровать', uz: 'Katta karavot (ayol jinsi)', audio_text: 'Большая кровать' },
         ],
       },
     ],
@@ -118,7 +126,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       },
       {
         heading: '‘В’ va ‘НА’ predloglarining farqi',
-        explanation: 'Yopiq binolar ichida boʻlsa odatda ‘В’, ochiq maydon, koʻcha yoki transportda ‘НА’ ishlatiladi:',
+        explanation: 'Bino yoki xona ichida odatda ‘в’, koʻcha, maydon va ochiq joylarda ‘на’ ishlatiladi. Ayrim soʻzlar bilan doim ‘на’ keladi (на вокзале, на работе, на почте), shuning uchun ularni birga yodlang:',
         examples: [
           { ru: 'в кафе / в магазине / в комнате', uz: 'kafe ichida / doʻkonda / xonada', audio_text: 'в кафе, в магазине, в комнате' },
           { ru: 'на улице / на вокзале / на площади', uz: 'koʻchada / vokzalda / maydonda', audio_text: 'на улице, на вокзале, на площади' },
@@ -174,7 +182,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
           ],
         },
         examples: [
-          { ru: 'Скажите, пожалуйста, сколько стоит билет?', uz: 'Ayting-chi, iltimos, chipta qancha turadi?', audio_text: 'Скажите, пожалуйста, сколько стоит билет?' },
+          { ru: 'Скажите, пожалуйста, сколько стоит билет?', uz: 'Aytingchi, iltimos, chipta qancha turadi?', audio_text: 'Скажите, пожалуйста, сколько стоит билет?' },
           { ru: 'Сколько стоят эти сувениры?', uz: 'Bu suvenirlar qancha turadi?', audio_text: 'Сколько стоят эти сувениры?' },
           { ru: 'С вас триста рублей.', uz: 'Sizdan uch yuz rubl boʻldi.', audio_text: 'С вас триста рублей.' },
         ],

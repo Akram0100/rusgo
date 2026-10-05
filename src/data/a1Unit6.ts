@@ -551,7 +551,7 @@ export const LESSON_38_DATA: LessonPackage = {
       instruction: "Ayting: 'Ularning oʻgʻli va qizi bor'",
       target_audio_text: "У них есть сын и дочь.",
       accepted_orders: ["У них есть дочь и сын."],
-      words_pool: ["У", "них", "есть", "сын", "и", "дочь.", "сына", "дочка"],
+      words_pool: ["У", "них", "есть", "сын", "и", "дочь.", "сына", "дочку"],
       correct_order: ["У", "них", "есть", "сын", "и", "дочь."],
       explanation: "‘Сын’ — oʻgʻil, ‘дочь’ — qiz (farzand). ‘У них есть …’ — ularda … bor."
     },

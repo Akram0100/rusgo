@@ -13,19 +13,19 @@ export const A2_LESSON_1: LessonPackage = {
   exercises_count: 8,
   vocabulary: [
     { term: 'Вчера', translation: 'Kecha', audio_text: 'Вчера' },
-    { term: 'Был / Была / Были', translation: 'Boʻlgan edi (er/ayol/koʻplik)', audio_text: 'Был, была, были' },
-    { term: 'Я работал', translation: 'Men ishladim (erkak kishi)', audio_text: 'Я работал' },
+    { term: 'Был, была, были', translation: 'Edi (erkak, ayol, koʻplik shakli)', audio_text: 'Был, была, были' },
+    { term: 'Где вы были?', translation: 'Qayerda edingiz?', audio_text: 'Где вы были?' },
     { term: 'Я отдыхала', translation: 'Men dam oldim (ayol kishi)', audio_text: 'Я отдыхала' },
     { term: 'Что вы делали?', translation: 'Siz nima qildingiz?', audio_text: 'Что вы делали?' },
     { term: 'Мы ходили в кино', translation: 'Biz kinoga bordik', audio_text: 'Мы ходили в кино' },
     { term: 'Прошлым летом', translation: 'Oʻtgan yozda', audio_text: 'Прошлым летом' },
-    { term: 'Я прочитал книгу', translation: 'Men kitobni oʻqib boʻldim', audio_text: 'Я прочитал книгу', alternatives: ['Я прочитала книгу'] },
+    { term: 'Я прочитал эту книгу', translation: 'Men bu kitobni oʻqib chiqdim', audio_text: 'Я прочитал эту книгу', alternatives: ['Я прочитала эту книгу'] },
   ],
   exercises: [
     {
       id: 1,
       type: 'multiple_choice',
-      instruction: "Erkak kishi 'Kecha men ishda edim' demoqchi boʻlsa, qaysi shakl toʻgʻri?",
+      instruction: "Erkak kishi 'Kecha men ishda edim' demoqchi. Qaysi shakl toʻgʻri (был, была, были)?",
       target_audio_text: 'Вчера я был на работе.',
       options: ['Вчера я был на работе', 'Вчера я была на работе', 'Вчера я были на работе', 'Вчера я буду на работе'],
       correct_answer: 'Вчера я был на работе',
@@ -44,12 +44,12 @@ export const A2_LESSON_1: LessonPackage = {
     {
       id: 3,
       type: 'fill_blank',
-      instruction: "Ayol kishi aytadi: 'Men kecha mazza qilib dam oldim': 'Я ___'",
-      sentence_with_blank: 'Вчера я отлично ___.',
+      instruction: "Ayol kishi aytadi: 'Kecha men uyda dam oldim'",
+      sentence_with_blank: 'Вчера я ___ дома.',
       blank_answer: 'отдыхала',
       hint: "Oʻtgan zamon ayol jinsi (-ла qoʻshimchasi)",
       options: ['отдыхала', 'отдыхал', 'отдыхали', 'отдыхает'],
-      target_audio_text: 'Вчера я отлично отдыхала.',
+      target_audio_text: 'Вчера я отдыхала дома.',
       explanation: "Ayol kishi soʻzlaganda oʻtgan zamon feʼli ‘-ла’ bilan tugaydi: ‘отдыхала’."
     },
     {
@@ -74,18 +74,18 @@ export const A2_LESSON_1: LessonPackage = {
     {
       id: 6,
       type: 'fill_blank',
-      instruction: "Tugallangan harakat: 'Men bu yangi kitobni oʻqib chiqdim' (erkak kishi)",
-      sentence_with_blank: 'Я уже ___ эту книгу.',
+      instruction: "Tugallangan harakat (erkak kishi): 'Men bu kitobni oʻqib chiqdim'",
+      sentence_with_blank: 'Я ___ эту книгу.',
       blank_answer: 'прочитал',
       hint: "Tugallangan oʻtgan zamon shakli",
       options: ['прочитал', 'читаю', 'буду читать', 'читать'],
-      target_audio_text: 'Я уже прочитал эту книгу.',
+      target_audio_text: 'Я прочитал эту книгу.',
       explanation: "‘Прочитал’ — kitobni boshidan oxirigacha oʻqib tamomladi."
     },
     {
       id: 7,
       type: 'multiple_choice',
-      instruction: "'Gde vy byli?' savoli nimani bildiradi?",
+      instruction: "'Где вы были вчера?' savoli nimani bildiradi?",
       target_audio_text: 'Где вы были вчера?',
       options: ['Kecha qayerda edingiz?', 'Kecha qayerga boryapsiz?', 'Siz qayerda yashaysiz?', 'Bu qayerda joylashgan?'],
       correct_answer: 'Kecha qayerda edingiz?',
@@ -113,12 +113,12 @@ export const A2_LESSON_2: LessonPackage = {
   exercises_count: 8,
   vocabulary: [
     { term: 'Завтра', translation: 'Ertaga', audio_text: 'Завтра' },
-    { term: 'Я буду делать', translation: 'Men qilmoqchi boʻlaman / qilaman', audio_text: 'Я буду делать' },
+    { term: 'Я буду учить', translation: 'Men oʻrganaman (kelasi zamon)', audio_text: 'Я буду учить' },
     { term: 'Мы поедем', translation: 'Biz transportda boramiz/ketamiz', audio_text: 'Мы поедем' },
     { term: 'На выходных', translation: 'Dam olish kunlarida', audio_text: 'На выходных' },
-    { term: 'Следующая неделя', translation: 'Kelasi hafta', audio_text: 'Следующая неделя' },
+    { term: 'На следующей неделе', translation: 'Kelasi haftada', audio_text: 'На следующей неделе' },
     { term: 'Я куплю', translation: 'Men sotib olaman', audio_text: 'Я куплю' },
-    { term: 'У нас будет встреча', translation: 'Bizda uchrashuv boʻladi', audio_text: 'У нас будет встреча' },
+    { term: 'Важная встреча', translation: 'Muhim uchrashuv', audio_text: 'Важная встреча' },
     { term: 'Я обязательно приду', translation: 'Men albatta kelaman', audio_text: 'Я обязательно приду' },
   ],
   exercises: [
@@ -144,10 +144,10 @@ export const A2_LESSON_2: LessonPackage = {
     {
       id: 3,
       type: 'fill_blank',
-      instruction: "Vaʼda bering: 'Men albatta ___' (kelaman)",
+      instruction: "Vaʼda bering: 'Xavotir olmang, men albatta kelaman'",
       sentence_with_blank: 'Не волнуйтесь, я обязательно ___.',
       blank_answer: 'приду',
-      hint: "Kelasi zamon 1-shaxs shakli (я приду)",
+      hint: "Kelasi zamon, 1-shaxs (я)",
       options: ['приду', 'пришёл', 'пришла', 'приходить'],
       target_audio_text: 'Не волнуйтесь, я обязательно приду.',
       explanation: "‘Я приду’ — piyoda yetib kelaman degani."
@@ -179,7 +179,7 @@ export const A2_LESSON_2: LessonPackage = {
     {
       id: 6,
       type: 'fill_blank',
-      instruction: "Boʻsh joyni toʻldiring: 'Ertaga ertalab men rus tili darsini ___'",
+      instruction: "Boʻsh joyni toʻldiring: 'Ertaga ertalab men rus tilini oʻrganaman'",
       sentence_with_blank: 'Завтра утром я буду ___ русский язык.',
       blank_answer: 'учить',
       hint: "Oʻrganmoq feʼlining infinitiv shakli",
@@ -218,10 +218,10 @@ export const A2_LESSON_3: LessonPackage = {
   exercises_count: 8,
   vocabulary: [
     { term: 'Столик на двоих', translation: 'Ikki kishilik stol', audio_text: 'Столик на двоих' },
-    { term: 'Принесите меню', translation: 'Menyuni olib keling', audio_text: 'Принесите меню' },
+    { term: 'Принесите мне', translation: 'Menga olib keling', audio_text: 'Принесите мне' },
     { term: 'Что вы посоветуете?', translation: 'Qaysi taomni maslahat berasiz?', audio_text: 'Что вы посоветуете?' },
-    { term: 'Горячие блюда', translation: 'Issiq taomlar', audio_text: 'Горячие блюда' },
-    { term: 'Суп и салат', translation: 'Shoʻrva va salat', audio_text: 'Суп и салат' },
+    { term: 'Это блюдо', translation: 'Bu taom', audio_text: 'Это блюдо' },
+    { term: 'Мясной суп', translation: 'Goʻshtli shoʻrva', audio_text: 'Мясной суп' },
     { term: 'Очень вкусно', translation: 'Juda mazali', audio_text: 'Очень вкусно' },
     { term: 'Раздельный счёт', translation: 'Alohida-alohida hisob', audio_text: 'Раздельный счёт' },
     { term: 'Приятного аппетита', translation: 'Yoqimli ishtaha', audio_text: 'Приятного аппетита' },
@@ -253,11 +253,11 @@ export const A2_LESSON_3: LessonPackage = {
     {
       id: 3,
       type: 'fill_blank',
-      instruction: "Iltimos qiling: 'Menga issiq choy olib keling': '___ мне горячий чай'",
+      instruction: "Iltimos qiling: 'Iltimos, menga koʻk choy olib keling'",
       sentence_with_blank: 'Пожалуйста, ___ мне зелёный чай.',
       blank_answer: 'принесите',
       hint: "Olib keling maʼnosidagi muloyim buyruq shakli",
-      options: ['принесите', 'возьмите', 'дайте', 'положите'],
+      options: ['принесите', 'принесу', 'принести', 'принёс'],
       target_audio_text: 'Пожалуйста, принесите мне зелёный чай.',
       explanation: "‘Принесите’ — olib keling (ofitsiantga murojaat)."
     },
@@ -288,7 +288,7 @@ export const A2_LESSON_3: LessonPackage = {
     {
       id: 6,
       type: 'fill_blank',
-      instruction: "Taom tanlash: 'Men goʻshtli ___ buyurtma qilaman'",
+      instruction: "Taom tanlang: 'Men goʻshtli shoʻrva olaman'",
       sentence_with_blank: 'Я буду ___ суп.',
       blank_answer: 'мясной',
       hint: "Goʻshtli sifat shakli (erkak jinsi)",
@@ -333,7 +333,7 @@ export const B1_LESSON_1: LessonPackage = {
     { term: 'Опыт работы', translation: 'Ish tajribasi', audio_text: 'Опыт работы' },
     { term: 'Резюме', translation: 'Rezyume (CV)', audio_text: 'Резюме' },
     { term: 'Обязанности', translation: 'Vazifalar va majburiyatlar', audio_text: 'Обязанности' },
-    { term: 'Заработная плата', translation: 'Oylik ish haqi', audio_text: 'Заработная плата' },
+    { term: 'Мы сообщим вам о результатах', translation: 'Natijalar haqida sizga xabar beramiz', audio_text: 'Мы сообщим вам о результатах' },
     { term: 'График работы', translation: 'Ish jadvali/tartibi', audio_text: 'График работы' },
     { term: 'Перспективы роста', translation: 'Karyera oʻsish imkoniyatlari', audio_text: 'Перспективы роста' },
     { term: 'Я готов приступить', translation: 'Men ish boshlashga tayyorman', audio_text: 'Я готов приступить', alternatives: ['Я готова приступить'] },
@@ -342,7 +342,7 @@ export const B1_LESSON_1: LessonPackage = {
     {
       id: 1,
       type: 'multiple_choice',
-      instruction: "Suhbatda 'Mening bu sohada 3 yillik tajribam bor' deb qanday aytiladi?",
+      instruction: "Ishga qabul suhbatida (собеседование) 'Mening bu sohada 3 yillik tajribam bor' deb qanday aytiladi?",
       target_audio_text: 'У меня есть трёхлетний опыт работы в этой сфере.',
       options: [
         'У меня есть трёхлетний опыт работы в этой сфере',
@@ -365,7 +365,7 @@ export const B1_LESSON_1: LessonPackage = {
     {
       id: 3,
       type: 'fill_blank',
-      instruction: "Savol bering: 'Bu lavozimda qanday asosiy ___ boʻladi?' (vazifalar)",
+      instruction: "Savol bering: 'Bu lavozimda asosiy vazifalar qanday?'",
       sentence_with_blank: 'Какие основные ___ на этой должности?',
       blank_answer: 'обязанности',
       hint: "Xodimning majburiyatlari",
@@ -400,7 +400,7 @@ export const B1_LESSON_1: LessonPackage = {
     {
       id: 6,
       type: 'fill_blank',
-      instruction: "Karyera haqida: 'Kompaniyada oʻsish ___ bormi?'",
+      instruction: "Karyera haqida soʻrang: 'Kompaniyada oʻsish imkoniyatlari bormi?'",
       sentence_with_blank: 'Есть ли в компании перспективы ___?',
       blank_answer: 'роста',
       hint: "Oʻsish, rivojlanish soʻzi",
@@ -443,10 +443,10 @@ export const B1_LESSON_2: LessonPackage = {
   instruction_language: 'uz',
   exercises_count: 8,
   vocabulary: [
-    { term: 'Открыть счёт', translation: 'Hisob raqam ochish', audio_text: 'Открыть счёт' },
-    { term: 'Банковская карта', translation: 'Bank kartasi', audio_text: 'Банковская карта' },
-    { term: 'Перевод денег', translation: 'Pul oʻtkazmasi', audio_text: 'Перевод денег' },
-    { term: 'Курс валют', translation: 'Valyuta kursi', audio_text: 'Курс валют' },
+    { term: 'Открыть банковский счёт', translation: 'Bank hisobini ochmoq', audio_text: 'Открыть банковский счёт' },
+    { term: 'Карта заблокирована', translation: 'Karta bloklangan', audio_text: 'Карта заблокирована' },
+    { term: 'Перевод', translation: 'Pul oʻtkazmasi', audio_text: 'Перевод' },
+    { term: 'Курс доллара', translation: 'Dollar kursi', audio_text: 'Курс доллара' },
     { term: 'Комиссия', translation: 'Xizmat haqi (komissiya)', audio_text: 'Комиссия' },
     { term: 'Банкомат', translation: 'Bankomat', audio_text: 'Банкомат' },
     { term: 'Снять наличные', translation: 'Naqd pul yechib olish', audio_text: 'Снять наличные' },
@@ -456,7 +456,7 @@ export const B1_LESSON_2: LessonPackage = {
     {
       id: 1,
       type: 'multiple_choice',
-      instruction: "Bankda 'Men yangi hisob raqam ochmoqchiman' deb qanday aytiladi?",
+      instruction: "Bankda (erkak kishi) 'Men bank hisobini ochmoqchi edim' deb qanday aytiladi?",
       target_audio_text: 'Я хотел бы открыть банковский счёт.',
       options: [
         'Я хотел бы открыть банковский счёт',
@@ -480,7 +480,7 @@ export const B1_LESSON_2: LessonPackage = {
     {
       id: 3,
       type: 'fill_blank',
-      instruction: "Valyuta almashuvi: 'Bugungi dollar ___ qanday?'",
+      instruction: "Valyuta almashtirishda soʻrang: 'Aytingchi, bugun dollar kursi qanday?'",
       sentence_with_blank: 'Подскажите, какой сегодня ___ доллара?',
       blank_answer: 'курс',
       hint: "Narx/kurs soʻzi",
@@ -491,7 +491,7 @@ export const B1_LESSON_2: LessonPackage = {
     {
       id: 4,
       type: 'multiple_choice',
-      instruction: "'Какая комиссия за этот перевод?' nimani soʻrash?",
+      instruction: "'Какая комиссия за этот перевод?' savoli nimani anglatadi?",
       target_audio_text: 'Какая комиссия за этот перевод?',
       options: [
         'Bu pul oʻtkazmasi uchun qancha komissiya olinadi?',
@@ -505,7 +505,7 @@ export const B1_LESSON_2: LessonPackage = {
     {
       id: 5,
       type: 'translate_order',
-      instruction: "Xavfsizlik: 'SMS orqali kelgan kodni tasdiqlang'",
+      instruction: "Ekranda yozuv: 'Amaliyotni SMS-dagi kod bilan tasdiqlang'",
       target_audio_text: 'Подтвердите операцию кодом из СМС.',
       words_pool: ['Подтвердите', 'операцию', 'кодом', 'из', 'СМС.', 'закройте'],
       correct_order: ['Подтвердите', 'операцию', 'кодом', 'из', 'СМС.'],
@@ -514,7 +514,7 @@ export const B1_LESSON_2: LessonPackage = {
     {
       id: 6,
       type: 'fill_blank',
-      instruction: "Muddati: 'Bu kartaning amal qilish ___ qachon tugaydi?'",
+      instruction: "Soʻrang: 'Bu kartaning amal qilish muddati qanday?'",
       sentence_with_blank: 'Какой ___ действия у этой карты?',
       blank_answer: 'срок',
       hint: "Vaqt, muddat soʻzi",
@@ -525,7 +525,7 @@ export const B1_LESSON_2: LessonPackage = {
     {
       id: 7,
       type: 'multiple_choice',
-      instruction: "'Моя карта заблокирована, помогите разблокировать':",
+      instruction: "'Моя карта заблокирована, помогите её разблокировать' gapi nimani anglatadi?",
       target_audio_text: 'Моя карта заблокирована, помогите её разблокировать.',
       options: [
         'Kartam bloklandi, blokdan chiqarishga yordam bering',

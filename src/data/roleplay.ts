@@ -38,11 +38,11 @@ export const SCENARIOS: Scenario[] = [
         speaker: 'user',
         name: 'Siz',
         ru: 'Здравствуйте! Кофе, пожалуйста.',
-        uz: 'Salom! Qahva bering, iltimos.',
+        uz: 'Assalomu alaykum! Qahva bering, iltimos.',
         options: [
-          { text: 'Здравствуйте! Кофе, пожалуйста.', uz: 'Salom! Qahva bering, iltimos.', isCorrect: true },
+          { text: 'Здравствуйте! Кофе, пожалуйста.', uz: 'Assalomu alaykum! Qahva bering, iltimos.', isCorrect: true },
           { text: 'До свидания, пока.', uz: 'Xayr, koʻrishguncha.', isCorrect: false },
-          { text: 'Я не знаю русский.', uz: 'Men rus tilini bilmayman.', isCorrect: false },
+          { text: 'Я не говорю по-русски.', uz: 'Men ruscha gapirmayman.', isCorrect: false },
         ],
       },
       {

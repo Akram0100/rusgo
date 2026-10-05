@@ -372,6 +372,17 @@ describe('learning progression (src/utils/duolingoFlow.ts: a card teaches a word
     }
   });
 
+  it('every built-in lesson teaches each of its words on a card, and opens with a card', () => {
+    for (const lesson of INITIAL_LESSONS) {
+      const steps = buildDuolingoProgression(lesson);
+      const taught = new Set(cardsOf(steps).map((card) => card.term));
+      for (const word of lesson.vocabulary ?? []) {
+        assert.ok(taught.has(word.term), `${lesson.lesson_id}: "${word.term}" gets no card (no exercise uses it)`);
+      }
+      assert.equal(steps[0].type, 'learn_word', `${lesson.lesson_id}: the first exercise tests a word not taught yet`);
+    }
+  });
+
   it('gives every step an id of its own, so a card is never mistaken for an exercise', () => {
     for (const lesson of INITIAL_LESSONS) {
       const ids = buildDuolingoProgression(lesson).map((step) => step.id);

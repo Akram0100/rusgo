@@ -359,7 +359,7 @@ export const LESSON_21_DATA: LessonPackage = {
     {
       id: 10,
       type: "multiple_choice",
-      instruction: "Telefoningiz oʻchib qolyapti. Doʻstingizdan soʻrang:",
+      instruction: "Telefoningiz oʻchib qolyapti. Hamkasbingizdan soʻrang:",
       target_audio_text: "У вас есть зарядка?",
       options: ["У вас есть зарядка?", "У вас есть сим-карта?", "Какой у вас номер телефона?", "Интернет не работает?"],
       correct_answer: "У вас есть зарядка?",
@@ -400,7 +400,7 @@ export const LESSON_22_DATA: LessonPackage = {
     {
       id: 2,
       type: "translate_order",
-      instruction: "Kassada soʻrang: 'Ayting-chi, karta bilan boʻladimi?'",
+      instruction: "Kassada soʻrang: 'Aytingchi, karta bilan boʻladimi?'",
       target_audio_text: "Скажите, можно картой?",
       words_pool: ["Скажите,", "можно", "картой?", "карта", "нельзя"],
       correct_order: ["Скажите,", "можно", "картой?"],

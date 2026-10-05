@@ -388,7 +388,7 @@ export const LESSON_17_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Doʻstingiz 'Какого цвета ваша куртка?' deb soʻradi. Bu qanday savol?",
+      instruction: "Hamkasbingiz 'Какого цвета ваша куртка?' deb soʻradi. Bu qanday savol?",
       target_audio_text: "Какого цвета ваша куртка?",
       options: ["Kurtkangiz qanaqa rangda?", "Kurtkangiz qancha turadi?", "Kurtkangiz qanaqa oʻlchamda?", "Kurtkangizni qayerdan oldingiz?"],
       correct_answer: "Kurtkangiz qanaqa rangda?",
@@ -577,7 +577,7 @@ export const LESSON_18_DATA: LessonPackage = {
     {
       id: 8,
       type: "translate_order",
-      instruction: "Doʻstingizni taklif qiling: 'Yur, parkda sayr qilaylik'",
+      instruction: "Doʻstingizga taklif qiling: 'Yur, parkda sayr qilaylik'",
       target_audio_text: "Давай погуляем в парке.",
       accepted_orders: ["Давай в парке погуляем."],
       words_pool: ["Давай", "погуляем", "в", "парке.", "гулять", "парк"],

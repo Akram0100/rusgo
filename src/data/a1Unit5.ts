@@ -35,11 +35,11 @@ export const LESSON_29_DATA: LessonPackage = {
     {
       id: 2,
       type: "translate_order",
-      instruction: "Ayting: 'Ukamga oʻn ikki yosh'",
+      instruction: "Ayting: 'Ukam oʻn ikki yoshda'",
       target_audio_text: "Моему брату двенадцать лет.",
       words_pool: ["Моему", "брату", "двенадцать", "лет.", "брат", "года"],
       correct_order: ["Моему", "брату", "двенадцать", "лет."],
-      explanation: "Yosh ‘kimga? + … лет’ qolipida: ‘моему брату двенадцать лет’ — ukamga 12 yosh."
+      explanation: "Yosh ‘kimga? + … лет’ qolipida aytiladi: ‘моему брату двенадцать лет’ — ukam 12 yoshda (soʻzma-soʻz: ukamga 12 yil)."
     },
     {
       id: 3,
@@ -103,7 +103,7 @@ export const LESSON_29_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Ayting: 'Buvimga 90 yosh'",
+      instruction: "Ayting: 'Buvim 90 yoshda'",
       sentence_with_blank: "Моей бабушке ___ лет.",
       blank_answer: "девяносто",
       hint: "90",
@@ -542,7 +542,7 @@ export const LESSON_33_DATA: LessonPackage = {
       target_audio_text: "Пожилой человек.",
       options: ["Пожилой", "Молодой", "Высокий", "Весёлый"],
       correct_answer: "Пожилой",
-      explanation: "Odam haqida hurmat bilan ‘пожилой’ deyiladi; ‘старый’ koʻproq narsalar haqida (eski)."
+      explanation: "Odam haqida hurmat bilan ‘пожилой’ deyiladi; ‘старый’ (qari, eski) odamga nisbatan qoʻpol eshitiladi."
     },
     {
       id: 5,

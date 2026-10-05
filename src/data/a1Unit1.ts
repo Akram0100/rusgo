@@ -219,7 +219,7 @@ export const LESSON_10_DATA: LessonPackage = {
       instruction: "Ayting: 'Bugun dam olish kunim'",
       target_audio_text: "Сегодня у меня выходной.",
       accepted_orders: ["У меня сегодня выходной."],
-      words_pool: ["Сегодня", "у", "меня", "выходной.", "работаю", "день"],
+      words_pool: ["Сегодня", "у", "меня", "выходной.", "работаю", "работа"],
       correct_order: ["Сегодня", "у", "меня", "выходной."],
       explanation: "‘Выходной (день)’ — dam olish kuni. ‘У меня …’ — menda … bor."
     },
@@ -586,7 +586,7 @@ export const LESSON_13_DATA: LessonPackage = {
     {
       id: 8,
       type: "translate_order",
-      instruction: "Doʻstingizga maslahat bering: 'Soyabon oling, yomgʻir yogʻyapti'",
+      instruction: "Hamkasbingizga maslahat bering: 'Soyabon oling, yomgʻir yogʻyapti'",
       target_audio_text: "Возьмите зонт, идёт дождь.",
       accepted_orders: ["Идёт дождь, возьмите зонт."],
       words_pool: ["Возьмите", "зонт,", "идёт", "дождь.", "зонта", "дождя"],

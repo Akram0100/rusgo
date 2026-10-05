@@ -86,39 +86,37 @@ export const LESSON_1_DATA: LessonPackage = {
     {
       id: 5,
       type: "translate_order",
-      instruction: "Soʻzlarni toʻgʻri ketma-ketlikda terib: 'Salom, koʻrishguncha!' jumlasini tuzing.",
-      target_audio_text: "Привет, до скорой встречи!",
+      instruction: "Doʻstingiz bilan salomlashing: 'Salom! Ishlar qalay?'",
+      target_audio_text: "Привет! Как дела?",
       words_pool: [
-        "Привет,",
-        "до",
-        "скорой",
-        "встречи!",
+        "Привет!",
+        "Как",
+        "дела?",
         "Добро",
         "пожаловать"
       ],
       correct_order: [
-        "Привет,",
-        "до",
-        "скорой",
-        "встречи!"
+        "Привет!",
+        "Как",
+        "дела?"
       ],
-      explanation: "‘Привет’ — doʻstona salom, ‘До скорой встречи!’ esa 'Tez orada koʻrishguncha!' deganidir."
+      explanation: "‘Привет’ — doʻstlar orasidagi salom (kattalarga ‘Здравствуйте’). ‘Как дела?’ — ishlar qalay?"
     },
     {
       id: 6,
       type: "fill_blank",
-      instruction: "Boʻsh joyni toʻldiring: 'Hol-ahvolingiz qalay?'",
-      sentence_with_blank: "Как ___?",
-      blank_answer: "дела",
-      hint: "Ishlar/hol-ahvol maʼnosidagi soʻz",
+      instruction: "Xayrlashing: 'Tez orada koʻrishguncha!'",
+      sentence_with_blank: "До скорой ___!",
+      blank_answer: "встречи",
+      hint: "Uchrashuv soʻzi",
       options: [
+        "встречи",
         "дела",
-        "вас",
-        "зовут",
-        "утро"
+        "утро",
+        "зовут"
       ],
-      target_audio_text: "Как дела?",
-      explanation: "‘Как дела?’ — rus tilida eng koʻp qoʻllaniladigan 'Ishlar qalay? Ahvollar yaxshimi?' iborasidir."
+      target_audio_text: "До скорой встречи!",
+      explanation: "‘До скорой встречи!’ — tez orada koʻrishguncha! ‘Встреча’ — uchrashuv."
     },
     {
       id: 7,
@@ -201,10 +199,10 @@ export const LESSON_2_DATA: LessonPackage = {
     { term: "Один кофе, пожалуйста", translation: "Bitta kofe, iltimos", audio_text: "Один кофе, пожалуйста" },
     { term: "Счёт, пожалуйста", translation: "Hisobni bering, iltimos", audio_text: "Счёт, пожалуйста" },
     { term: "Один, два, три", translation: "Bir, ikki, uch", audio_text: "Один, два, три" },
-    { term: "Четыре, пять", translation: "Toʻrt, besh", audio_text: "Четыре, пять" },
-    { term: "Десять", translation: "Oʻn", audio_text: "Десять" },
+    { term: "Четыре, пять, шесть", translation: "Toʻrt, besh, olti", audio_text: "Четыре, пять, шесть" },
+    { term: "Семь, восемь, девять, десять", translation: "Yetti, sakkiz, toʻqqiz, oʻn", audio_text: "Семь, восемь, девять, десять" },
     { term: "Стакан воды", translation: "Bir stakan suv", audio_text: "Стакан воды" },
-    { term: "Рубль / Рубли", translation: "Rubl (pul birligi)", audio_text: "Рубль" },
+    { term: "Десять рублей", translation: "Oʻn rubl", audio_text: "Десять рублей" },
     { term: "Без сахара", translation: "Shakarsiz", audio_text: "Без сахара" },
     { term: "Вот, пожалуйста", translation: "Mana, marhamat", audio_text: "Вот, пожалуйста" },
   ],
@@ -312,16 +310,16 @@ export const LESSON_2_DATA: LessonPackage = {
     {
       id: 7,
       type: "multiple_choice",
-      instruction: "'Сто рублей' iborasi oʻzbek tilida nimani bildiradi?",
-      target_audio_text: "Сто рублей.",
+      instruction: "Sanashni davom ettiring: 'Четыре, пять, шесть…' Keyin qaysi sonlar keladi?",
+      target_audio_text: "Семь, восемь, девять, десять.",
       options: [
-        "Yuz rubl",
-        "Oʻn rubl",
-        "Ming rubl",
-        "Besh yuz rubl"
+        "Семь, восемь, девять, десять",
+        "Один, два, три",
+        "Три, два, один",
+        "Десять, девять, восемь, семь"
       ],
-      correct_answer: "Yuz rubl",
-      explanation: "‘Сто’ — 100 raqami, ‘рублей’ — rubl valyutasining koʻplik shakli."
+      correct_answer: "Семь, восемь, девять, десять",
+      explanation: "1 dan 10 gacha: один, два, три, четыре, пять, шесть, семь, восемь, девять, десять."
     },
     {
       id: 8,
@@ -346,8 +344,8 @@ export const LESSON_2_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Kassirga 'Qaytim kerak emas' deb ayting: 'Сдачу ___ надо'",
-      sentence_with_blank: "Спасибо, сдачу ___ надо.",
+      instruction: "Kassirga ayting: 'Rahmat, qaytim kerak emas'",
+      sentence_with_blank: "Спасибо, сдачи ___ надо.",
       blank_answer: "не",
       hint: "Inkor yuklamasi",
       options: [
@@ -356,22 +354,22 @@ export const LESSON_2_DATA: LessonPackage = {
         "нет",
         "без"
       ],
-      target_audio_text: "Спасибо, сдачу не надо.",
-      explanation: "‘Сдачу не надо’ — mayda qaytim pulini qoldirganda 'Qaytimi kerak emas' maʼnosida qoʻllaniladi."
+      target_audio_text: "Спасибо, сдачи не надо.",
+      explanation: "‘Сдачи не надо’ — qaytim kerak emas (qaytimni olmaganda aytiladi)."
     },
     {
       id: 10,
       type: "multiple_choice",
-      instruction: "Kassada 'Ikkita chipta bering' iborasi qanday boʻladi?",
-      target_audio_text: "Дайте два билета, пожалуйста.",
+      instruction: "'Десять рублей' iborasi oʻzbek tilida nimani bildiradi?",
+      target_audio_text: "Десять рублей.",
       options: [
-        "Дайте два билета, пожалуйста",
-        "Один кофе, пожалуйста",
-        "Сколько это стоит?",
-        "Счёт, пожалуйста"
+        "Oʻn rubl",
+        "Ikki rubl",
+        "Yuz rubl",
+        "Ming rubl"
       ],
-      correct_answer: "Дайте два билета, пожалуйста",
-      explanation: "‘Два билета’ — ikkita chipta. ‘Дайте ... пожалуйста’ — bering, iltimos."
+      correct_answer: "Oʻn rubl",
+      explanation: "‘Десять’ — 10. 5 va undan katta sonlardan keyin ‘рублей’ deyiladi: пять рублей, десять рублей."
     }
   ]
 };
@@ -385,14 +383,14 @@ export const LESSON_3_DATA: LessonPackage = {
   exercises_count: 10,
   vocabulary: [
     { term: "Это моя семья", translation: "Bu mening oilam", audio_text: "Это моя семья" },
-    { term: "Мама и папа", translation: "Ona va ota", audio_text: "Мама и папа" },
+    { term: "Моя мама", translation: "Mening onam", audio_text: "Моя мама" },
     { term: "Брат и сестра", translation: "Aka/uka va opa/singil", audio_text: "Брат и сестра" },
     { term: "У меня есть...", translation: "Menda bor...", audio_text: "У меня есть" },
     { term: "Где вы живёте?", translation: "Siz qayerda yashaysiz?", audio_text: "Где вы живёте?" },
     { term: "Я живу в...", translation: "Men ...da yashayman", audio_text: "Я живу в" },
-    { term: "Наш дом", translation: "Bizning uyimiz", audio_text: "Наш дом" },
+    { term: "Мой папа", translation: "Mening otam", audio_text: "Мой папа" },
     { term: "Квартира", translation: "Kvartira (xonadon)", audio_text: "Квартира" },
-    { term: "Большая семья", translation: "Katta oila", audio_text: "Большая семья" },
+    { term: "Большая и дружная семья", translation: "Katta va ahil oila", audio_text: "Большая и дружная семья" },
     { term: "Мы живём вместе", translation: "Biz birga yashaymiz", audio_text: "Мы живём вместе" },
   ],
   exercises: [
@@ -450,16 +448,16 @@ export const LESSON_3_DATA: LessonPackage = {
     {
       id: 4,
       type: "multiple_choice",
-      instruction: "'У меня есть сестра' gapi oʻzbek tilida qanday maʼno beradi?",
-      target_audio_text: "У меня есть сестра.",
+      instruction: "'У меня есть брат и сестра' gapi oʻzbek tilida qanday maʼno beradi?",
+      target_audio_text: "У меня есть брат и сестра.",
       options: [
-        "Mening opam (singlim) bor",
+        "Mening akam (ukam) va opam (singlim) bor",
         "Mening akam (ukam) bor",
         "Bu mening onam",
         "Biz birga yashaymiz"
       ],
-      correct_answer: "Mening opam (singlim) bor",
-      explanation: "‘Сестра’ — opa yoki singil maʼnosini bildiradi."
+      correct_answer: "Mening akam (ukam) va opam (singlim) bor",
+      explanation: "‘Брат’ — aka yoki uka, ‘сестра’ — opa yoki singil."
     },
     {
       id: 5,
@@ -581,7 +579,7 @@ export const LESSON_4_DATA: LessonPackage = {
     { term: "Это рядом", translation: "Bu yaqin", audio_text: "Это рядом" },
     { term: "Остановка", translation: "Bekat", audio_text: "Остановка" },
     { term: "Пешком", translation: "Piyoda", audio_text: "Пешком" },
-    { term: "Перекрёсток", translation: "Chorraha", audio_text: "Перекрёсток" },
+    { term: "На перекрёстке", translation: "Chorrahada", audio_text: "На перекрёстке" },
     { term: "Скажите, пожалуйста", translation: "Aytingchi, iltimos", audio_text: "Скажите, пожалуйста" },
   ],
   exercises: [
@@ -624,7 +622,7 @@ export const LESSON_4_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Boʻsh joyni toʻldiring: 'Chorraxada chapga buriling'",
+      instruction: "Boʻsh joyni toʻldiring: 'Chorrahada chapga buriling'",
       sentence_with_blank: "На перекрёстке поверните ___.",
       blank_answer: "налево",
       hint: "Chap tomonga yoʻnalish",
@@ -727,7 +725,7 @@ export const LESSON_4_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Metrodan chiqish joyini toping: 'Где находится ___?'",
+      instruction: "Metroda chiqish joyini soʻrang: 'Aytingchi, chiqish qayerda?'",
       sentence_with_blank: "Подскажите, где ___?",
       blank_answer: "выход",
       hint: "Chiqish eshigi (kirish emas)",
@@ -766,15 +764,15 @@ export const LESSON_5_DATA: LessonPackage = {
   exercises_count: 10,
   vocabulary: [
     { term: "Можно примерить?", translation: "Kiyib koʻrsam boʻladimi?", audio_text: "Можно примерить?" },
-    { term: "Какой это размер?", translation: "Bu qaysi oʻlcham?", audio_text: "Какой это размер?" },
+    { term: "Другой размер", translation: "Boshqa oʻlcham", audio_text: "Другой размер" },
     { term: "Можно оплатить картой?", translation: "Karta bilan toʻlasa boʻladimi?", audio_text: "Можно оплатить картой?" },
     { term: "Это слишком дорого", translation: "Bu juda qimmat", audio_text: "Это слишком дорого" },
-    { term: "Есть ли скидка?", translation: "Chegirma bormi?", audio_text: "Есть ли скидка?" },
+    { term: "У вас есть скидка?", translation: "Chegirma bormi?", audio_text: "У вас есть скидка?" },
     { term: "Примерочная", translation: "Kiyib koʻrish xonasi", audio_text: "Примерочная" },
     { term: "Чек", translation: "Xarid cheki", audio_text: "Чек" },
     { term: "Пакет", translation: "Xarid xaltasi (paket)", audio_text: "Пакет" },
     { term: "Я беру это", translation: "Men buni olaman", audio_text: "Я беру это" },
-    { term: "Другой цвет", translation: "Boshqa rang", audio_text: "Другой цвет" },
+    { term: "Я оплачу наличными", translation: "Naqd pul bilan toʻlayman", audio_text: "Я оплачу наличными" },
   ],
   exercises: [
     {
@@ -867,7 +865,7 @@ export const LESSON_5_DATA: LessonPackage = {
     {
       id: 6,
       type: "fill_blank",
-      instruction: "Kassir soʻraydi: 'Пакет ___?' (Paket kerakmi?)",
+      instruction: "Kassir soʻraydi: 'Sizga paket kerakmi?'",
       sentence_with_blank: "Вам пакет ___?",
       blank_answer: "нужен",
       hint: "Kerak maʼnosidagi soʻz",
@@ -897,7 +895,7 @@ export const LESSON_5_DATA: LessonPackage = {
     {
       id: 8,
       type: "translate_order",
-      instruction: "Xarid qilishga qaror qildingiz: 'Men buni olaman'",
+      instruction: "Xarid qilishga qaror qildingiz: 'Yaxshi, men buni olaman'",
       target_audio_text: "Хорошо, я беру это.",
       accepted_orders: ["Хорошо, я это беру."],
       words_pool: [
@@ -919,7 +917,7 @@ export const LESSON_5_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Chegirma soʻrang: 'У вас есть ___ на этот товар?'",
+      instruction: "Chegirma soʻrang: 'Bu koʻylakka chegirma bormi?'",
       sentence_with_blank: "У вас есть ___ на это платье?",
       blank_answer: "скидка",
       hint: "Narxning arzonlashtirilishi",
@@ -1150,26 +1148,26 @@ export const LESSON_7_DATA: LessonPackage = {
     { term: "Лекарство от простуды", translation: "Shamollashga qarshi dori", audio_text: "Лекарство от простуды" },
     { term: "Как принимать?", translation: "Qanday qabul qilish kerak?", audio_text: "Как принимать?" },
     { term: "После еды", translation: "Ovqatdan keyin", audio_text: "После еды" },
-    { term: "До еды", translation: "Ovqatdan oldin", audio_text: "До еды" },
+    { term: "Два раза в день", translation: "Kuniga ikki marta", audio_text: "Два раза в день" },
     { term: "Высокая температура", translation: "Yuqori harorat (isitma)", audio_text: "Высокая температура" },
     { term: "Обезболивающее", translation: "Ogʻriq qoldiruvchi vosita", audio_text: "Обезболивающее" },
     { term: "Капли для носа", translation: "Burun tomchilari", audio_text: "Капли для носа" },
-    { term: "Рецепт врача", translation: "Shifokor retsepti", audio_text: "Рецепт врача" },
-    { term: "Скорая помощь", translation: "Tez tibbiy yordam", audio_text: "Скорая помощь" },
+    { term: "Рецепт от врача", translation: "Shifokor retsepti", audio_text: "Рецепт от врача" },
+    { term: "Без рецепта", translation: "Retseptsiz", audio_text: "Без рецепта" },
   ],
   exercises: [
     {
       id: 1,
       type: "multiple_choice",
       instruction: "Dorixonada 'Mening boshim ogʻriyapti' deb oʻz holatingizni tushuntiring:",
-      target_audio_text: "У меня сильно болит голова.",
+      target_audio_text: "У меня болит голова.",
       options: [
-        "У меня сильно болит голова",
+        "У меня болит голова",
         "У меня есть рецепт",
         "Где находится аптека?",
         "Дайте стакан воды"
       ],
-      correct_answer: "У меня сильно болит голова",
+      correct_answer: "У меня болит голова",
       explanation: "‘Болит...’ — ogʻriyapti (birlikdagi tana aʼzolari uchun)."
     },
     {
@@ -1198,7 +1196,7 @@ export const LESSON_7_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Dorini qachon ichish kerakligini soʻrang: 'Как ___ эти таблетки?'",
+      instruction: "Dorini qanday ichish kerakligini soʻrang: 'Aytingchi, bu tabletkalarni qanday ichish kerak?'",
       sentence_with_blank: "Подскажите, как ___ эти таблетки?",
       blank_answer: "принимать",
       hint: "Dorini ichmoq/qabul qilmoq feʼli",
@@ -1250,7 +1248,7 @@ export const LESSON_7_DATA: LessonPackage = {
     {
       id: 6,
       type: "fill_blank",
-      instruction: "Ogʻriq qoldiruvchi soʻrang: 'Есть ли у вас хорошее ___?'",
+      instruction: "Ogʻriq qoldiruvchi soʻrang: 'Sizda kuchli ogʻriq qoldiruvchi bormi?'",
       sentence_with_blank: "У вас есть сильное ___?",
       blank_answer: "обезболивающее",
       hint: "Ogʻriqni bartaraf qiluvchi vosita",
@@ -1280,24 +1278,21 @@ export const LESSON_7_DATA: LessonPackage = {
     {
       id: 8,
       type: "translate_order",
-      instruction: "Shoshilinch holatda ayting: 'Tez tibbiy yordamni chaqiring!'",
-      target_audio_text: "Срочно вызовите скорую помощь!",
-      accepted_orders: ["Вызовите срочно скорую помощь!", "Вызовите скорую помощь срочно!"],
+      instruction: "Farmatsevtdan soʻrang: 'Retseptsiz boʻladimi?'",
+      target_audio_text: "Можно без рецепта?",
       words_pool: [
-        "Срочно",
-        "вызовите",
-        "скорую",
-        "помощь!",
-        "врач",
-        "аптека"
+        "Можно",
+        "без",
+        "рецепта?",
+        "рецепт",
+        "нет"
       ],
       correct_order: [
-        "Срочно",
-        "вызовите",
-        "скорую",
-        "помощь!"
+        "Можно",
+        "без",
+        "рецепта?"
       ],
-      explanation: "‘Скорая помощь’ — tez tibbiy yordam xizmati (103)."
+      explanation: "‘Без рецепта’ — retseptsiz, shifokor qogʻozisiz. ‘Без’ dan keyin: рецепт → без рецепта."
     },
     {
       id: 9,
@@ -1348,7 +1343,7 @@ export const LESSON_8_DATA: LessonPackage = {
     { term: "Рейс задерживается", translation: "Parvoz kechikmoqda", audio_text: "Рейс задерживается" },
     { term: "Пристегните ремни", translation: "Xavfsizlik kamarlarini taqing", audio_text: "Пристегните ремни" },
     { term: "Счастливого пути!", translation: "Oq yoʻl! Xayrli safar!", audio_text: "Счастливого пути!" },
-    { term: "Таможня", translation: "Bojxona", audio_text: "Таможня" },
+    { term: "Паспорт и билет", translation: "Pasport va chipta", audio_text: "Паспорт и билет" },
     { term: "Самолёт приземлился", translation: "Samolyot qoʻndi", audio_text: "Самолёт приземлился" },
   ],
   exercises: [
@@ -1422,7 +1417,7 @@ export const LESSON_8_DATA: LessonPackage = {
     {
       id: 5,
       type: "translate_order",
-      instruction: "Styuardessa eʼlon qiladi: 'Xavfsizlik kamarlarini taqing'",
+      instruction: "Styuardessa eʼlon qiladi: 'Iltimos, xavfsizlik kamarlarini taqing'",
       target_audio_text: "Пожалуйста, пристегните ремни безопасности.",
       accepted_orders: ["Пристегните, пожалуйста, ремни безопасности.", "Пристегните ремни безопасности, пожалуйста."],
       words_pool: [
@@ -1474,7 +1469,7 @@ export const LESSON_8_DATA: LessonPackage = {
     {
       id: 8,
       type: "translate_order",
-      instruction: "Yoʻlovchiga tilak bildiring: 'Sizga oq yoʻl va xayrli safar!'",
+      instruction: "Yoʻlovchiga tilak bildiring: 'Sizga oq yoʻl tilayman!'",
       target_audio_text: "Желаю вам счастливого пути!",
       words_pool: [
         "Желаю",
@@ -1511,16 +1506,16 @@ export const LESSON_8_DATA: LessonPackage = {
     {
       id: 10,
       type: "multiple_choice",
-      instruction: "Uchuvchi 'Наш самолёт совершил посадку' desa, nima maʼnoni anglatadi?",
-      target_audio_text: "Наш самолёт успешно совершил посадку.",
+      instruction: "Uchuvchi 'Наш самолёт приземлился' dedi. Bu nima degani?",
+      target_audio_text: "Наш самолёт приземлился.",
       options: [
-        "Samolyotimiz muvaffaqiyatli qoʻndi",
+        "Samolyotimiz qoʻndi",
         "Samolyot havoga koʻtarildi",
         "Samolyot kechikmoqda",
         "Havo harorati past"
       ],
-      correct_answer: "Samolyotimiz muvaffaqiyatli qoʻndi",
-      explanation: "‘Совершил посадку’ — manzilga qoʻndi deganidir."
+      correct_answer: "Samolyotimiz qoʻndi",
+      explanation: "‘Приземлиться’ — yerga qoʻnmoq: ‘самолёт приземлился’ — samolyot qoʻndi."
     }
   ]
 };
