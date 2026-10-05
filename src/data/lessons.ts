@@ -1514,6 +1514,7 @@ export const LESSON_8_DATA: LessonPackage = {
 import { ALL_A2_LESSONS, ALL_B1_LESSONS } from './advancedLessons';
 import { A1_UNIT_1_LESSONS } from './a1Unit1';
 import { A1_UNIT_2_LESSONS } from './a1Unit2';
+import { A1_UNIT_3_LESSONS } from './a1Unit3';
 
 export const INITIAL_A1_LESSONS: LessonPackage[] = [
   LESSON_1_DATA,
@@ -1527,6 +1528,7 @@ export const INITIAL_A1_LESSONS: LessonPackage[] = [
   // New lessons are added after the first eight, so the lessons learners have unlocked stay as they are
   ...A1_UNIT_1_LESSONS,
   ...A1_UNIT_2_LESSONS,
+  ...A1_UNIT_3_LESSONS,
 ];
 
 export const INITIAL_LESSONS: LessonPackage[] = [
