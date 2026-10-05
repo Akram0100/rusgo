@@ -732,6 +732,7 @@ export default function App() {
               lessonNumber={activeLessonNumber}
               xpEarned={lessonXpEarned}
               mistakesCount={mistakesCount}
+              answeredSteps={lessonSteps.filter((step) => step.type !== 'learn_word').length}
               onRestart={handleResetLesson}
               onViewJson={() => setActiveTab('json')}
               onNextLesson={handleNextLesson}

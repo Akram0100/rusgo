@@ -19,6 +19,8 @@ export interface MultipleChoiceExercise extends BaseExercise {
   type: 'multiple_choice';
   options: string[];
   correct_answer: string;
+  /** A listening question: the phrase is only heard (target_audio_text), and the learner picks what was said. */
+  audio_only?: boolean;
 }
 
 export interface TranslateOrderExercise extends BaseExercise {

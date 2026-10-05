@@ -1,4 +1,4 @@
-import { LessonPackage, Exercise, LearnWordExercise } from '../types/lesson';
+import { LessonPackage, Exercise, LearnWordExercise, MultipleChoiceExercise } from '../types/lesson';
 
 /**
  * Transforms a raw lesson into a pedagogical Duolingo-style progression:
@@ -6,6 +6,7 @@ import { LessonPackage, Exercise, LearnWordExercise } from '../types/lesson';
  *    First display a dedicated "Yangi soʻz bilan tanishamiz" (Learn) card with audio & translation.
  * 2. Immediately follow it with the exercises that practice and test that exact word.
  * 3. This guarantees the student is never tested on a word before being taught!
+ * 4. The lesson ends with listening steps (see listeningSteps) on words it taught.
  */
 export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
   const result: Exercise[] = [];
@@ -67,6 +68,7 @@ export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
   const remainingVocab = vocabulary.filter(
     (v) => !introducedTerms.has(v.term.toLowerCase().trim())
   );
+  let steps = result;
   if (remainingVocab.length > 0 && result.length === lesson.exercises.length) {
     const prepends: Exercise[] = remainingVocab.slice(0, 3).map((vocab) => ({
       id: ++learnIdCounter,
@@ -78,10 +80,42 @@ export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
       explanation: 'Ushbu yangi soʻzni eshitib, talaffuzini eslab qoling.',
       context_note: 'Darsdagi asosiy yangi soʻz.',
     }));
-    return [...prepends, ...result];
+    steps = [...prepends, ...result];
   }
 
-  return result;
+  return [...steps, ...listeningSteps(steps, vocabulary.map((vocab) => vocab.term))];
+}
+
+/** Listening steps that close a lesson. */
+export const LISTENING_STEPS = 2;
+
+/**
+ * Listening steps: a word the lesson taught on a card is only heard, and the learner picks it among four of the
+ * lesson's words. They take the first taught word and one from the middle, so they come after their cards.
+ */
+function listeningSteps(steps: Exercise[], terms: string[]): MultipleChoiceExercise[] {
+  const taught = steps.filter((step): step is LearnWordExercise => step.type === 'learn_word');
+  const choices = Array.from(new Set(terms.map((term) => term.trim()).filter(Boolean)));
+  if (taught.length === 0 || choices.length < 4) return [];
+
+  const picks = Array.from(new Set([0, Math.floor(taught.length / 2)])).slice(0, LISTENING_STEPS);
+  return picks.map((at, n) => {
+    const card = taught[at];
+    const others = choices.filter((term) => term !== card.term.trim());
+    // The wrong choices follow the word in the lesson's list, so each listening step gets different ones
+    const start = Math.max(0, choices.indexOf(card.term.trim()));
+    const wrong = [...others.slice(start), ...others.slice(0, start)].slice(0, 3);
+    return {
+      id: 8001 + n,
+      type: 'multiple_choice',
+      audio_only: true,
+      instruction: 'Eshitganingizni tanlang:',
+      target_audio_text: card.target_audio_text,
+      options: [card.term, ...wrong],
+      correct_answer: card.term,
+      explanation: `‘${card.term}’ — ${card.translation}.`,
+    };
+  });
 }
 
 /**

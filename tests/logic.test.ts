@@ -33,7 +33,7 @@ import {
   getReviewXp,
   getSpeedMatchPairXp,
 } from '../src/utils/xp';
-import { addRetry, buildDuolingoProgression, lessonStepsDone } from '../src/utils/duolingoFlow';
+import { LISTENING_STEPS, addRetry, buildDuolingoProgression, lessonStepsDone } from '../src/utils/duolingoFlow';
 import {
   REVIEW_SESSION_SIZE,
   addDays,
@@ -46,7 +46,7 @@ import {
   type ReviewCard,
 } from '../src/utils/review';
 import { collectAudioTexts } from '../src/utils/audioTexts';
-import type { Exercise, LearnWordExercise } from '../src/types/lesson';
+import type { Exercise, LearnWordExercise, MultipleChoiceExercise } from '../src/types/lesson';
 import type { UserStats } from '../src/types/gamification';
 
 const HAS_CYRILLIC = /[А-Яа-яЁё]/;
@@ -309,11 +309,12 @@ describe('sanitizeGeneratedLesson (AI lessons are validated before they reach th
 describe('learning progression (src/utils/duolingoFlow.ts: a card teaches a word before it is tested)', () => {
   const cardsOf = (steps: Exercise[]) => steps.filter((step): step is LearnWordExercise => step.type === 'learn_word');
 
-  it('keeps every exercise of every lesson, in order, and only adds cards', () => {
+  it('keeps every exercise of every lesson, in order, and only adds cards and the closing listening steps', () => {
     for (const lesson of INITIAL_LESSONS) {
       const steps = buildDuolingoProgression(lesson);
-      assert.deepEqual(steps.filter((step) => step.type !== 'learn_word'), lesson.exercises, lesson.lesson_id);
-      assert.equal(steps.length, lesson.exercises.length + cardsOf(steps).length, lesson.lesson_id);
+      const authored = steps.filter((step) => step.type !== 'learn_word' && !(step.type === 'multiple_choice' && step.audio_only));
+      assert.deepEqual(authored, lesson.exercises, lesson.lesson_id);
+      assert.equal(steps.length, lesson.exercises.length + cardsOf(steps).length + LISTENING_STEPS, lesson.lesson_id);
     }
   });
 
@@ -346,6 +347,37 @@ describe('learning progression (src/utils/duolingoFlow.ts: a card teaches a word
   it('a lesson without vocabulary (an AI lesson may have none) gets no cards at all', () => {
     const lesson = { ...INITIAL_LESSONS[0], vocabulary: undefined };
     assert.deepEqual(buildDuolingoProgression(lesson), lesson.exercises);
+  });
+});
+
+describe('listening steps (src/utils/duolingoFlow.ts: a taught word is only heard, then picked)', () => {
+  const listeningOf = (steps: Exercise[]) =>
+    steps.filter((step): step is MultipleChoiceExercise => step.type === 'multiple_choice' && Boolean(step.audio_only));
+
+  it('every lesson ends with its listening steps, each on a different word that the lesson taught before', () => {
+    for (const lesson of INITIAL_LESSONS) {
+      const steps = buildDuolingoProgression(lesson);
+      const listening = listeningOf(steps);
+      assert.equal(listening.length, LISTENING_STEPS, lesson.lesson_id);
+      assert.deepEqual(steps.slice(-LISTENING_STEPS), listening, `${lesson.lesson_id}: they close the lesson`);
+      assert.equal(new Set(listening.map((step) => step.correct_answer)).size, LISTENING_STEPS, `${lesson.lesson_id}: the same word twice`);
+
+      for (const step of listening) {
+        const tag = `${lesson.lesson_id}: "${step.correct_answer}"`;
+        const cardAt = steps.findIndex((s) => s.type === 'learn_word' && s.term === step.correct_answer);
+        assert.ok(cardAt >= 0 && cardAt < steps.indexOf(step), `${tag} is heard before it is taught`);
+        assert.equal(step.target_audio_text, (steps[cardAt] as LearnWordExercise).target_audio_text, `${tag}: not the card's audio`);
+        assert.equal(step.options.length, 4, tag);
+        assert.equal(new Set(step.options).size, 4, `${tag}: a choice twice`);
+        assert.ok(step.options.includes(step.correct_answer), tag);
+        assert.ok(!step.instruction.includes(step.correct_answer), `${tag}: the instruction gives the word away`);
+      }
+    }
+  });
+
+  it('a lesson with fewer than four words gets no listening step (there would not be four choices)', () => {
+    const lesson = { ...INITIAL_LESSONS[0], vocabulary: INITIAL_LESSONS[0].vocabulary!.slice(0, 3) };
+    assert.deepEqual(listeningOf(buildDuolingoProgression(lesson)), []);
   });
 });
 

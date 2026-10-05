@@ -8,6 +8,8 @@ interface CompletionModalProps {
   lessonNumber?: number;
   xpEarned?: number;
   mistakesCount: number;
+  /** Steps that were answered (exercises and listening steps, not the new-word cards); default: the exercises */
+  answeredSteps?: number;
   onRestart: () => void;
   onViewJson: () => void;
   onNextLesson?: () => void;
@@ -19,15 +21,17 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
   lessonNumber,
   xpEarned = 50,
   mistakesCount,
+  answeredSteps,
   onRestart,
   onViewJson,
   onNextLesson,
   hasNextLesson,
 }) => {
   const totalExercises = lessonData.exercises.length;
+  const totalAnswered = answeredSteps ?? totalExercises;
   const accuracy =
-    totalExercises > 0
-      ? Math.max(0, Math.round(((totalExercises - mistakesCount) / totalExercises) * 100))
+    totalAnswered > 0
+      ? Math.max(0, Math.round(((totalAnswered - mistakesCount) / totalAnswered) * 100))
       : 100;
 
   return (
@@ -41,7 +45,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
         Tabriklaymiz! {lessonNumber ? `${lessonNumber}-dars` : 'Dars'} yakunlandi!
       </h1>
       <p className="text-slate-600 text-sm max-w-md mx-auto mb-6">
-        Siz <b className="text-slate-800">{lessonData.topic}</b> mavzusidagi {totalExercises} ta mikro-mashqni
+        Siz <b className="text-slate-800">{lessonData.topic}</b> mavzusidagi {totalAnswered} ta mikro-mashqni
         muvaffaqiyatli tamomladingiz.
       </p>
 

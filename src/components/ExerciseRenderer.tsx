@@ -9,7 +9,7 @@ import {
 import { AudioButton } from './AudioButton';
 import { HighlightedText } from './HighlightedText';
 import { playTileClick, speakRussian } from '../utils/audio';
-import { CheckCircle2, XCircle, HelpCircle, Mic, Sparkles } from 'lucide-react';
+import { CheckCircle2, XCircle, HelpCircle, Mic, Sparkles, Volume2 } from 'lucide-react';
 
 interface ExerciseRendererProps {
   exercise: Exercise;
@@ -59,7 +59,7 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
             ) : (
               <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                 {exercise.type === 'learn_word' && '✨ Oʻrganamiz'}
-                {exercise.type === 'multiple_choice' && 'Variantli test'}
+                {exercise.type === 'multiple_choice' && (exercise.audio_only ? '🎧 Eshitib tanlang' : 'Variantli test')}
                 {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}
                 {exercise.type === 'fill_blank' && 'Boʻsh joyni toʻldirish'}
               </span>
@@ -77,7 +77,8 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <AudioButton text={exercise.target_audio_text} />
+            {/* A listening step has its own big play button below */}
+            {!(exercise.type === 'multiple_choice' && exercise.audio_only) && <AudioButton text={exercise.target_audio_text} />}
             {onOpenSpeaking && (
               <button
                 onClick={() => onOpenSpeaking(exercise.target_audio_text)}
@@ -149,6 +150,8 @@ const MultipleChoiceView: React.FC<{
   onSelectOption: (option: string) => void;
 }> = ({ exercise, selectedAnswer, isChecked, isCorrect, onSelectOption }) => {
   return (
+    <>
+    {exercise.audio_only && <ListenPrompt exercise={exercise} />}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-6">
       {exercise.options.map((option, index) => {
         const isSelected = selectedAnswer === option;
@@ -195,6 +198,34 @@ const MultipleChoiceView: React.FC<{
           </button>
         );
       })}
+    </div>
+    </>
+  );
+};
+
+/* LISTENING PROMPT: the phrase is only heard, so it plays by itself and can be replayed, slowly too */
+const ListenPrompt: React.FC<{ exercise: MultipleChoiceExercise }> = ({ exercise }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => speakRussian(exercise.target_audio_text), 300);
+    return () => clearTimeout(timer);
+  }, [exercise]); // a new object for every step, a retry included, so each one plays
+
+  return (
+    <div className="mt-4 flex flex-col items-center gap-3 p-5 sm:p-6 rounded-3xl border-2 border-sky-200 bg-sky-50/60">
+      <button
+        onClick={() => speakRussian(exercise.target_audio_text)}
+        className="w-20 h-20 rounded-full bg-sky-500 hover:bg-sky-400 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 active:translate-y-0.5 transition-colors cursor-pointer"
+        aria-label="Qayta eshitish"
+        title="Qayta eshitish"
+      >
+        <Volume2 className="w-9 h-9" />
+      </button>
+      <button
+        onClick={() => speakRussian(exercise.target_audio_text, 0.68)}
+        className="text-xs font-bold text-sky-700 hover:text-sky-900 px-3 py-1.5 rounded-lg hover:bg-sky-100 transition-colors cursor-pointer"
+      >
+        🐢 Sekinroq eshitish
+      </button>
     </div>
   );
 };
