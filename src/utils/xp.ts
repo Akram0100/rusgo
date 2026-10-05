@@ -22,6 +22,13 @@ export const getLessonXp = (isFirstCompletion: boolean, learnCards: number): num
   return LESSON_FIRST_XP + LEARN_CARD_XP * cards;
 };
 
+/** XP for each word of a finished review session that was answered right at the first try. */
+export const REVIEW_WORD_XP = 2;
+
+/** XP a finished review session pays. A word comes back only when it is due, so reviews cannot be farmed. */
+export const getReviewXp = (rightFirstTime: number): number =>
+  REVIEW_WORD_XP * (Number.isFinite(rightFirstTime) ? Math.max(0, Math.floor(rightFirstTime)) : 0);
+
 /** XP for finishing a role-play scenario for the first time, and for repeating it afterwards. */
 export const ROLEPLAY_FIRST_XP = 30;
 export const ROLEPLAY_REPEAT_XP = 5;

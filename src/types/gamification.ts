@@ -12,7 +12,7 @@ export interface Achievement {
 export interface UserStats {
   xp: number;
   streakDays: number;
-  lastActiveDate: string; // local YYYY-MM-DD of the last day a lesson was completed ('' = never)
+  lastActiveDate: string; // local YYYY-MM-DD of the last day a lesson or a review was finished ('' = never)
   completedLessonsCount: number;
   perfectLessonsCount: number;
   speakingAttemptsCount: number;

@@ -44,6 +44,8 @@ interface LessonDrawerProps {
   onOpenSpeedMatch: () => void;
   onOpenRoleplay: () => void;
   onOpenGrammar: () => void;
+  onOpenReview?: () => void;
+  reviewDueCount?: number; // words due for review today
   onOpenLeaderboard?: () => void;
   onResetLesson?: () => void;
   onToggleJson?: () => void;
@@ -71,6 +73,8 @@ export const LessonDrawer: React.FC<LessonDrawerProps> = ({
   onOpenSpeedMatch,
   onOpenRoleplay,
   onOpenGrammar,
+  onOpenReview,
+  reviewDueCount = 0,
   onOpenLeaderboard,
   onResetLesson,
   onToggleJson,
@@ -380,6 +384,29 @@ export const LessonDrawer: React.FC<LessonDrawerProps> = ({
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block mb-2.5">
                 Qoʻshimcha trenajyorlar
               </span>
+
+              {onOpenReview && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenReview();
+                  }}
+                  className="w-full mb-2 flex items-center gap-2.5 p-2.5 rounded-xl border border-violet-200 bg-violet-50/60 hover:bg-violet-100/70 text-violet-900 transition-colors cursor-pointer text-left"
+                >
+                  <RotateCcw className="w-4 h-4 text-violet-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold">Takrorlash</div>
+                    <div className="text-[11px] text-violet-600/80">
+                      {reviewDueCount > 0 ? `${reviewDueCount} ta soʻz kutmoqda` : 'Bugun takrorlanadigan soʻz yoʻq'}
+                    </div>
+                  </div>
+                  {reviewDueCount > 0 && (
+                    <span className="min-w-6 h-6 px-1.5 rounded-full bg-violet-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+                      {reviewDueCount}
+                    </span>
+                  )}
+                </button>
+              )}
 
               <div className="grid grid-cols-2 gap-2">
                 <button

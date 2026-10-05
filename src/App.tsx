@@ -22,7 +22,21 @@ import { LeaderboardModal } from './components/LeaderboardModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { OutOfHearts } from './components/OutOfHearts';
 import { AchievementToast } from './components/AchievementToast';
+import { ReviewModal, ReviewReminder } from './components/ReviewModal';
 import {
+  ReviewDeck,
+  ReviewQuestion,
+  addDays,
+  addWords,
+  buildReviewSession,
+  dueCards,
+  gradeCard,
+  lessonWords,
+  loadReviewDeck,
+  saveReviewDeck,
+} from './utils/review';
+import {
+  daysBetween,
   findNewAchievements,
   getLocalDateString,
   loadUserStats,
@@ -101,6 +115,25 @@ export default function App() {
   const [isRoleplayOpen, setIsRoleplayOpen] = useState<boolean>(false);
   const [isGrammarOpen, setIsGrammarOpen] = useState<boolean>(false);
   const [speakingTargetText, setSpeakingTargetText] = useState<string>('');
+
+  // Spaced repetition: the words of finished lessons, each due again on its own day
+  const [reviewDeck, setReviewDeck] = useState<ReviewDeck>(loadReviewDeck);
+  const [isReviewOpen, setIsReviewOpen] = useState<boolean>(false);
+  const [reviewQuestions, setReviewQuestions] = useState<ReviewQuestion[]>([]);
+  // A new number for every session, so the review screen starts afresh
+  const [reviewSessionId, setReviewSessionId] = useState<number>(0);
+
+  useEffect(() => saveReviewDeck(reviewDeck), [reviewDeck]);
+
+  // Lessons finished before the review existed (or on another device) put their words in it, due today
+  useEffect(() => {
+    const today = getLocalDateString();
+    setReviewDeck((deck) =>
+      lessons
+        .filter((lesson) => completedLessons.includes(lesson.lesson_id))
+        .reduce((next, lesson) => addWords(next, lessonWords(lesson), today), deck)
+    );
+  }, [lessons, completedLessons]);
 
   // Listen to Firebase Auth state
   useEffect(() => {
@@ -336,6 +369,38 @@ export default function App() {
     });
   };
 
+  // Review: what is due today and tomorrow, and the words the wrong choices are taken from
+  const today = getLocalDateString();
+  const dueReview = useMemo(() => dueCards(reviewDeck, today), [reviewDeck, today]);
+  const dueTomorrowCount = useMemo(() => dueCards(reviewDeck, addDays(today, 1)).length, [reviewDeck, today]);
+  const deckCards = Object.values(reviewDeck);
+  const nextDueInDays = deckCards.length > 0
+    ? Math.max(0, Math.min(...deckCards.map((card) => daysBetween(today, card.due))))
+    : null;
+
+  const handleOpenReview = () => {
+    // Wrong choices come from the learner's own words once there are enough of them, else from every lesson
+    const pool = deckCards.length >= 4 ? deckCards : lessons.flatMap(lessonWords);
+    setReviewQuestions(buildReviewSession(dueReview, pool));
+    setReviewSessionId((id) => id + 1);
+    setIsReviewOpen(true);
+  };
+
+  // The first answer to a word in a session moves it to its next review day
+  const handleReviewAnswer = (term: string, right: boolean) => {
+    setReviewDeck((deck) => (deck[term] ? { ...deck, [term]: gradeCard(deck[term], right, getLocalDateString()) } : deck));
+  };
+
+  // A finished review counts the day for the streak, as a finished lesson does, and pays its XP
+  const handleReviewFinished = (xp: number) => {
+    setStats((prev) => {
+      const next = registerLessonDay(prev, getLocalDateString());
+      saveUserStats(next);
+      return next;
+    });
+    handleAddXp(xp);
+  };
+
   // Add a newly generated AI lesson
   const handleLessonGenerated = (newLesson: LessonPackage) => {
     setLessons((prev) => [...prev, newLesson]);
@@ -404,6 +469,8 @@ export default function App() {
         localStorage.setItem('rusgo_completed_lessons', JSON.stringify(next));
         return next;
       });
+      // Its words join the review, first due tomorrow (words already there keep their schedule)
+      setReviewDeck((deck) => addWords(deck, lessonWords(activeLesson), addDays(today, 1)));
 
       // 2. Unlock next lesson (Duolingo style)
       setUnlockedLessons((prev) => {
@@ -454,6 +521,7 @@ export default function App() {
     activeSteps,
     lessonSteps,
     resetExerciseState,
+    activeLesson,
     activeLessonId,
     activeLessonIndex,
     lessons,
@@ -515,7 +583,8 @@ export default function App() {
     isRoleplayOpen ||
     isGrammarOpen ||
     isAchievementsOpen ||
-    isLeaderboardOpen;
+    isLeaderboardOpen ||
+    isReviewOpen;
 
   // Keyboard shortcut listener for Enter
   useEffect(() => {
@@ -642,6 +711,8 @@ export default function App() {
         onOpenSpeedMatch={() => setIsSpeedMatchOpen(true)}
         onOpenRoleplay={() => setIsRoleplayOpen(true)}
         onOpenGrammar={() => setIsGrammarOpen(true)}
+        onOpenReview={handleOpenReview}
+        reviewDueCount={dueReview.length}
         onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
         onResetLesson={handleResetLesson}
         onToggleJson={() => setActiveTab(activeTab === 'trainer' ? 'json' : 'trainer')}
@@ -650,6 +721,10 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-32">
+        {/* Words due for review: offered at the start of a lesson and once it is finished */}
+        {activeTab === 'trainer' && dueReview.length > 0 && !isOutOfHearts && (isCompleted || (currentIndex === 0 && !isChecked)) && (
+          <ReviewReminder count={dueReview.length} onStart={handleOpenReview} />
+        )}
         {activeTab === 'trainer' ? (
           isCompleted ? (
             <CompletionModal
@@ -778,6 +853,22 @@ export default function App() {
         onComplete={handleRoleplayComplete}
         onOpenSpeaking={handleOpenSpeaking}
       />
+
+      {/* Spaced repetition: the review of learned words */}
+      {isReviewOpen && (
+        <ReviewModal
+          key={reviewSessionId}
+          onClose={() => setIsReviewOpen(false)}
+          questions={reviewQuestions}
+          deckSize={deckCards.length}
+          nextDueInDays={nextDueInDays}
+          remainingToday={dueReview.length}
+          dueTomorrow={dueTomorrowCount}
+          onAnswer={handleReviewAnswer}
+          onFinish={handleReviewFinished}
+          onMore={handleOpenReview}
+        />
+      )}
 
       {/* Grammar Tips and Rules Modal */}
       <GrammarModal

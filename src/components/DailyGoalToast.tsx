@@ -80,7 +80,7 @@ export const DailyGoalToast: React.FC<DailyGoalToastProps> = ({
             Bugungi darsingizni boshlang!
           </h4>
           <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-            Kunlik olovingizni saqlab qolish uchun bugun kamida bitta darsni tugating.
+            Kunlik olovingizni saqlab qolish uchun bugun bitta dars yoki takrorlashni tugating.
           </p>
 
           <button

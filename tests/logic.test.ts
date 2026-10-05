@@ -26,12 +26,25 @@ import {
   MAX_HEARTS,
   ROLEPLAY_FIRST_XP,
   ROLEPLAY_REPEAT_XP,
+  REVIEW_WORD_XP,
   SPEED_MATCH_ROUND_MAX_XP,
   addSpeedMatchXp,
   getLessonXp,
+  getReviewXp,
   getSpeedMatchPairXp,
 } from '../src/utils/xp';
 import { addRetry, buildDuolingoProgression, lessonStepsDone } from '../src/utils/duolingoFlow';
+import {
+  REVIEW_SESSION_SIZE,
+  addDays,
+  addWords,
+  buildReviewSession,
+  dueCards,
+  gradeCard,
+  lessonWords,
+  parseReviewDeck,
+  type ReviewCard,
+} from '../src/utils/review';
 import { collectAudioTexts } from '../src/utils/audioTexts';
 import type { Exercise, LearnWordExercise } from '../src/types/lesson';
 import type { UserStats } from '../src/types/gamification';
@@ -403,6 +416,121 @@ describe('mistakes come back at the end of the lesson (src/utils/duolingoFlow.ts
     const [retry] = addRetry([], exercise);
     assert.deepEqual(retry, exercise);
     assert.notEqual(retry, exercise);
+  });
+});
+
+describe('spaced repetition (src/utils/review.ts)', () => {
+  const words = lessonWords(INITIAL_LESSONS[0]);
+  const allWords = INITIAL_LESSONS.flatMap(lessonWords);
+  const card = (box: number, due: string, word = words[0]): ReviewCard => ({ ...word, box, due });
+  const deckOf = (cards: ReviewCard[]) => Object.fromEntries(cards.map((c) => [c.term, c]));
+
+  it('counts days across month and year ends, leap days included', () => {
+    assert.equal(addDays('2026-10-05', 1), '2026-10-06');
+    assert.equal(addDays('2026-01-31', 1), '2026-02-01');
+    assert.equal(addDays('2026-12-31', 1), '2027-01-01');
+    assert.equal(addDays('2028-02-28', 1), '2028-02-29');
+    assert.equal(addDays('2026-03-01', 30), '2026-03-31');
+  });
+
+  it('every built-in lesson gives its whole vocabulary to the review, each word with an MP3 planned', () => {
+    const withAudio = new Set(collectAudioTexts());
+    for (const lesson of INITIAL_LESSONS) {
+      const taught = lessonWords(lesson);
+      assert.equal(taught.length, lesson.vocabulary?.length ?? 0, lesson.lesson_id);
+      for (const word of taught) {
+        assert.ok(word.term && word.translation, `${lesson.lesson_id}: an empty word`);
+        assert.ok(withAudio.has(word.audio_text), `${lesson.lesson_id}: no MP3 is planned for "${word.audio_text}"`);
+      }
+    }
+    assert.deepEqual(lessonWords({ ...INITIAL_LESSONS[0], vocabulary: undefined }), []);
+  });
+
+  it('a lesson adds its words once: a word met again keeps its schedule', () => {
+    const deck = addWords({}, words, '2026-10-06');
+    assert.equal(Object.keys(deck).length, words.length);
+    assert.ok(Object.values(deck).every((c) => c.box === 0 && c.due === '2026-10-06'));
+    assert.equal(addWords(deck, words, '2026-12-01'), deck, 'nothing new: the same deck comes back');
+
+    const learned = { ...deck, [words[0].term]: card(3, '2026-10-20') };
+    assert.equal(addWords(learned, words, '2026-12-01')[words[0].term].due, '2026-10-20');
+  });
+
+  it('a word remembered every time comes back after 2, 4, 7, 14 and then every 30 days; a slip brings it back tomorrow', () => {
+    let current = card(0, '2026-10-06'); // learned the day before
+    let day = current.due;
+    const gaps: number[] = [];
+    for (let review = 0; review < 7; review++) {
+      current = gradeCard(current, true, day);
+      gaps.push(daysBetween(day, current.due));
+      day = current.due;
+    }
+    assert.deepEqual(gaps, [2, 4, 7, 14, 30, 30, 30]);
+
+    const slipped = gradeCard(current, false, day);
+    assert.equal(slipped.box, 0);
+    assert.equal(slipped.due, addDays(day, 1));
+  });
+
+  it('only the words whose day has come are due: the longest overdue first, then the least known', () => {
+    const deck = deckOf([
+      card(2, '2026-10-05', words[0]),
+      card(0, '2026-10-03', words[1]),
+      card(1, '2026-10-05', words[2]),
+      card(0, '2026-10-06', words[3]),
+    ]);
+    assert.deepEqual(
+      dueCards(deck, '2026-10-05').map((c) => c.term),
+      [words[1].term, words[2].term, words[0].term]
+    );
+    assert.deepEqual(dueCards(deck, '2026-10-02'), []);
+  });
+
+  it('a session asks each due word once, at most a session full, with the answer among four different choices', () => {
+    const due = allWords.map((word, i) => card(i % 3, '2026-10-05', word));
+    const session = buildReviewSession(due, allWords);
+    assert.equal(session.length, REVIEW_SESSION_SIZE);
+    assert.deepEqual(
+      session.map((q) => q.card.term),
+      due.slice(0, REVIEW_SESSION_SIZE).map((c) => c.term)
+    );
+    for (const q of session) {
+      assert.equal(q.answer, q.kind === 'ru_uz' ? q.card.translation : q.card.term);
+      assert.equal(q.kind, q.card.box % 2 === 0 ? 'ru_uz' : 'uz_ru', 'the direction changes as the word is remembered');
+      assert.equal(q.options.length, 4);
+      assert.ok(q.options.includes(q.answer));
+      assert.equal(new Set(q.options.map((o) => o.trim().toLowerCase())).size, 4, `"${q.card.term}": a choice twice`);
+    }
+  });
+
+  it('with only two words a question has two choices, never the answer twice', () => {
+    const two = words.slice(0, 2);
+    for (const q of buildReviewSession(two.map((w) => card(0, '2026-10-05', w)), two)) {
+      assert.equal(q.options.length, 2);
+      assert.equal(q.options.filter((o) => o === q.answer).length, 1);
+    }
+  });
+
+  it('a damaged or older save loses only its broken cards', () => {
+    const good = card(1, '2026-10-05');
+    const parsed = parseReviewDeck({
+      [good.term]: good,
+      a: { ...good, term: '' },
+      b: { ...good, term: 'x', box: 9 },
+      c: { ...good, term: 'y', due: 'tomorrow' },
+      d: { ...good, term: 'z', translation: 42 },
+      e: null,
+      f: 'text',
+    });
+    assert.deepEqual(parsed, { [good.term]: good });
+    for (const raw of [null, 'garbage', 42, []]) assert.deepEqual(parseReviewDeck(raw), {});
+  });
+
+  it('a finished review pays XP for each word right at the first try, and nothing for a bad count', () => {
+    assert.equal(getReviewXp(0), 0);
+    assert.equal(getReviewXp(5), 5 * REVIEW_WORD_XP);
+    assert.equal(getReviewXp(-3), 0);
+    assert.equal(getReviewXp(Number.NaN), 0);
   });
 });
 

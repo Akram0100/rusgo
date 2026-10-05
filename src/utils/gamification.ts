@@ -101,7 +101,7 @@ export const daysBetween = (from: string, to: string): number => dayNumber(to) -
 export const expireStreak = (stats: UserStats, today: string): UserStats =>
   daysBetween(stats.lastActiveDate, today) > 1 && stats.streakDays !== 0 ? { ...stats, streakDays: 0 } : stats;
 
-/** A lesson was completed today: extends the streak (once per day) or starts a new one. */
+/** A lesson or a review was finished today: extends the streak (once per day) or starts a new one. */
 export const registerLessonDay = (stats: UserStats, today: string): UserStats => {
   const gap = daysBetween(stats.lastActiveDate, today);
   if (gap === 0) return stats; // today already counted
