@@ -386,7 +386,9 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
   let runs = 0;
   const run = (args: string[], env: Record<string, string> = {}) => {
     const childEnv: Record<string, string | undefined> = { ...process.env };
-    for (const name of ['GEMINI_API_KEY', 'MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_MP3_FILE', 'MOCK_GEMINI_DAILY_AFTER']) delete childEnv[name];
+    for (const name of ['MOCK_TRANSLATE', 'MOCK_GEMINI_TTS', 'MOCK_MP3_FILE', 'MOCK_GEMINI_DAILY_AFTER']) delete childEnv[name];
+    // Empty rather than deleted: the script would otherwise read the real keys from the project's .env
+    for (const name of ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3', 'GEMINI_API_KEY_4', 'GEMINI_API_KEY_5']) childEnv[name] = '';
     const mockLog = path.join(workDir, `mock-${++runs}.log`);
     const result = spawnSync(process.execPath, ['--import', tsxPreload, '--import', mockPreload, scriptFile, ...args], {
       cwd: workDir,
@@ -520,6 +522,30 @@ describe('scripts/generate-audio.ts (the voices are mocked)', () => {
     manifest = readManifest(out);
     assert.equal(manifest.complete, true);
     assert.deepEqual(Object.keys(manifest.files).sort(), [...phrases].sort());
+  });
+
+  it('with several keys a used-up key hands over to the next one, and the run stops when all are used up', () => {
+    const out = freshOut();
+    const result = run([`--out=${out}`, '--source=gemini', '--limit=6', ...fast], {
+      GEMINI_API_KEY: 'test-key',
+      GEMINI_API_KEY_3: 'test-key-3', // a gap in the numbers does not hide a key
+      MOCK_GEMINI_TTS: 'pcm',
+      MOCK_GEMINI_DAILY_AFTER: '2', // per key
+    });
+    assert.equal(result.status, 1);
+    assert.match(result.output, /Gemini \(.*\), 2 API keys/);
+    assert.match(result.output, /key 1\/2: daily quota used up .*; going on with key 2\/2/);
+    assert.match(result.output, /daily quota of the voice service is used up on all 2 keys/);
+    assert.equal(result.calls.length, 6, 'two phrases and one refused request per key');
+    assert.deepEqual(Object.keys(readManifest(out).files).sort(), phrases.slice(0, 4).sort(), 'the refused phrase is done with the next key');
+    assert.equal((result.output.match(/FAILED/g) ?? []).length, 0, 'a used-up key is not a failed phrase');
+    assert.doesNotMatch(result.output, /test-key/, 'the keys are never printed');
+  });
+
+  it('a key given twice counts once', () => {
+    const result = run([`--out=${freshOut()}`, '--dry-run'], { GEMINI_API_KEY: 'test-key', GEMINI_API_KEY_2: ' test-key ' });
+    assert.match(result.output, /Voice: Gemini/);
+    assert.doesNotMatch(result.output, /API keys/);
   });
 
   it('a per-minute quota is retried, then counts as a failure; five of them in a row stop the run', () => {

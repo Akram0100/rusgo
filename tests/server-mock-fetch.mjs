@@ -18,7 +18,7 @@ const sinePcm = () => {
 };
 // MOCK_MP3_FILE: a real MP3 for the voices to hand out (the generator script refuses audio that is not valid MP3)
 const mockMp3 = () => fs.readFileSync(process.env.MOCK_MP3_FILE);
-let geminiTtsRequests = 0;
+const geminiTtsRequests = new Map(); // per API key
 
 globalThis.fetch = async (input, init) => {
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -44,9 +44,10 @@ globalThis.fetch = async (input, init) => {
           'You exceeded your current quota. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_requests_per_model_per_day, limit: 10, model: gemini-3.8-flash-lite-tts\nPlease retry in 5h30m1.5s.';
         return json({ error: { code: 429, message, status: 'RESOURCE_EXHAUSTED' } }, 429);
       };
-      // MOCK_GEMINI_DAILY_AFTER=N: the first N requests of this process work, then the daily limit is reached
-      geminiTtsRequests++;
-      if (Number(process.env.MOCK_GEMINI_DAILY_AFTER) > 0 && geminiTtsRequests > Number(process.env.MOCK_GEMINI_DAILY_AFTER)) return dailyLimit();
+      // MOCK_GEMINI_DAILY_AFTER=N: the first N requests with each key work, then that key's daily limit is reached
+      const apiKey = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined)).get('x-goog-api-key');
+      geminiTtsRequests.set(apiKey, (geminiTtsRequests.get(apiKey) ?? 0) + 1);
+      if (Number(process.env.MOCK_GEMINI_DAILY_AFTER) > 0 && geminiTtsRequests.get(apiKey) > Number(process.env.MOCK_GEMINI_DAILY_AFTER)) return dailyLimit();
 
       if (mode === 'quota') return json({ error: { code: 429, message: 'Quota exceeded', status: 'RESOURCE_EXHAUSTED' } }, 429);
       if (mode === 'error') return json({ error: { code: 500, message: 'secret-internal-detail', status: 'INTERNAL' } }, 500);

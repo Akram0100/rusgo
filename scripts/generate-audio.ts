@@ -9,7 +9,9 @@
 // .env, otherwise the Google Translate voice that the server uses as its fallback. The run can be repeated at
 // any time: files that exist are kept, and the manifest is saved after every phrase. The phrases are done in
 // the order a learner meets them, and a daily quota ends the run cleanly: run it again after the reset (the
-// free Gemini tier allows 100 requests a day for this model, the lessons need 272).
+// free Gemini tier allows 100 requests a day for this model, the lessons need 272). More keys in .env
+// (GEMINI_API_KEY_2 ... GEMINI_API_KEY_5) let the run go on with the next key when one key's day is used up;
+// Google counts the quota per project, not per key, so a key only adds requests when it comes from another project.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -37,7 +39,9 @@ if (flag('help')) {
   --source=gemini|google voice (default: gemini when GEMINI_API_KEY is set, otherwise google)
   --delay=MS             pause between requests (default 700)
   --retry-wait=MS        pause before a retry (default 3000; a quota error waits 65 s)
-  --out=DIR              output directory (default public/audio)`);
+  --out=DIR              output directory (default public/audio)
+Keys: GEMINI_API_KEY, and optionally GEMINI_API_KEY_2 ... GEMINI_API_KEY_5 (each from its own Google project),
+used one after the other as their daily quotas run out.`);
   process.exit(0);
 }
 
@@ -69,15 +73,18 @@ const requestedSource = option('source');
 if (requestedSource !== undefined && requestedSource !== 'gemini' && requestedSource !== 'google') {
   fail(`--source must be "gemini" or "google", got "${requestedSource}"`);
 }
-const apiKey = process.env.GEMINI_API_KEY;
-const source: Source = (requestedSource as Source | undefined) ?? (apiKey ? 'gemini' : 'google');
-if (source === 'gemini' && !apiKey) fail('--source=gemini needs GEMINI_API_KEY (set it in .env.local).');
-const ai = source === 'gemini' ? new GoogleGenAI({ apiKey }) : null;
+const KEY_NAMES = ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3', 'GEMINI_API_KEY_4', 'GEMINI_API_KEY_5'];
+const apiKeys = [...new Set(KEY_NAMES.map((name) => process.env[name]?.trim()).filter((key): key is string => Boolean(key)))];
+const source: Source = (requestedSource as Source | undefined) ?? (apiKeys.length > 0 ? 'gemini' : 'google');
+if (source === 'gemini' && apiKeys.length === 0) fail('--source=gemini needs GEMINI_API_KEY (set it in .env.local).');
+const clients = source === 'gemini' ? apiKeys.map((apiKey) => new GoogleGenAI({ apiKey })) : [];
+let keyIndex = 0; // the key in use: the run moves on to the next one when the daily quota of this one is used up
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** The phrase as MP3 bytes, from the chosen voice. Throws when the voice does not deliver. */
 async function synthesizeMp3(text: string): Promise<Buffer> {
+  const ai = clients[keyIndex];
   if (ai) {
     const audio = await synthesizeWithGemini(ai, text, false);
     if (!audio) throw new Error('Gemini returned no audio');
@@ -119,6 +126,22 @@ async function withRetries<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 
+/** The phrase from the key in use, moving on to the next key when the daily quota of this one is used up. */
+async function synthesizeWithAnyKey(text: string): Promise<Buffer> {
+  for (;;) {
+    try {
+      return await withRetries(() => synthesizeMp3(text));
+    } catch (error) {
+      if (!(error instanceof DailyQuotaError) || keyIndex >= clients.length - 1) throw error;
+      const usedUp = keyIndex + 1;
+      keyIndex++;
+      console.log(
+        `  key ${usedUp}/${clients.length}: daily quota used up (${describeQuota(error)}); going on with key ${keyIndex + 1}/${clients.length}`,
+      );
+    }
+  }
+}
+
 function readManifest(): Record<string, string> {
   try {
     const data = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as { files?: Record<string, unknown> };
@@ -151,7 +174,7 @@ console.log(
   `${texts.length} phrases in the lessons, ${texts.length - missing.length} already have audio, ${queue.length} to generate.`,
 );
 console.log(
-  `Voice: ${source === 'gemini' ? `Gemini (${TTS_MODEL}, voice ${TTS_VOICE})` : 'Google Translate voice (unofficial, the server fallback)'}`,
+  `Voice: ${source === 'gemini' ? `Gemini (${TTS_MODEL}, voice ${TTS_VOICE})${clients.length > 1 ? `, ${clients.length} API keys` : ''}` : 'Google Translate voice (unofficial, the server fallback)'}`,
 );
 console.log(`Output: ${outDir}`);
 
@@ -170,7 +193,7 @@ const failed: string[] = [];
 for (const [index, text] of queue.entries()) {
   const label = `[${index + 1}/${queue.length}]`;
   try {
-    const mp3 = await withRetries(() => synthesizeMp3(text));
+    const mp3 = await synthesizeWithAnyKey(text);
     const info = inspectMp3(mp3);
     if (!info.valid || info.durationSeconds < 0.2 || info.durationSeconds > 30) {
       throw new Error(`not a usable MP3 (valid: ${info.valid}, ${info.durationSeconds.toFixed(2)} s)`);
@@ -193,7 +216,7 @@ for (const [index, text] of queue.entries()) {
     if (error instanceof DailyQuotaError) {
       aborted = true;
       console.error(
-        `${label} The daily quota of the voice service is used up: ${describeQuota(error)}.\n` +
+        `${label} The daily quota of the voice service is used up${clients.length > 1 ? ` on all ${clients.length} keys` : ''}: ${describeQuota(error)}.\n` +
           'What was generated is saved: run the command again after the quota resets (usually the next day), or with a key that has a higher limit.',
       );
       break;
