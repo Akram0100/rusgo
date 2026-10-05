@@ -1,4 +1,4 @@
-import { LessonPackage, Exercise, LearnWordExercise, MultipleChoiceExercise } from '../types/lesson';
+import { LessonPackage, Exercise, LearnWordExercise, MultipleChoiceExercise, TypeWordExercise } from '../types/lesson';
 
 /**
  * Transforms a raw lesson into a pedagogical Duolingo-style progression:
@@ -6,7 +6,7 @@ import { LessonPackage, Exercise, LearnWordExercise, MultipleChoiceExercise } fr
  *    First display a dedicated "Yangi soʻz bilan tanishamiz" (Learn) card with audio & translation.
  * 2. Immediately follow it with the exercises that practice and test that exact word.
  * 3. This guarantees the student is never tested on a word before being taught!
- * 4. The lesson ends with listening steps (see listeningSteps) on words it taught.
+ * 4. The lesson ends with a typing step and listening steps (see typingSteps, listeningSteps) on words it taught.
  */
 export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
   const result: Exercise[] = [];
@@ -83,7 +83,41 @@ export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
     steps = [...prepends, ...result];
   }
 
-  return [...steps, ...listeningSteps(steps, vocabulary.map((vocab) => vocab.term))];
+  const listening = listeningSteps(steps, vocabulary.map((vocab) => vocab.term));
+  const typing = typingSteps(steps, new Set(listening.map((step) => step.correct_answer)));
+  return [...steps, ...typing, ...listening];
+}
+
+/**
+ * A typing step: the Uzbek meaning of a word the lesson taught is shown, and the learner writes the word in Russian.
+ * It takes the shortest taught word of one or two Cyrillic words (3 to 12 letters) that the listening steps do not
+ * use; a lesson without one gets no typing step.
+ */
+function typingSteps(steps: Exercise[], skip: Set<string>): TypeWordExercise[] {
+  const letters = (term: string) => term.replace(/[^\p{L}]/gu, '').length;
+  const candidates = steps.filter(
+    (step): step is LearnWordExercise =>
+      step.type === 'learn_word' &&
+      !skip.has(step.term) &&
+      /^[\p{Script=Cyrillic}\s.,!?…-]+$/u.test(step.term) &&
+      step.term.trim().split(/\s+/).length <= 2 &&
+      letters(step.term) >= 3 &&
+      letters(step.term) <= 12
+  );
+  if (candidates.length === 0) return [];
+
+  const card = candidates.reduce((best, step) => (letters(step.term) < letters(best.term) ? step : best));
+  return [
+    {
+      id: 8101,
+      type: 'type_word',
+      instruction: 'Ruscha yozing:',
+      prompt: card.translation,
+      answer: card.term,
+      target_audio_text: card.target_audio_text,
+      explanation: `‘${card.term}’ — ${card.translation}.`,
+    },
+  ];
 }
 
 /** Listening steps that close a lesson. */

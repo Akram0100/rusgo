@@ -14,6 +14,8 @@ interface FeedbackBannerProps {
   onContinue: () => void;
   onOpenSpeaking?: (text: string) => void;
   isLearnWord?: boolean;
+  /** Shown under the verdict, e.g. the spelling of a typed answer that had one wrong letter */
+  note?: string;
 }
 
 export const FeedbackBanner: React.FC<FeedbackBannerProps> = ({
@@ -27,6 +29,7 @@ export const FeedbackBanner: React.FC<FeedbackBannerProps> = ({
   onContinue,
   onOpenSpeaking,
   isLearnWord = false,
+  note,
 }) => {
   if (isLearnWord) {
     return (
@@ -127,6 +130,8 @@ export const FeedbackBanner: React.FC<FeedbackBannerProps> = ({
                 {correctAnswerText}
               </p>
             )}
+
+            {note && <p className="font-bold text-sm text-amber-800 mt-0.5">✏️ {note}</p>}
 
             <div className="text-sm font-medium mt-1 text-slate-700 leading-relaxed max-w-lg">
               <HighlightedText

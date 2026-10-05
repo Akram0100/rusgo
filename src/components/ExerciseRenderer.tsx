@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Exercise,
   MultipleChoiceExercise,
   TranslateOrderExercise,
   FillBlankExercise,
   LearnWordExercise,
+  TypeWordExercise,
 } from '../types/lesson';
 import { AudioButton } from './AudioButton';
 import { HighlightedText } from './HighlightedText';
@@ -62,10 +63,11 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
                 {exercise.type === 'multiple_choice' && (exercise.audio_only ? '🎧 Eshitib tanlang' : 'Variantli test')}
                 {exercise.type === 'translate_order' && 'Soʻzlarni tartiblash'}
                 {exercise.type === 'fill_blank' && 'Boʻsh joyni toʻldirish'}
+                {exercise.type === 'type_word' && '⌨️ Ruscha yozing'}
               </span>
             )}
 
-            {onOpenVocabulary && vocabulary.length > 0 && exercise.type !== 'learn_word' && (
+            {onOpenVocabulary && vocabulary.length > 0 && exercise.type !== 'learn_word' && exercise.type !== 'type_word' && (
               <button
                 onClick={onOpenVocabulary}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors cursor-pointer"
@@ -77,9 +79,11 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* A listening step has its own big play button below */}
-            {!(exercise.type === 'multiple_choice' && exercise.audio_only) && <AudioButton text={exercise.target_audio_text} />}
-            {onOpenSpeaking && (
+            {/* A listening step has its own big play button below; a typing step would hear its answer */}
+            {!(exercise.type === 'multiple_choice' && exercise.audio_only) && exercise.type !== 'type_word' && (
+              <AudioButton text={exercise.target_audio_text} />
+            )}
+            {onOpenSpeaking && exercise.type !== 'type_word' && (
               <button
                 onClick={() => onOpenSpeaking(exercise.target_audio_text)}
                 className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xs active:translate-y-0.5 border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 cursor-pointer"
@@ -125,6 +129,16 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
           isCorrect={isCorrect}
           onAddWord={onAddWord}
           onRemoveWord={onRemoveWord}
+        />
+      )}
+
+      {exercise.type === 'type_word' && (
+        <TypeWordView
+          exercise={exercise}
+          value={selectedAnswer ?? ''}
+          isChecked={isChecked}
+          isCorrect={isCorrect}
+          onChange={onSelectOption}
         />
       )}
 
@@ -226,6 +240,97 @@ const ListenPrompt: React.FC<{ exercise: MultipleChoiceExercise }> = ({ exercise
       >
         🐢 Sekinroq eshitish
       </button>
+    </div>
+  );
+};
+
+/* TYPING VIEW: the Uzbek prompt, a text field and on-screen Russian letters (a phone may have no Russian keyboard) */
+const CYRILLIC_ROWS = ['йцукенгшщзхъ', 'фывапролджэ', 'ячсмитьбюё'];
+
+const TypeWordView: React.FC<{
+  exercise: TypeWordExercise;
+  value: string;
+  isChecked: boolean;
+  isCorrect: boolean;
+  onChange: (text: string) => void;
+}> = ({ exercise, value, isChecked, isCorrect, onChange }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // With a computer keyboard the field is ready to type into; on a phone it stays closed, so the letters below are used
+  useEffect(() => {
+    if (window.matchMedia?.('(pointer: fine)').matches) inputRef.current?.focus();
+  }, [exercise]);
+
+  const press = (key: string) => {
+    if (isChecked) return;
+    playTileClick();
+    onChange(key === '⌫' ? value.slice(0, -1) : value + key);
+  };
+  // Keeps the focus where it is (on a computer: in the text field)
+  const keepFocus = (event: React.MouseEvent) => event.preventDefault();
+  const keyClass =
+    'h-10 sm:h-11 rounded-lg bg-white border border-slate-300 shadow-xs font-bold text-slate-800 hover:bg-slate-50 active:translate-y-0.5 transition-colors cursor-pointer';
+
+  return (
+    <div className="mt-4">
+      <div className="text-center mb-4">
+        <div className="text-2xl sm:text-3xl font-black text-slate-900 break-words">{exercise.prompt}</div>
+      </div>
+
+      <input
+        ref={inputRef}
+        value={value}
+        onChange={(event) => !isChecked && onChange(event.target.value)}
+        disabled={isChecked}
+        lang="ru"
+        autoCapitalize="off"
+        autoCorrect="off"
+        autoComplete="off"
+        spellCheck={false}
+        placeholder="Ruscha yozing…"
+        aria-label="Javobingiz (ruscha)"
+        className={`w-full p-3.5 sm:p-4 rounded-2xl border-2 text-xl font-bold text-center outline-none transition-colors ${
+          isChecked
+            ? isCorrect
+              ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+              : 'border-rose-500 bg-rose-50 text-rose-900'
+            : 'border-slate-300 bg-white focus:border-emerald-500'
+        }`}
+      />
+
+      {!isChecked && (
+        <div className="mt-3 flex flex-col gap-1.5 select-none">
+          {CYRILLIC_ROWS.map((row) => (
+            <div key={row} className="flex justify-center gap-1">
+              {[...row].map((letter) => (
+                <button
+                  key={letter}
+                  type="button"
+                  onMouseDown={keepFocus}
+                  onClick={() => press(letter)}
+                  className={`flex-1 max-w-10 text-base sm:text-lg ${keyClass}`}
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div className="flex justify-center gap-1">
+            <button type="button" onMouseDown={keepFocus} onClick={() => press(' ')} className={`flex-[3] max-w-xs text-xs ${keyClass}`}>
+              boʻsh joy
+            </button>
+            <button
+              type="button"
+              onMouseDown={keepFocus}
+              onClick={() => press('⌫')}
+              className={`flex-1 max-w-24 text-lg ${keyClass}`}
+              aria-label="Oxirgi harfni oʻchirish"
+            >
+              ⌫
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

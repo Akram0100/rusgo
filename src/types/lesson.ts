@@ -1,4 +1,4 @@
-export type ExerciseType = 'multiple_choice' | 'translate_order' | 'fill_blank' | 'learn_word';
+export type ExerciseType = 'multiple_choice' | 'translate_order' | 'fill_blank' | 'learn_word' | 'type_word';
 
 export interface BaseExercise {
   id: number;
@@ -37,11 +37,19 @@ export interface FillBlankExercise extends BaseExercise {
   options: string[];
 }
 
+/** A typing step: the Uzbek prompt is shown and the learner types the Russian answer (on-screen keys if need be). */
+export interface TypeWordExercise extends BaseExercise {
+  type: 'type_word';
+  prompt: string;
+  answer: string;
+}
+
 export type Exercise =
   | MultipleChoiceExercise
   | TranslateOrderExercise
   | FillBlankExercise
-  | LearnWordExercise;
+  | LearnWordExercise
+  | TypeWordExercise;
 
 export interface LessonPackage {
   lesson_id: string;

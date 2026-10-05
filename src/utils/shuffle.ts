@@ -16,7 +16,7 @@ export function shuffle<T>(items: readonly T[]): T[] {
  * Answers are graded by value, never by position, so the lesson data stays as authored.
  */
 export function withShuffledChoices(exercise: Exercise): Exercise {
-  if (exercise.type === 'learn_word') {
+  if (exercise.type === 'learn_word' || exercise.type === 'type_word') {
     return exercise;
   }
 

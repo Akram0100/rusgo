@@ -60,6 +60,7 @@ import {
   preloadAudioRecordings,
 } from './utils/audio';
 import { withShuffledChoices } from './utils/shuffle';
+import { checkTyped } from './utils/typing';
 
 // Lesson levels are free-form strings (AI lessons too); map them onto the three known levels.
 const toLevel = (value?: string): 'A1' | 'A2' | 'B1' | null => {
@@ -227,8 +228,10 @@ export default function App() {
   // Bumped whenever a lesson is (re)started so its answer choices get reshuffled
   const [shuffleSeed, setShuffleSeed] = useState<number>(0);
 
-  // Exercise interaction state
+  // Exercise interaction state (a typing step keeps the typed text in selectedOption)
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  // A typed answer accepted with one wrong letter: the spelling to show
+  const [typoNote, setTypoNote] = useState<string | null>(null);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [usedWordIndices, setUsedWordIndices] = useState<number[]>([]);
   const [isChecked, setIsChecked] = useState<boolean>(false);
@@ -281,6 +284,7 @@ export default function App() {
     setUsedWordIndices([]);
     setIsChecked(false);
     setIsCorrect(false);
+    setTypoNote(null);
   }, []);
 
   // Full reset for restarting current lesson
@@ -438,7 +442,8 @@ export default function App() {
     isLearnStep ||
     (currentExercise?.type === 'multiple_choice' && selectedOption !== null) ||
     (currentExercise?.type === 'fill_blank' && selectedOption !== null) ||
-    (currentExercise?.type === 'translate_order' && selectedWords.length > 0);
+    (currentExercise?.type === 'translate_order' && selectedWords.length > 0) ||
+    (currentExercise?.type === 'type_word' && Boolean(selectedOption?.trim()));
 
   // Proceed to next exercise or complete lesson with unlock & cloud sync
   const handleContinue = useCallback(() => {
@@ -554,6 +559,11 @@ export default function App() {
       const userSentence = selectedWords.join(' ').trim();
       const targetSentence = currentExercise.correct_order.join(' ').trim();
       correct = userSentence === targetSentence;
+    } else if (currentExercise.type === 'type_word') {
+      // One wrong letter in a longer word still counts, with the spelling shown
+      const result = checkTyped(selectedOption ?? '', currentExercise.answer);
+      correct = result !== 'wrong';
+      if (result === 'typo') setTypoNote(`Imloga eʼtibor bering: ${currentExercise.answer}`);
     }
 
     setIsCorrect(correct);
@@ -662,6 +672,7 @@ export default function App() {
     if (currentExercise.type === 'multiple_choice') return currentExercise.correct_answer;
     if (currentExercise.type === 'fill_blank') return currentExercise.blank_answer;
     if (currentExercise.type === 'translate_order') return currentExercise.correct_order.join(' ');
+    if (currentExercise.type === 'type_word') return currentExercise.answer;
     return '';
   };
 
@@ -777,6 +788,7 @@ export default function App() {
           isCorrect={isCorrect}
           hasAnswer={hasAnswer}
           explanation={currentExercise.explanation}
+          note={typoNote ?? undefined}
           correctAnswerText={getCorrectAnswerDisplay()}
           onCheck={handleCheck}
           onContinue={handleContinue}

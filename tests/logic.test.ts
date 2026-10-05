@@ -46,7 +46,8 @@ import {
   type ReviewCard,
 } from '../src/utils/review';
 import { collectAudioTexts } from '../src/utils/audioTexts';
-import type { Exercise, LearnWordExercise, MultipleChoiceExercise } from '../src/types/lesson';
+import type { Exercise, LearnWordExercise, MultipleChoiceExercise, TypeWordExercise } from '../src/types/lesson';
+import { checkTyped } from '../src/utils/typing';
 import type { UserStats } from '../src/types/gamification';
 
 const HAS_CYRILLIC = /[А-Яа-яЁё]/;
@@ -312,9 +313,11 @@ describe('learning progression (src/utils/duolingoFlow.ts: a card teaches a word
   it('keeps every exercise of every lesson, in order, and only adds cards and the closing listening steps', () => {
     for (const lesson of INITIAL_LESSONS) {
       const steps = buildDuolingoProgression(lesson);
-      const authored = steps.filter((step) => step.type !== 'learn_word' && !(step.type === 'multiple_choice' && step.audio_only));
+      const generated = (step: Exercise) => step.type === 'type_word' || (step.type === 'multiple_choice' && Boolean(step.audio_only));
+      const authored = steps.filter((step) => step.type !== 'learn_word' && !generated(step));
       assert.deepEqual(authored, lesson.exercises, lesson.lesson_id);
-      assert.equal(steps.length, lesson.exercises.length + cardsOf(steps).length + LISTENING_STEPS, lesson.lesson_id);
+      const typing = steps.filter((step) => step.type === 'type_word').length;
+      assert.equal(steps.length, lesson.exercises.length + cardsOf(steps).length + typing + LISTENING_STEPS, lesson.lesson_id);
     }
   });
 
@@ -378,6 +381,62 @@ describe('listening steps (src/utils/duolingoFlow.ts: a taught word is only hear
   it('a lesson with fewer than four words gets no listening step (there would not be four choices)', () => {
     const lesson = { ...INITIAL_LESSONS[0], vocabulary: INITIAL_LESSONS[0].vocabulary!.slice(0, 3) };
     assert.deepEqual(listeningOf(buildDuolingoProgression(lesson)), []);
+  });
+});
+
+describe('typing steps (src/utils/typing.ts, src/utils/duolingoFlow.ts)', () => {
+  it('a typed answer is right whatever its case, ё/е, punctuation and spacing', () => {
+    for (const typed of ['хлеб', 'Хлеб', ' хлеб! ', 'ХЛЕБ.']) assert.equal(checkTyped(typed, 'Хлеб'), 'right', typed);
+    assert.equal(checkTyped('жёлтый', 'Жёлтый'), 'right');
+    assert.equal(checkTyped('желтый', 'Жёлтый'), 'right', 'ё may be typed as е');
+    assert.equal(checkTyped('я  узбек', 'Я узбек'), 'right');
+    assert.equal(checkTyped('пин код', 'Пин-код'), 'right', 'a hyphen counts as a space');
+  });
+
+  it('one wrong, missing or extra letter is a typo in a word of four letters or more; more is wrong', () => {
+    assert.equal(checkTyped('хлеп', 'Хлеб'), 'typo');
+    assert.equal(checkTyped('хеб', 'Хлеб'), 'typo');
+    assert.equal(checkTyped('хлебб', 'Хлеб'), 'typo');
+    assert.equal(checkTyped('пинкод', 'Пин-код'), 'typo');
+    assert.equal(checkTyped('хлап', 'Хлеб'), 'wrong', 'two letters off');
+    assert.equal(checkTyped('чак', 'Чек'), 'wrong', 'a three-letter word has no room for a typo');
+    assert.equal(checkTyped('', 'Хлеб'), 'wrong');
+    assert.equal(checkTyped('   ', 'Хлеб'), 'wrong');
+  });
+
+  it('a lesson types at most one short word it taught on a card before, other than its listening words', () => {
+    let lessonsWithTyping = 0;
+    for (const lesson of INITIAL_LESSONS) {
+      const steps = buildDuolingoProgression(lesson);
+      const typing = steps.filter((step): step is TypeWordExercise => step.type === 'type_word');
+      assert.ok(typing.length <= 1, lesson.lesson_id);
+      if (typing.length === 0) continue;
+      lessonsWithTyping++;
+
+      const step = typing[0];
+      const tag = `${lesson.lesson_id}: "${step.answer}"`;
+      const cardAt = steps.findIndex((s) => s.type === 'learn_word' && s.term === step.answer);
+      assert.ok(cardAt >= 0 && cardAt < steps.indexOf(step), `${tag} is typed before it is taught`);
+      assert.equal(step.prompt, (steps[cardAt] as LearnWordExercise).translation, tag);
+      assert.ok(/^[А-Яа-яЁё\s.,!?…-]+$/.test(step.answer), `${tag}: not plain Cyrillic`);
+      assert.ok(step.answer.trim().split(/\s+/).length <= 2, `${tag}: more than two words`);
+      const listening = steps.filter((s): s is MultipleChoiceExercise => s.type === 'multiple_choice' && Boolean(s.audio_only));
+      assert.ok(!listening.some((s) => s.correct_answer === step.answer), `${tag} is also a listening word`);
+      assert.ok(steps.indexOf(step) < steps.indexOf(listening[0]), `${tag}: typing comes before listening`);
+      assert.ok(!step.instruction.includes(step.answer) && !step.prompt.includes(step.answer), `${tag} is given away`);
+    }
+    assert.ok(lessonsWithTyping >= INITIAL_LESSONS.length / 2, `only ${lessonsWithTyping} lessons type a word`);
+  });
+
+  it('a lesson whose words are all long phrases gets no typing step', () => {
+    const lesson = {
+      ...INITIAL_LESSONS[0],
+      vocabulary: [
+        { term: 'Я хочу снять комнату сегодня', translation: 'a', audio_text: 'Я хочу снять комнату сегодня' },
+        { term: 'Где находится ближайшая аптека', translation: 'b', audio_text: 'Где находится ближайшая аптека' },
+      ],
+    };
+    assert.deepEqual(buildDuolingoProgression(lesson).filter((step) => step.type === 'type_word'), []);
   });
 });
 
