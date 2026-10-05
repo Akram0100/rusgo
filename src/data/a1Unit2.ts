@@ -37,6 +37,7 @@ export const LESSON_14_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Chanqadim' (suv ichgim kelyapti)",
       target_audio_text: "Я хочу пить.",
+      accepted_orders: ["Я пить хочу."],
       words_pool: ["Я", "хочу", "пить.", "пью", "вода"],
       correct_order: ["Я", "хочу", "пить."],
       explanation: "‘Я хочу пить’ — chanqadim. ‘Пить’ — ichmoq."
@@ -66,6 +67,7 @@ export const LESSON_14_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men choʻchqa goʻshtini yemayman'",
       target_audio_text: "Я не ем свинину.",
+      accepted_orders: ["Свинину я не ем."],
       words_pool: ["Я", "не", "ем", "свинину.", "свинина", "ешь"],
       correct_order: ["Я", "не", "ем", "свинину."],
       explanation: "‘Свинина’ — choʻchqa goʻshti: ‘я не ем свинину’ (-а → -у). ‘Есть’ — yemoq: я ем, ты ешь."
@@ -95,6 +97,7 @@ export const LESSON_14_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men mevalar va sabzavotlar sotib olaman'",
       target_audio_text: "Я покупаю фрукты и овощи.",
+      accepted_orders: ["Я покупаю овощи и фрукты."],
       words_pool: ["Я", "покупаю", "фрукты", "и", "овощи.", "фрукт", "покупать"],
       correct_order: ["Я", "покупаю", "фрукты", "и", "овощи."],
       explanation: "‘Покупать’ — sotib olmoq. ‘Фрукты’ — mevalar, ‘овощи’ — sabzavotlar."
@@ -156,6 +159,7 @@ export const LESSON_15_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ofitsiantdan soʻrang: 'Sizda nima bor?'",
       target_audio_text: "Что у вас есть?",
+      accepted_orders: ["Что есть у вас?"],
       words_pool: ["Что", "у", "вас", "есть?", "нет", "вы"],
       correct_order: ["Что", "у", "вас", "есть?"],
       explanation: "‘У вас есть …?’ — sizda … bormi? ‘Что у вас есть?’ — sizda nima bor?"
@@ -185,6 +189,7 @@ export const LESSON_15_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Kassir soʻraydi: 'Shu yerdami yoki olib ketasizmi?'",
       target_audio_text: "Здесь или с собой?",
+      accepted_orders: ["С собой или здесь?"],
       words_pool: ["Здесь", "или", "с", "собой?", "и", "вы"],
       correct_order: ["Здесь", "или", "с", "собой?"],
       explanation: "‘Здесь’ — shu yerda; ‘с собой’ — oʻzi bilan (olib ketish)."
@@ -452,6 +457,7 @@ export const LESSON_17_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Doʻkonda ayting: 'Menga bu rang yoqadi'",
       target_audio_text: "Мне нравится этот цвет.",
+      accepted_orders: ["Этот цвет мне нравится."],
       words_pool: ["Мне", "нравится", "этот", "цвет.", "эта", "нравятся"],
       correct_order: ["Мне", "нравится", "этот", "цвет."],
       explanation: "‘Мне нравится …’ — menga … yoqadi. ‘Цвет’ erkak jinsida: ‘этот цвет’."
@@ -513,6 +519,7 @@ export const LESSON_18_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men futbol oʻynashni yaxshi koʻraman'",
       target_audio_text: "Я люблю играть в футбол.",
+      accepted_orders: ["Я люблю в футбол играть."],
       words_pool: ["Я", "люблю", "играть", "в", "футбол.", "на", "футбола"],
       correct_order: ["Я", "люблю", "играть", "в", "футбол."],
       explanation: "Sport oʻyinlari bilan ‘играть в …’: в футбол, в шахматы."
@@ -542,6 +549,7 @@ export const LESSON_18_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men musiqa tinglayman'",
       target_audio_text: "Я слушаю музыку.",
+      accepted_orders: ["Я музыку слушаю."],
       words_pool: ["Я", "слушаю", "музыку.", "музыка", "слушать"],
       correct_order: ["Я", "слушаю", "музыку."],
       explanation: "‘Слушать’ — tinglamoq. ‘Музыка’ → ‘слушаю музыку’ (-а → -у)."
@@ -571,6 +579,7 @@ export const LESSON_18_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Doʻstingizni taklif qiling: 'Yur, parkda sayr qilaylik'",
       target_audio_text: "Давай погуляем в парке.",
+      accepted_orders: ["Давай в парке погуляем."],
       words_pool: ["Давай", "погуляем", "в", "парке.", "гулять", "парк"],
       correct_order: ["Давай", "погуляем", "в", "парке."],
       explanation: "‘Давай …’ — yur, …-aylik (doʻstga taklif). ‘В парке’ — parkda."
@@ -598,10 +607,3 @@ export const LESSON_18_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_2_LESSONS: LessonPackage[] = [
-  LESSON_14_DATA,
-  LESSON_15_DATA,
-  LESSON_16_DATA,
-  LESSON_17_DATA,
-  LESSON_18_DATA,
-];

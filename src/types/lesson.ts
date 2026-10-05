@@ -27,6 +27,8 @@ export interface TranslateOrderExercise extends BaseExercise {
   type: 'translate_order';
   words_pool: string[];
   correct_order: string[];
+  /** Other natural orders of the same words that are right too (Russian word order is free); case and punctuation aside */
+  accepted_orders?: string[];
 }
 
 export interface FillBlankExercise extends BaseExercise {

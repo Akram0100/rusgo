@@ -60,7 +60,7 @@ import {
   preloadAudioRecordings,
 } from './utils/audio';
 import { withShuffledChoices } from './utils/shuffle';
-import { checkTypedAgainst } from './utils/typing';
+import { checkTypedAgainst, isRightOrder } from './utils/typing';
 
 // Lesson levels are free-form strings (AI lessons too); map them onto the three known levels.
 const toLevel = (value?: string): 'A1' | 'A2' | 'B1' | null => {
@@ -556,9 +556,8 @@ export default function App() {
         selectedOption?.trim().toLowerCase() ===
         currentExercise.blank_answer.trim().toLowerCase();
     } else if (currentExercise.type === 'translate_order') {
-      const userSentence = selectedWords.join(' ').trim();
-      const targetSentence = currentExercise.correct_order.join(' ').trim();
-      correct = userSentence === targetSentence;
+      // The other natural word orders an exercise lists are right too
+      correct = isRightOrder(selectedWords, currentExercise.correct_order, currentExercise.accepted_orders);
     } else if (currentExercise.type === 'type_word') {
       // One wrong letter in a longer word still counts, with the spelling of the form being written shown
       const result = checkTypedAgainst(selectedOption ?? '', [currentExercise.answer, ...(currentExercise.accept ?? [])]);

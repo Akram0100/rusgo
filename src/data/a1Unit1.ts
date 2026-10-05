@@ -66,6 +66,7 @@ export const LESSON_9_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Qayerda yashashingizni ayting: 'Men Moskvada yashayman'",
       target_audio_text: "Я живу в Москве.",
+      accepted_orders: ["Я в Москве живу."],
       words_pool: ["Я", "живу", "в", "Москве.", "Москва", "из"],
       correct_order: ["Я", "живу", "в", "Москве."],
       explanation: "‘Жить в …’ — …da yashamoq. ‘В’ dan keyin shahar nomi oʻzgaradi: Москва → в Москве."
@@ -95,6 +96,7 @@ export const LESSON_9_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men ozgina ruscha gapiraman'",
       target_audio_text: "Я немного говорю по-русски.",
+      accepted_orders: ["Я говорю по-русски немного.", "Я говорю немного по-русски."],
       words_pool: ["Я", "немного", "говорю", "по-русски.", "язык", "русский"],
       correct_order: ["Я", "немного", "говорю", "по-русски."],
       explanation: "‘Немного’ — ozgina; ‘говорить по-русски’ — ruscha gapirmoq."
@@ -156,6 +158,7 @@ export const LESSON_10_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Kasbingizni ayting: 'Men haydovchi boʻlib ishlayman'",
       target_audio_text: "Я работаю водителем.",
+      accepted_orders: ["Я водителем работаю."],
       words_pool: ["Я", "работаю", "водителем.", "водитель", "на"],
       correct_order: ["Я", "работаю", "водителем."],
       explanation: "‘Работать кем?’ dan keyin kasb nomi oʻzgaradi: водитель → работаю водителем."
@@ -185,6 +188,7 @@ export const LESSON_10_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻrang: 'Siz qayerda ishlaysiz?'",
       target_audio_text: "Где вы работаете?",
+      accepted_orders: ["Вы где работаете?"],
       words_pool: ["Где", "вы", "работаете?", "кем", "работаю"],
       correct_order: ["Где", "вы", "работаете?"],
       explanation: "‘Где?’ — qayerda? ‘Вы работаете’ — siz ishlaysiz."
@@ -214,6 +218,7 @@ export const LESSON_10_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Bugun dam olish kunim'",
       target_audio_text: "Сегодня у меня выходной.",
+      accepted_orders: ["У меня сегодня выходной."],
       words_pool: ["Сегодня", "у", "меня", "выходной.", "работаю", "день"],
       correct_order: ["Сегодня", "у", "меня", "выходной."],
       explanation: "‘Выходной (день)’ — dam olish kuni. ‘У меня …’ — menda … bor."
@@ -309,6 +314,7 @@ export const LESSON_11_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Keyin men ishga ketaman'",
       target_audio_text: "Потом я иду на работу.",
+      accepted_orders: ["Я потом иду на работу."],
       words_pool: ["Потом", "я", "иду", "на", "работу.", "работа", "в"],
       correct_order: ["Потом", "я", "иду", "на", "работу."],
       explanation: "‘Потом’ — keyin. ‘Идти на работу’ — ishga (piyoda) bormoq."
@@ -338,6 +344,7 @@ export const LESSON_11_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men soat oʻn birda uxlashga yotaman'",
       target_audio_text: "Я ложусь спать в одиннадцать.",
+      accepted_orders: ["В одиннадцать я ложусь спать.", "Я в одиннадцать ложусь спать."],
       words_pool: ["Я", "ложусь", "спать", "в", "одиннадцать.", "утро", "часа"],
       correct_order: ["Я", "ложусь", "спать", "в", "одиннадцать."],
       explanation: "‘Ложиться спать’ — uxlashga yotmoq."
@@ -399,6 +406,7 @@ export const LESSON_12_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Bugun dushanba, men ishdaman'",
       target_audio_text: "Сегодня понедельник, я на работе.",
+      accepted_orders: ["Я на работе, сегодня понедельник."],
       words_pool: ["Сегодня", "понедельник,", "я", "на", "работе.", "работа", "дом"],
       correct_order: ["Сегодня", "понедельник,", "я", "на", "работе."],
       explanation: "‘Понедельник’ — dushanba. ‘На работе’ — ishda."
@@ -428,6 +436,7 @@ export const LESSON_12_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Shanba kuni men dam olaman'",
       target_audio_text: "В субботу я отдыхаю.",
+      accepted_orders: ["Я отдыхаю в субботу.", "Я в субботу отдыхаю."],
       words_pool: ["В", "субботу", "я", "отдыхаю.", "отдыхать", "суббота"],
       correct_order: ["В", "субботу", "я", "отдыхаю."],
       explanation: "‘Отдыхать’ — dam olmoq. ‘Суббота’ → ‘в субботу’ — shanba kuni."
@@ -457,6 +466,7 @@ export const LESSON_12_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Payshanba kuni mening darsim bor'",
       target_audio_text: "В четверг у меня урок.",
+      accepted_orders: ["У меня урок в четверг.", "У меня в четверг урок."],
       words_pool: ["В", "четверг", "у", "меня", "урок.", "четверга", "уроки"],
       correct_order: ["В", "четверг", "у", "меня", "урок."],
       explanation: "‘Четверг’ — payshanba; ‘в четверг’ — payshanba kuni. ‘У меня урок’ — mening darsim bor."
@@ -518,6 +528,7 @@ export const LESSON_13_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Bugun juda sovuq'",
       target_audio_text: "Сегодня очень холодно.",
+      accepted_orders: ["Очень холодно сегодня."],
       words_pool: ["Сегодня", "очень", "холодно.", "холодный", "погода"],
       correct_order: ["Сегодня", "очень", "холодно."],
       explanation: "Havo haqida ‘холодно’ (sovuq) deyiladi. ‘Очень’ — juda."
@@ -547,6 +558,7 @@ export const LESSON_13_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Qishda tez-tez qor yogʻadi'",
       target_audio_text: "Зимой часто идёт снег.",
+      accepted_orders: ["Часто зимой идёт снег."],
       words_pool: ["Зимой", "часто", "идёт", "снег.", "снега", "зима"],
       correct_order: ["Зимой", "часто", "идёт", "снег."],
       explanation: "‘Зимой’ — qishda; ‘часто’ — tez-tez."
@@ -576,6 +588,7 @@ export const LESSON_13_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Doʻstingizga maslahat bering: 'Soyabon oling, yomgʻir yogʻyapti'",
       target_audio_text: "Возьмите зонт, идёт дождь.",
+      accepted_orders: ["Идёт дождь, возьмите зонт."],
       words_pool: ["Возьмите", "зонт,", "идёт", "дождь.", "зонта", "дождя"],
       correct_order: ["Возьмите", "зонт,", "идёт", "дождь."],
       explanation: "‘Возьмите’ — oling (hurmat bilan); ‘зонт’ — soyabon."
@@ -603,10 +616,3 @@ export const LESSON_13_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_1_LESSONS: LessonPackage[] = [
-  LESSON_9_DATA,
-  LESSON_10_DATA,
-  LESSON_11_DATA,
-  LESSON_12_DATA,
-  LESSON_13_DATA,
-];

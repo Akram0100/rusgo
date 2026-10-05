@@ -66,6 +66,7 @@ export const LESSON_34_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Yotoqxonada katta karavot bor'",
       target_audio_text: "В спальне большая кровать.",
+      accepted_orders: ["Большая кровать в спальне."],
       words_pool: ["В", "спальне", "большая", "кровать.", "большой", "спальня"],
       correct_order: ["В", "спальне", "большая", "кровать."],
       explanation: "‘Кровать’ — karavot (ayol jinsi → ‘большая’). ‘В спальне’ — yotoqxonada."
@@ -95,6 +96,7 @@ export const LESSON_34_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Muzlatkich oshxonada'",
       target_audio_text: "Холодильник на кухне.",
+      accepted_orders: ["На кухне холодильник."],
       words_pool: ["Холодильник", "на", "кухне.", "кухня", "кухню"],
       correct_order: ["Холодильник", "на", "кухне."],
       explanation: "‘Холодильник’ — muzlatkich (‘холод’ — sovuq soʻzidan)."
@@ -156,6 +158,7 @@ export const LESSON_35_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men kir yuvaman'",
       target_audio_text: "Я стираю одежду.",
+      accepted_orders: ["Я одежду стираю."],
       words_pool: ["Я", "стираю", "одежду.", "одежда", "стирать"],
       correct_order: ["Я", "стираю", "одежду."],
       explanation: "‘Стирать’ — kir yuvmoq: я стираю. ‘Одежда’ → ‘стираю одежду’."
@@ -185,6 +188,7 @@ export const LESSON_35_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻrang: 'Oyi, changyutgich qayerda?'",
       target_audio_text: "Мама, где пылесос?",
+      accepted_orders: ["Где пылесос, мама?"],
       words_pool: ["Мама,", "где", "пылесос?", "пылесоса", "куда"],
       correct_order: ["Мама,", "где", "пылесос?"],
       explanation: "‘Пылесос’ — changyutgich (‘пыль’ — chang soʻzidan)."
@@ -214,6 +218,7 @@ export const LESSON_35_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ukangizdan soʻrang: 'Menga yordam ber, iltimos'",
       target_audio_text: "Помоги мне, пожалуйста.",
+      accepted_orders: ["Пожалуйста, помоги мне."],
       words_pool: ["Помоги", "мне,", "пожалуйста.", "помощь", "меня"],
       correct_order: ["Помоги", "мне,", "пожалуйста."],
       explanation: "‘Помоги мне’ — menga yordam ber (sen); ‘помогите’ — yordam bering (siz)."
@@ -304,6 +309,7 @@ export const LESSON_36_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Oilam uchun shoʻrva pishiryapman'",
       target_audio_text: "Я варю суп для семьи.",
+      accepted_orders: ["Для семьи я варю суп."],
       words_pool: ["Я", "варю", "суп", "для", "семьи.", "семья", "варить"],
       correct_order: ["Я", "варю", "суп", "для", "семьи."],
       explanation: "‘Варить’ — qaynatib pishirmoq: я варю суп. ‘Для’ — uchun."
@@ -333,6 +339,7 @@ export const LESSON_36_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Yogʻ stolda'",
       target_audio_text: "Масло на столе.",
+      accepted_orders: ["На столе масло."],
       words_pool: ["Масло", "на", "столе.", "стол", "масла"],
       correct_order: ["Масло", "на", "столе."],
       explanation: "‘Масло’ — yogʻ (sariyogʻ yoki oʻsimlik yogʻi). ‘На столе’ — stolda."
@@ -513,6 +520,7 @@ export const LESSON_38_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Amakim Samarqandda yashaydi'",
       target_audio_text: "Мой дядя живёт в Самарканде.",
+      accepted_orders: ["Мой дядя в Самарканде живёт.", "В Самарканде живёт мой дядя."],
       words_pool: ["Мой", "дядя", "живёт", "в", "Самарканде.", "моя", "живу"],
       correct_order: ["Мой", "дядя", "живёт", "в", "Самарканде."],
       explanation: "‘Дядя’ — amaki yoki togʻa: ‘-я’ bilan tugasa ham erkak, shuning uchun ‘мой’."
@@ -542,6 +550,7 @@ export const LESSON_38_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Ularning oʻgʻli va qizi bor'",
       target_audio_text: "У них есть сын и дочь.",
+      accepted_orders: ["У них есть дочь и сын."],
       words_pool: ["У", "них", "есть", "сын", "и", "дочь.", "сына", "дочка"],
       correct_order: ["У", "них", "есть", "сын", "и", "дочь."],
       explanation: "‘Сын’ — oʻgʻil, ‘дочь’ — qiz (farzand). ‘У них есть …’ — ularda … bor."
@@ -571,6 +580,7 @@ export const LESSON_38_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Uning eri Moskvada ishlaydi'",
       target_audio_text: "Её муж работает в Москве.",
+      accepted_orders: ["Её муж в Москве работает."],
       words_pool: ["Её", "муж", "работает", "в", "Москве.", "мужа", "его"],
       correct_order: ["Её", "муж", "работает", "в", "Москве."],
       explanation: "‘Муж’ — er (turmush oʻrtogʻi). ‘Её муж’ — uning (ayolning) eri."
@@ -598,10 +608,3 @@ export const LESSON_38_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_6_LESSONS: LessonPackage[] = [
-  LESSON_34_DATA,
-  LESSON_35_DATA,
-  LESSON_36_DATA,
-  LESSON_37_DATA,
-  LESSON_38_DATA,
-];

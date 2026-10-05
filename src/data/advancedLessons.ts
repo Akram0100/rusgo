@@ -36,6 +36,7 @@ export const A2_LESSON_1: LessonPackage = {
       type: 'translate_order',
       instruction: "Savolni toʻgʻri tuzing: 'Kecha kechqurun siz nima qildingiz?'",
       target_audio_text: 'Что вы делали вчера вечером?',
+      accepted_orders: ['Что вы вчера вечером делали?'],
       words_pool: ['Что', 'вы', 'делали', 'вчера', 'вечером?', 'утром'],
       correct_order: ['Что', 'вы', 'делали', 'вчера', 'вечером?'],
       explanation: "‘Что вы делали...?’ — oʻtgan zamonda kishidan nima ish bilan mashgʻul boʻlganini soʻrash."
@@ -65,6 +66,7 @@ export const A2_LESSON_1: LessonPackage = {
       type: 'translate_order',
       instruction: "Tuzing: 'Oʻtgan yozda biz Samarqandda edik'",
       target_audio_text: 'Прошлым летом мы были в Самарканде.',
+      accepted_orders: ['Мы были в Самарканде прошлым летом.', 'Мы прошлым летом были в Самарканде.'],
       words_pool: ['Прошлым', 'летом', 'мы', 'были', 'в', 'Самарканде.', 'будем'],
       correct_order: ['Прошлым', 'летом', 'мы', 'были', 'в', 'Самарканде.'],
       explanation: "‘Прошлым летом’ — oʻtgan yoz mavsumida, ‘были’ — edik."
@@ -94,6 +96,7 @@ export const A2_LESSON_1: LessonPackage = {
       type: 'translate_order',
       instruction: "Tuzing: 'Ular kecha juda charchashdi'",
       target_audio_text: 'Они вчера очень устали.',
+      accepted_orders: ['Вчера они очень устали.'],
       words_pool: ['Они', 'вчера', 'очень', 'устали.', 'были', 'дома'],
       correct_order: ['Они', 'вчера', 'очень', 'устали.'],
       explanation: "‘Устали’ — charchadilar (koʻplik oʻtgan zamon)."
@@ -133,6 +136,7 @@ export const A2_LESSON_2: LessonPackage = {
       type: 'translate_order',
       instruction: "Reja tuzing: 'Dam olish kunlarida biz togʻga boramiz'",
       target_audio_text: 'На выходных мы поедем в горы.',
+      accepted_orders: ['Мы поедем в горы на выходных.', 'Мы на выходных поедем в горы.'],
       words_pool: ['На', 'выходных', 'мы', 'поедем', 'в', 'горы.', 'были'],
       correct_order: ['На', 'выходных', 'мы', 'поедем', 'в', 'горы.'],
       explanation: "‘Поедем’ — kelasi zamonda transportda yoʻlga chiqish."
@@ -167,6 +171,7 @@ export const A2_LESSON_2: LessonPackage = {
       type: 'translate_order',
       instruction: "Tuzing: 'Kelasi haftada men yangi telefon sotib olaman'",
       target_audio_text: 'На следующей неделе я куплю новый телефон.',
+      accepted_orders: ['Я куплю новый телефон на следующей неделе.'],
       words_pool: ['На', 'следующей', 'неделе', 'я', 'куплю', 'новый', 'телефон.', 'купил'],
       correct_order: ['На', 'следующей', 'неделе', 'я', 'куплю', 'новый', 'телефон.'],
       explanation: "‘Куплю’ — sotib olaman (tugallangan kelasi zamon)."
@@ -196,6 +201,7 @@ export const A2_LESSON_2: LessonPackage = {
       type: 'translate_order',
       instruction: "Tuzing: 'Biz kechqurun albatta qoʻngʻiroq qilamiz'",
       target_audio_text: 'Мы обязательно позвоним вечером.',
+      accepted_orders: ['Мы вечером обязательно позвоним.'],
       words_pool: ['Мы', 'обязательно', 'позвоним', 'вечером.', 'утром', 'были'],
       correct_order: ['Мы', 'обязательно', 'позвоним', 'вечером.'],
       explanation: "‘Позвоним’ — telefon qilamiz."
@@ -274,6 +280,7 @@ export const A2_LESSON_3: LessonPackage = {
       type: 'translate_order',
       instruction: "Hisob soʻrang: 'Bizga alohida hisob qilib bering, iltimos'",
       target_audio_text: 'Сделайте нам раздельный счёт, пожалуйста.',
+      accepted_orders: ['Пожалуйста, сделайте нам раздельный счёт.'],
       words_pool: ['Сделайте', 'нам', 'раздельный', 'счёт,', 'пожалуйста.', 'один'],
       correct_order: ['Сделайте', 'нам', 'раздельный', 'счёт,', 'пожалуйста.'],
       explanation: "‘Раздельный счёт’ — har bir kishi oʻz hisobini alohida toʻlashi."
@@ -385,6 +392,7 @@ export const B1_LESSON_1: LessonPackage = {
       type: 'translate_order',
       instruction: "Tayyorlikni bildiring: 'Men dushanbadan ishga kirishishga tayyorman'",
       target_audio_text: 'Я готов приступить к работе с понедельника.',
+      accepted_orders: ['С понедельника я готов приступить к работе.'],
       words_pool: ['Я', 'готов', 'приступить', 'к', 'работе', 'с', 'понедельника.', 'вчера'],
       correct_order: ['Я', 'готов', 'приступить', 'к', 'работе', 'с', 'понедельника.'],
       explanation: "‘Приступить к работе’ — rasman vazifani bajarishga kirishmoq."
@@ -417,11 +425,12 @@ export const B1_LESSON_1: LessonPackage = {
     {
       id: 8,
       type: 'translate_order',
-      instruction: "Minadorchilik: 'Qiziqarli suhbat uchun katta rahmat'",
+      instruction: "Minnatdorchilik bildiring: 'Qiziqarli suhbat uchun katta rahmat'",
       target_audio_text: 'Большое спасибо за интересную беседу.',
+      accepted_orders: ['Спасибо большое за интересную беседу.'],
       words_pool: ['Большое', 'спасибо', 'за', 'интересную', 'беседу.', 'до', 'свидания'],
       correct_order: ['Большое', 'спасибо', 'за', 'интересную', 'беседу.'],
-      explanation: "‘Интересная беседа’ — mazmunli suhbat."
+      explanation: "‘Интересная беседа’ — qiziqarli suhbat."
     }
   ]
 };
@@ -463,6 +472,7 @@ export const B1_LESSON_2: LessonPackage = {
       type: 'translate_order',
       instruction: "Tuzing: 'Bankomatdan naqd pul yechib olsam boʻladimi?'",
       target_audio_text: 'Можно снять наличные в банкомате?',
+      accepted_orders: ['В банкомате можно снять наличные?'],
       words_pool: ['Можно', 'снять', 'наличные', 'в', 'банкомате?', 'открыть', 'карту'],
       correct_order: ['Можно', 'снять', 'наличные', 'в', 'банкомате?'],
       explanation: "‘Снять наличные’ — kartadan naqd pul yechish."

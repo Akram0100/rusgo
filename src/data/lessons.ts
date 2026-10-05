@@ -139,6 +139,7 @@ export const LESSON_1_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ertalabki 'Xayrli tong, doʻstim!' jumlasini rus tilida toʻgʻri tartibda tering.",
       target_audio_text: "Доброе утро, мой друг!",
+      accepted_orders: ["Мой друг, доброе утро!"],
       words_pool: [
         "Доброе",
         "утро,",
@@ -227,6 +228,7 @@ export const LESSON_2_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻzlarni toʻgʻri tartibda terib: 'Bu qancha turadi?' savolini hosil qiling.",
       target_audio_text: "Сколько это стоит?",
+      accepted_orders: ["Сколько стоит это?"],
       words_pool: [
         "стоит?",
         "Сколько",
@@ -276,6 +278,7 @@ export const LESSON_2_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻzlarni toʻgʻri joylashtirib: 'Iltimos, bir stakan suv bering' jumlasini tuzing.",
       target_audio_text: "Стакан воды, пожалуйста.",
+      accepted_orders: ["Пожалуйста, стакан воды."],
       words_pool: [
         "Стакан",
         "воды,",
@@ -325,6 +328,7 @@ export const LESSON_2_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Doʻkonda narsa uzatayotganda: 'Mana, marhamat oling' jumlasini tartiblang.",
       target_audio_text: "Вот, пожалуйста, возьмите.",
+      accepted_orders: ["Вот, возьмите, пожалуйста."],
       words_pool: [
         "Вот,",
         "пожалуйста,",
@@ -462,6 +466,7 @@ export const LESSON_3_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻzlarni toʻgʻri joylashtirib: 'Biz birga yashaymiz' jumlasini tuzing.",
       target_audio_text: "Мы живём вместе.",
+      accepted_orders: ["Мы вместе живём."],
       words_pool: [
         "Мы",
         "живём",
@@ -651,6 +656,7 @@ export const LESSON_4_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Javob bering: 'Bu yaqin, piyoda besh daqiqa'",
       target_audio_text: "Это рядом, пять минут пешком.",
+      accepted_orders: ["Это рядом, пешком пять минут."],
       words_pool: [
         "Это",
         "рядом,",
@@ -703,6 +709,7 @@ export const LESSON_4_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻzlarni terib: 'Avtobus hozir yetib keladi' jumlasini tuzing.",
       target_audio_text: "Автобус сейчас приедет.",
+      accepted_orders: ["Сейчас автобус приедет."],
       words_pool: [
         "Автобус",
         "сейчас",
@@ -789,6 +796,7 @@ export const LESSON_5_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Kassirga 'Karta orqali toʻlasa boʻladimi?' deb soʻrang.",
       target_audio_text: "Можно оплатить картой?",
+      accepted_orders: ["Можно картой оплатить?"],
       words_pool: [
         "Можно",
         "оплатить",
@@ -836,8 +844,9 @@ export const LESSON_5_DATA: LessonPackage = {
     {
       id: 5,
       type: "translate_order",
-      instruction: "Soʻzlarni tartiblang: 'Menga boshqa oʻlcham bormi?'",
+      instruction: "Soʻzlarni tartiblang: 'Sizda boshqa oʻlcham bormi?'",
       target_audio_text: "У вас есть другой размер?",
+      accepted_orders: ["Другой размер у вас есть?"],
       words_pool: [
         "У",
         "вас",
@@ -890,6 +899,7 @@ export const LESSON_5_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Xarid qilishga qaror qildingiz: 'Men buni olaman'",
       target_audio_text: "Хорошо, я беру это.",
+      accepted_orders: ["Хорошо, я это беру."],
       words_pool: [
         "Хорошо,",
         "я",
@@ -1027,8 +1037,9 @@ export const LESSON_6_DATA: LessonPackage = {
     {
       id: 5,
       type: "translate_order",
-      instruction: "Soʻzlarni joylashtiring: 'Lift qayerda joylashgan?'",
+      instruction: "Soʻzlarni joylashtiring: 'Aytingchi, lift qayerda joylashgan?'",
       target_audio_text: "Скажите, где находится лифт?",
+      accepted_orders: ["Скажите, где лифт находится?"],
       words_pool: [
         "Скажите,",
         "где",
@@ -1079,18 +1090,16 @@ export const LESSON_6_DATA: LessonPackage = {
       id: 8,
       type: "translate_order",
       instruction: "Ketish vaqtini soʻrang: 'Chiqib ketish vaqti soat nechada?'",
-      target_audio_text: "Во сколько время выезда?",
+      target_audio_text: "Какое время выезда?",
       words_pool: [
-        "Во",
-        "сколько",
+        "Какое",
         "время",
         "выезда?",
-        "завтрак",
-        "лифт"
+        "Какой",
+        "завтрак"
       ],
       correct_order: [
-        "Во",
-        "сколько",
+        "Какое",
         "время",
         "выезда?"
       ],
@@ -1168,6 +1177,7 @@ export const LESSON_7_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Dori soʻrang: 'Shamollashga qarshi dori bering, iltimos'",
       target_audio_text: "Дайте лекарство от простуды, пожалуйста.",
+      accepted_orders: ["Пожалуйста, дайте лекарство от простуды."],
       words_pool: [
         "Дайте",
         "лекарство",
@@ -1220,6 +1230,7 @@ export const LESSON_7_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Shikoyat qiling: 'Menda yuqori harorat (isitma) bor'",
       target_audio_text: "У меня высокая температура.",
+      accepted_orders: ["У меня температура высокая."],
       words_pool: [
         "У",
         "меня",
@@ -1271,6 +1282,7 @@ export const LESSON_7_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Shoshilinch holatda ayting: 'Tez tibbiy yordamni chaqiring!'",
       target_audio_text: "Срочно вызовите скорую помощь!",
+      accepted_orders: ["Вызовите срочно скорую помощь!", "Вызовите скорую помощь срочно!"],
       words_pool: [
         "Срочно",
         "вызовите",
@@ -1359,6 +1371,7 @@ export const LESSON_8_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Hujjat topshiring: 'Mana mening pasportim va chiptam'",
       target_audio_text: "Вот мой паспорт и билет.",
+      accepted_orders: ["Вот мой билет и паспорт."],
       words_pool: [
         "Вот",
         "мой",
@@ -1411,6 +1424,7 @@ export const LESSON_8_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Styuardessa eʼlon qiladi: 'Xavfsizlik kamarlarini taqing'",
       target_audio_text: "Пожалуйста, пристегните ремни безопасности.",
+      accepted_orders: ["Пристегните, пожалуйста, ремни безопасности.", "Пристегните ремни безопасности, пожалуйста."],
       words_pool: [
         "Пожалуйста,",
         "пристегните",
@@ -1512,31 +1526,77 @@ export const LESSON_8_DATA: LessonPackage = {
 };
 
 import { ALL_A2_LESSONS, ALL_B1_LESSONS } from './advancedLessons';
-import { A1_UNIT_1_LESSONS } from './a1Unit1';
-import { A1_UNIT_2_LESSONS } from './a1Unit2';
-import { A1_UNIT_3_LESSONS } from './a1Unit3';
-import { A1_UNIT_4_LESSONS } from './a1Unit4';
-import { A1_UNIT_5_LESSONS } from './a1Unit5';
-import { A1_UNIT_6_LESSONS } from './a1Unit6';
-import { A1_UNIT_7_LESSONS } from './a1Unit7';
+import { LESSON_9_DATA, LESSON_10_DATA, LESSON_11_DATA, LESSON_12_DATA, LESSON_13_DATA } from './a1Unit1';
+import { LESSON_14_DATA, LESSON_15_DATA, LESSON_16_DATA, LESSON_17_DATA, LESSON_18_DATA } from './a1Unit2';
+import { LESSON_19_DATA, LESSON_20_DATA, LESSON_21_DATA, LESSON_22_DATA } from './a1Unit3';
+import { LESSON_23_DATA, LESSON_24_DATA, LESSON_25_DATA, LESSON_26_DATA, LESSON_27_DATA, LESSON_28_DATA } from './a1Unit4';
+import { LESSON_29_DATA, LESSON_30_DATA, LESSON_31_DATA, LESSON_32_DATA, LESSON_33_DATA } from './a1Unit5';
+import { LESSON_34_DATA, LESSON_35_DATA, LESSON_36_DATA, LESSON_37_DATA, LESSON_38_DATA } from './a1Unit6';
+import { LESSON_39_DATA, LESSON_40_DATA, LESSON_41_DATA, LESSON_42_DATA, LESSON_43_DATA } from './a1Unit7';
+import { LESSON_44_DATA, LESSON_45_DATA, LESSON_46_DATA, LESSON_47_DATA, LESSON_48_DATA } from './a1Unit8';
 
+/**
+ * The A1 course in teaching order, from easy to hard: a lesson comes after what it builds on (the time after the
+ * numbers 11-100, prices after the big numbers, the doctor after the body). The lesson ids keep the order the lessons
+ * were written in; the number a learner sees is the position here.
+ */
 export const INITIAL_A1_LESSONS: LessonPackage[] = [
+  // 1. Birinchi qadamlar
   LESSON_1_DATA,
+  LESSON_9_DATA,
   LESSON_2_DATA,
   LESSON_3_DATA,
-  LESSON_4_DATA,
+  LESSON_10_DATA,
+  LESSON_12_DATA,
+  // 2. Sonlar, vaqt, odamlar
+  LESSON_29_DATA,
+  LESSON_11_DATA,
+  LESSON_13_DATA,
+  LESSON_32_DATA,
+  LESSON_33_DATA,
+  LESSON_38_DATA,
+  // 3. Ovqat va xarid
+  LESSON_14_DATA,
+  LESSON_15_DATA,
+  LESSON_16_DATA,
+  LESSON_30_DATA,
+  LESSON_17_DATA,
   LESSON_5_DATA,
-  LESSON_6_DATA,
+  LESSON_37_DATA,
+  // 4. Uy va boʻsh vaqt
+  LESSON_34_DATA,
+  LESSON_35_DATA,
+  LESSON_36_DATA,
+  LESSON_18_DATA,
+  LESSON_47_DATA,
+  LESSON_28_DATA,
+  // 5. Shaharda
+  LESSON_44_DATA,
+  LESSON_4_DATA,
+  LESSON_19_DATA,
+  LESSON_20_DATA,
+  LESSON_21_DATA,
+  LESSON_22_DATA,
+  LESSON_45_DATA,
+  LESSON_48_DATA,
+  // 6. Sogʻliq va xavfsizlik
+  LESSON_31_DATA,
   LESSON_7_DATA,
+  LESSON_26_DATA,
+  LESSON_27_DATA,
+  // 7. Ish
+  LESSON_24_DATA,
+  LESSON_43_DATA,
+  LESSON_39_DATA,
+  LESSON_40_DATA,
+  LESSON_41_DATA,
+  LESSON_42_DATA,
+  // 8. Hujjatlar va sayohat
+  LESSON_23_DATA,
+  LESSON_25_DATA,
+  LESSON_6_DATA,
   LESSON_8_DATA,
-  // New lessons are added after the first eight, so the lessons learners have unlocked stay as they are
-  ...A1_UNIT_1_LESSONS,
-  ...A1_UNIT_2_LESSONS,
-  ...A1_UNIT_3_LESSONS,
-  ...A1_UNIT_4_LESSONS,
-  ...A1_UNIT_5_LESSONS,
-  ...A1_UNIT_6_LESSONS,
-  ...A1_UNIT_7_LESSONS,
+  LESSON_46_DATA,
 ];
 
 export const INITIAL_LESSONS: LessonPackage[] = [

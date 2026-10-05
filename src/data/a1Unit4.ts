@@ -96,6 +96,7 @@ export const LESSON_23_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Xodim imzo joyini koʻrsatib aytdi: 'Shu yerga imzo qoʻying, iltimos'",
       target_audio_text: "Подпишите здесь, пожалуйста.",
+      accepted_orders: ["Пожалуйста, подпишите здесь.", "Подпишите, пожалуйста, здесь."],
       words_pool: ["Подпишите", "здесь,", "пожалуйста.", "подпись", "пишите"],
       correct_order: ["Подпишите", "здесь,", "пожалуйста."],
       explanation: "‘Подписать’ — imzo qoʻymoq: ‘подпишите здесь’ — shu yerga imzo qoʻying."
@@ -157,6 +158,7 @@ export const LESSON_24_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻrang: 'Sizda ish bormi?'",
       target_audio_text: "У вас есть работа?",
+      accepted_orders: ["Работа у вас есть?"],
       words_pool: ["У", "вас", "есть", "работа?", "работу", "нет"],
       correct_order: ["У", "вас", "есть", "работа?"],
       explanation: "‘У вас есть …?’ — sizda … bormi?"
@@ -305,6 +307,7 @@ export const LESSON_25_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Kvartira egasi yaqinda yashaydi'",
       target_audio_text: "Хозяин квартиры живёт рядом.",
+      accepted_orders: ["Рядом живёт хозяин квартиры."],
       words_pool: ["Хозяин", "квартиры", "живёт", "рядом.", "квартира", "живу"],
       correct_order: ["Хозяин", "квартиры", "живёт", "рядом."],
       explanation: "‘Хозяин квартиры’ — kvartira egasi. ‘Рядом’ — yaqinda, yonida."
@@ -395,6 +398,7 @@ export const LESSON_26_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Poliklinikada ayting: 'Meni shifokor qabuliga yozib qoʻying, iltimos'",
       target_audio_text: "Запишите меня к врачу, пожалуйста.",
+      accepted_orders: ["Пожалуйста, запишите меня к врачу.", "Запишите, пожалуйста, меня к врачу."],
       words_pool: ["Запишите", "меня", "к", "врачу,", "пожалуйста.", "врач", "мне"],
       correct_order: ["Запишите", "меня", "к", "врачу,", "пожалуйста."],
       explanation: "‘Записаться к врачу’ — shifokor qabuliga yozilmoq. ‘К врачу’ — shifokorga."
@@ -424,6 +428,7 @@ export const LESSON_26_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Qornim ogʻriyapti'",
       target_audio_text: "У меня болит живот.",
+      accepted_orders: ["У меня живот болит."],
       words_pool: ["У", "меня", "болит", "живот.", "болят", "животе"],
       correct_order: ["У", "меня", "болит", "живот."],
       explanation: "‘Живот’ — qorin. Bitta aʼzo uchun ‘болит’, koʻplik uchun ‘болят’."
@@ -514,6 +519,7 @@ export const LESSON_27_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Politsiyani chaqiring, iltimos!'",
       target_audio_text: "Вызовите полицию, пожалуйста!",
+      accepted_orders: ["Пожалуйста, вызовите полицию!"],
       words_pool: ["Вызовите", "полицию,", "пожалуйста!", "полиции", "вызов"],
       correct_order: ["Вызовите", "полицию,", "пожалуйста!"],
       explanation: "‘Полиция’ → ‘вызовите полицию’ (-я → -ю). Politsiya raqami: 102."
@@ -543,6 +549,7 @@ export const LESSON_27_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Politsiyada ayting: 'Telefonimni oʻgʻirlab ketishdi'",
       target_audio_text: "У меня украли телефон.",
+      accepted_orders: ["У меня телефон украли.", "Телефон у меня украли."],
       words_pool: ["У", "меня", "украли", "телефон.", "украл", "телефона"],
       correct_order: ["У", "меня", "украли", "телефон."],
       explanation: "‘Украсть’ — oʻgʻirlamoq: ‘у меня украли …’ — …imni oʻgʻirlab ketishdi."
@@ -572,6 +579,7 @@ export const LESSON_27_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Ahvolim yomon, yordam bering!'",
       target_audio_text: "Мне плохо, помогите!",
+      accepted_orders: ["Помогите, мне плохо!"],
       words_pool: ["Мне", "плохо,", "помогите!", "плохой", "помощь"],
       correct_order: ["Мне", "плохо,", "помогите!"],
       explanation: "‘Мне плохо’ — ahvolim yomon (oʻzimni yomon his qilyapman)."
@@ -662,6 +670,7 @@ export const LESSON_28_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Tilak bildiring: 'Sizga baxt va omad tilayman!'",
       target_audio_text: "Желаю счастья и удачи!",
+      accepted_orders: ["Желаю удачи и счастья!"],
       words_pool: ["Желаю", "счастья", "и", "удачи!", "счастье", "удача"],
       correct_order: ["Желаю", "счастья", "и", "удачи!"],
       explanation: "‘Желаю’ dan keyin shakl oʻzgaradi: счастье → счастья, удача → удачи."
@@ -691,6 +700,7 @@ export const LESSON_28_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Ertaga 8-mart'",
       target_audio_text: "Завтра Восьмое марта.",
+      accepted_orders: ["Восьмое марта завтра."],
       words_pool: ["Завтра", "Восьмое", "марта.", "март", "восьмой"],
       correct_order: ["Завтра", "Восьмое", "марта."],
       explanation: "‘Восьмое марта’ — 8-mart, Xalqaro xotin-qizlar kuni: bu kuni ayollarni tabriklashadi."
@@ -718,11 +728,3 @@ export const LESSON_28_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_4_LESSONS: LessonPackage[] = [
-  LESSON_23_DATA,
-  LESSON_24_DATA,
-  LESSON_25_DATA,
-  LESSON_26_DATA,
-  LESSON_27_DATA,
-  LESSON_28_DATA,
-];

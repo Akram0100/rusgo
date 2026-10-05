@@ -1,5 +1,5 @@
-// Checking a typed answer: case, ё/е, punctuation and spacing do not count, and one wrong letter in a longer word
-// is accepted with a note, as Duolingo does.
+// Checking typed answers and built sentences: case, ё/е, punctuation and spacing do not count, and one wrong letter
+// in a longer typed word is accepted with a note, as Duolingo does.
 
 /** The text as compared: lower case, ё as е, punctuation and hyphens as spaces, single spaces. */
 export const normalizeTyped = (text: string): string =>
@@ -9,6 +9,15 @@ export const normalizeTyped = (text: string): string =>
     .replace(/[.,!?;:…"'«»„“”‘’()\-—–/]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+/**
+ * A sentence built from word tiles is right in the authored order or in any other order the exercise accepts
+ * (Russian word order is free); the tiles' case and punctuation do not count.
+ */
+export const isRightOrder = (words: string[], correctOrder: string[], acceptedOrders: string[] = []): boolean => {
+  const given = normalizeTyped(words.join(' '));
+  return given !== '' && [correctOrder.join(' '), ...acceptedOrders].some((order) => normalizeTyped(order) === given);
+};
 
 /** Edits (insert, delete, replace) that turn `a` into `b`. */
 const editDistance = (a: string, b: string): number => {

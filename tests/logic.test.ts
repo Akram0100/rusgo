@@ -3,7 +3,7 @@
 // the integrity of the lesson data that ships with the app, and the XP / streak / achievement rules.
 import { afterEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { INITIAL_LESSONS } from '../src/data/lessons';
+import { INITIAL_A1_LESSONS, INITIAL_LESSONS } from '../src/data/lessons';
 import { shuffle, withShuffledChoices } from '../src/utils/shuffle';
 import { sanitizeGeneratedLesson } from '../src/utils/validateLesson';
 import { SCENARIOS } from '../src/data/roleplay';
@@ -47,7 +47,7 @@ import {
 } from '../src/utils/review';
 import { collectAudioTexts } from '../src/utils/audioTexts';
 import type { Exercise, LearnWordExercise, MultipleChoiceExercise, TypeWordExercise } from '../src/types/lesson';
-import { checkTyped, checkTypedAgainst } from '../src/utils/typing';
+import { checkTyped, checkTypedAgainst, isRightOrder, normalizeTyped } from '../src/utils/typing';
 import type { UserStats } from '../src/types/gamification';
 
 const HAS_CYRILLIC = /[А-Яа-яЁё]/;
@@ -117,6 +117,48 @@ describe('lesson data', () => {
         assert.equal(normalize(exercise.correct_order.join(' ')), normalize(exercise.target_audio_text), tag);
       }
     }
+  });
+
+  it('sentence building: every other accepted order uses exactly the words of the answer, in another order', () => {
+    const words = (sentence: string) => sorted(normalizeTyped(sentence).split(' '));
+    for (const lesson of INITIAL_LESSONS) {
+      for (const exercise of lesson.exercises) {
+        if (exercise.type !== 'translate_order') continue;
+        const answer = exercise.correct_order.join(' ');
+        const orders = exercise.accepted_orders ?? [];
+        for (const order of orders) {
+          const tag: string = `${lesson.lesson_id}#${exercise.id}: "${order}"`;
+          assert.equal(words(order), words(answer), `${tag} does not use the words of "${answer}"`);
+          assert.notEqual(normalizeTyped(order), normalizeTyped(answer), `${tag} is the answer itself`);
+        }
+        assert.equal(new Set(orders.map(normalizeTyped)).size, orders.length, `${lesson.lesson_id}#${exercise.id}: an order twice`);
+      }
+    }
+  });
+
+  it('the A1 course goes from easy to hard: a lesson comes after what it builds on', () => {
+    const at = (id: string) => INITIAL_A1_LESSONS.findIndex((lesson) => lesson.lesson_id === id);
+    const pairs: [string, string, string][] = [
+      ['a1_lesson_02', 'a1_lesson_29', 'numbers 1-10, then 11-100'],
+      ['a1_lesson_29', 'a1_lesson_11', 'the numbers, then the time'],
+      ['a1_lesson_29', 'a1_lesson_30', 'numbers 11-100, then hundreds and thousands'],
+      ['a1_lesson_30', 'a1_lesson_22', 'big numbers, then the cash machine'],
+      ['a1_lesson_30', 'a1_lesson_05', 'big numbers, then prices in shops'],
+      ['a1_lesson_17', 'a1_lesson_05', 'clothes, then trying them on'],
+      ['a1_lesson_03', 'a1_lesson_38', 'the family, then the relatives'],
+      ['a1_lesson_12', 'a1_lesson_47', 'the days of the week, then meeting up'],
+      ['a1_lesson_14', 'a1_lesson_36', 'food, then cooking'],
+      ['a1_lesson_31', 'a1_lesson_07', 'the body, then the pharmacy'],
+      ['a1_lesson_31', 'a1_lesson_26', 'the body, then the doctor'],
+      ['a1_lesson_10', 'a1_lesson_24', 'professions, then looking for work'],
+      ['a1_lesson_44', 'a1_lesson_04', 'places in town, then asking the way'],
+    ];
+    for (const [first, then, why] of pairs) {
+      assert.ok(at(first) >= 0 && at(then) >= 0, `${first} or ${then} is not an A1 lesson`);
+      assert.ok(at(first) < at(then), `${why}: ${first} must come before ${then}`);
+    }
+    assert.equal(INITIAL_A1_LESSONS[0].lesson_id, 'a1_lesson_01', 'the first lesson is the one open from the start');
+    assert.equal(new Set(INITIAL_A1_LESSONS).size, INITIAL_A1_LESSONS.length, 'a lesson twice');
   });
 
   it('vocabulary terms are unique across lessons (Speed Match pairs cards by term)', () => {
@@ -452,6 +494,16 @@ describe('typing steps (src/utils/typing.ts, src/utils/duolingoFlow.ts)', () => 
         }
       }
     }
+  });
+
+  it('a built sentence is right in the authored order or an accepted one, whatever the tiles’ case and punctuation', () => {
+    const answer = ['Мне', 'грустно', 'без', 'семьи.'];
+    const accepted = ['Без семьи мне грустно.'];
+    assert.equal(isRightOrder(['Мне', 'грустно', 'без', 'семьи.'], answer, accepted), true);
+    assert.equal(isRightOrder(['без', 'семьи.', 'Мне', 'грустно'], answer, accepted), true, 'the other natural order');
+    assert.equal(isRightOrder(['грустно', 'мне', 'без', 'семьи.'], answer, accepted), false, 'an order nobody accepted');
+    assert.equal(isRightOrder(['Мне', 'грустно'], answer, accepted), false, 'words missing');
+    assert.equal(isRightOrder([], answer, accepted), false);
   });
 
   it('a lesson whose words are all long phrases gets no typing step', () => {

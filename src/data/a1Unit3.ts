@@ -37,6 +37,7 @@ export const LESSON_19_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Soʻrang: 'Vokzalga qaysi avtobus boradi?'",
       target_audio_text: "Какой автобус идёт до вокзала?",
+      accepted_orders: ["Какой автобус до вокзала идёт?"],
       words_pool: ["Какой", "автобус", "идёт", "до", "вокзала?", "вокзал", "куда"],
       correct_order: ["Какой", "автобус", "идёт", "до", "вокзала?"],
       explanation: "Transport haqida ‘идёт’ deyiladi: ‘автобус идёт до вокзала’ — avtobus vokzalgacha boradi."
@@ -66,6 +67,7 @@ export const LESSON_19_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Men shu yerda tushishim kerak'",
       target_audio_text: "Мне нужно выйти здесь.",
+      accepted_orders: ["Мне здесь нужно выйти.", "Здесь мне нужно выйти."],
       words_pool: ["Мне", "нужно", "выйти", "здесь.", "выхожу", "нужен"],
       correct_order: ["Мне", "нужно", "выйти", "здесь."],
       explanation: "‘Мне нужно …’ — men …ishim kerak. ‘Выйти’ — (transportdan) tushmoq."
@@ -95,6 +97,7 @@ export const LESSON_19_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Metroda soʻrang: 'Bu yerda boshqa liniyaga qayerdan oʻtiladi?'",
       target_audio_text: "Где здесь пересадка?",
+      accepted_orders: ["Где пересадка здесь?"],
       words_pool: ["Где", "здесь", "пересадка?", "пересадку", "куда"],
       correct_order: ["Где", "здесь", "пересадка?"],
       explanation: "‘Пересадка’ — metroda boshqa liniyaga oʻtish joyi."
@@ -156,6 +159,7 @@ export const LESSON_20_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Mehmonxonada ayting: 'Taksi chaqiring, iltimos'",
       target_audio_text: "Вызовите такси, пожалуйста.",
+      accepted_orders: ["Пожалуйста, вызовите такси."],
       words_pool: ["Вызовите", "такси,", "пожалуйста.", "вызов", "таксист"],
       correct_order: ["Вызовите", "такси,", "пожалуйста."],
       explanation: "‘Вызвать такси’ — taksi chaqirmoq: ‘вызовите’ — chaqiring."
@@ -185,6 +189,7 @@ export const LESSON_20_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Haydovchiga ayting: 'Kutib turing, iltimos, besh daqiqa'",
       target_audio_text: "Подождите, пожалуйста, пять минут.",
+      accepted_orders: ["Подождите пять минут, пожалуйста.", "Пожалуйста, подождите пять минут."],
       words_pool: ["Подождите,", "пожалуйста,", "пять", "минут.", "минута", "ждать"],
       correct_order: ["Подождите,", "пожалуйста,", "пять", "минут."],
       explanation: "‘Подождите’ — kutib turing. ‘Пять минут’ — besh daqiqa."
@@ -275,6 +280,7 @@ export const LESSON_21_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Yangi tanishingizdan soʻrang: 'Telefon raqamingiz qanday?'",
       target_audio_text: "Какой у вас номер телефона?",
+      accepted_orders: ["Какой номер телефона у вас?"],
       words_pool: ["Какой", "у", "вас", "номер", "телефона?", "телефон", "мой"],
       correct_order: ["Какой", "у", "вас", "номер", "телефона?"],
       explanation: "‘Номер телефона’ — telefon raqami. ‘У вас’ — sizda."
@@ -304,6 +310,7 @@ export const LESSON_21_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Telefon jiringladi. Javob bering: 'Allo, eshitaman'",
       target_audio_text: "Алло, слушаю вас.",
+      accepted_orders: ["Алло, вас слушаю."],
       words_pool: ["Алло,", "слушаю", "вас.", "слышно", "вам"],
       correct_order: ["Алло,", "слушаю", "вас."],
       explanation: "Telefonni olganda: ‘Алло, слушаю (вас)’ — allo, eshitaman."
@@ -333,6 +340,7 @@ export const LESSON_21_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Menda internet ishlamayapti'",
       target_audio_text: "У меня интернет не работает.",
+      accepted_orders: ["Интернет у меня не работает.", "У меня не работает интернет."],
       words_pool: ["У", "меня", "интернет", "не", "работает.", "работаю", "нет"],
       correct_order: ["У", "меня", "интернет", "не", "работает."],
       explanation: "‘Не работает’ — ishlamayapti."
@@ -423,6 +431,7 @@ export const LESSON_22_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Bankomat ekranida yozuv: 'PIN-kodni kiriting, iltimos'",
       target_audio_text: "Введите, пожалуйста, пин-код.",
+      accepted_orders: ["Введите пин-код, пожалуйста.", "Пожалуйста, введите пин-код."],
       words_pool: ["Введите,", "пожалуйста,", "пин-код.", "код", "карту"],
       correct_order: ["Введите,", "пожалуйста,", "пин-код."],
       explanation: "‘Введите’ — kiriting. ‘Пин-код’ — kartaning maxfiy kodi."
@@ -479,9 +488,3 @@ export const LESSON_22_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_3_LESSONS: LessonPackage[] = [
-  LESSON_19_DATA,
-  LESSON_20_DATA,
-  LESSON_21_DATA,
-  LESSON_22_DATA,
-];

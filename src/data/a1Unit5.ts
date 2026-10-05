@@ -95,6 +95,7 @@ export const LESSON_29_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Doʻstingizdan soʻrang: 'Necha yoshdasan?'",
       target_audio_text: "Сколько тебе лет?",
+      accepted_orders: ["Тебе сколько лет?"],
       words_pool: ["Сколько", "тебе", "лет?", "ты", "годы"],
       correct_order: ["Сколько", "тебе", "лет?"],
       explanation: "Doʻstga: ‘Сколько тебе лет?’ (sen); hurmat bilan: ‘Сколько вам лет?’ (siz)."
@@ -214,6 +215,7 @@ export const LESSON_30_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Bu yerda hamma narsa juda arzon'",
       target_audio_text: "Здесь всё очень дёшево.",
+      accepted_orders: ["Всё здесь очень дёшево."],
       words_pool: ["Здесь", "всё", "очень", "дёшево.", "дешёвый", "дешевле"],
       correct_order: ["Здесь", "всё", "очень", "дёшево."],
       explanation: "‘Дёшево’ — arzon (‘дешёвый’ — arzon narsa haqida: ‘дешёвый телефон’)."
@@ -304,6 +306,7 @@ export const LESSON_31_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Uning koʻzlari jigarrang'",
       target_audio_text: "У него карие глаза.",
+      accepted_orders: ["Глаза у него карие."],
       words_pool: ["У", "него", "карие", "глаза.", "глаз", "карий"],
       correct_order: ["У", "него", "карие", "глаза."],
       explanation: "‘Глаза’ — koʻzlar (bitta koʻz — ‘глаз’). ‘Карие’ — jigarrang."
@@ -333,6 +336,7 @@ export const LESSON_31_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Kun boʻyi tik turib ishladingiz. Ayting: 'Oyoqlarim ogʻriyapti'",
       target_audio_text: "У меня болят ноги.",
+      accepted_orders: ["У меня ноги болят."],
       words_pool: ["У", "меня", "болят", "ноги.", "болит", "ногу"],
       correct_order: ["У", "меня", "болят", "ноги."],
       explanation: "Koʻplik: ‘ноги болят’ — oyoqlar ogʻriyapti."
@@ -394,6 +398,7 @@ export const LESSON_32_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting (erkak kishi): 'Ishdan keyin charchadim'",
       target_audio_text: "Я устал после работы.",
+      accepted_orders: ["После работы я устал."],
       words_pool: ["Я", "устал", "после", "работы.", "работа", "устали"],
       correct_order: ["Я", "устал", "после", "работы."],
       explanation: "‘Устать’ — charchamoq: erkak — ‘я устал’, ayol — ‘я устала’."
@@ -423,6 +428,7 @@ export const LESSON_32_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Oilamsiz maʼyusman'",
       target_audio_text: "Мне грустно без семьи.",
+      accepted_orders: ["Без семьи мне грустно."],
       words_pool: ["Мне", "грустно", "без", "семьи.", "семья", "грустный"],
       correct_order: ["Мне", "грустно", "без", "семьи."],
       explanation: "‘Мне грустно’ — maʼyusman. ‘Без’ (…siz) dan keyin: семья → без семьи."
@@ -452,6 +458,7 @@ export const LESSON_32_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Doʻstingizni tinchlantiring: 'Xavotir olmang, hammasi yaxshi'",
       target_audio_text: "Не волнуйтесь, всё хорошо.",
+      accepted_orders: ["Всё хорошо, не волнуйтесь."],
       words_pool: ["Не", "волнуйтесь,", "всё", "хорошо.", "волнуюсь", "хороший"],
       correct_order: ["Не", "волнуйтесь,", "всё", "хорошо."],
       explanation: "‘Не волнуйтесь’ — xavotir olmang. ‘Всё хорошо’ — hammasi yaxshi."
@@ -571,6 +578,7 @@ export const LESSON_33_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'U baland boʻyli va ozgʻin'",
       target_audio_text: "Он высокий и худой.",
+      accepted_orders: ["Он худой и высокий."],
       words_pool: ["Он", "высокий", "и", "худой.", "худая", "высокая"],
       correct_order: ["Он", "высокий", "и", "худой."],
       explanation: "‘Худой’ — ozgʻin; ‘полный’ — toʻla."
@@ -598,10 +606,3 @@ export const LESSON_33_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_5_LESSONS: LessonPackage[] = [
-  LESSON_29_DATA,
-  LESSON_30_DATA,
-  LESSON_31_DATA,
-  LESSON_32_DATA,
-  LESSON_33_DATA,
-];

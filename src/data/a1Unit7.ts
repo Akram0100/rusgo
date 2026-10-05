@@ -37,6 +37,7 @@ export const LESSON_39_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Menga qoʻlqop kerak'",
       target_audio_text: "Мне нужны перчатки.",
+      accepted_orders: ["Перчатки мне нужны."],
       words_pool: ["Мне", "нужны", "перчатки.", "нужна", "перчатку"],
       correct_order: ["Мне", "нужны", "перчатки."],
       explanation: "‘Перчатки’ — qoʻlqop (koʻplikda), shuning uchun ‘нужны’."
@@ -66,6 +67,7 @@ export const LESSON_39_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ustaga ayting: 'Bizda sement tugadi'",
       target_audio_text: "У нас закончился цемент.",
+      accepted_orders: ["Цемент у нас закончился.", "У нас цемент закончился."],
       words_pool: ["У", "нас", "закончился", "цемент.", "цемента", "закончилась"],
       correct_order: ["У", "нас", "закончился", "цемент."],
       explanation: "‘Цемент’ — sement. ‘Закончился’ — tugadi."
@@ -95,6 +97,7 @@ export const LESSON_39_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ishdoshingizga ayting: 'Taxtalarni olib kel, iltimos'",
       target_audio_text: "Принеси доски, пожалуйста.",
+      accepted_orders: ["Пожалуйста, принеси доски."],
       words_pool: ["Принеси", "доски,", "пожалуйста.", "доска", "досок"],
       correct_order: ["Принеси", "доски,", "пожалуйста."],
       explanation: "‘Доска’ — taxta, koʻplikda ‘доски’. ‘Принеси’ — olib kel (sen)."
@@ -214,6 +217,7 @@ export const LESSON_40_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Oshpaz aytdi: 'Salat uchun sabzavotlarni toʻgʻra'",
       target_audio_text: "Нарежь овощи для салата.",
+      accepted_orders: ["Для салата нарежь овощи."],
       words_pool: ["Нарежь", "овощи", "для", "салата.", "салат", "овощ"],
       correct_order: ["Нарежь", "овощи", "для", "салата."],
       explanation: "‘Нарезать’ — toʻgʻrab tayyorlamoq: ‘нарежь овощи’ — sabzavotlarni toʻgʻra."
@@ -304,6 +308,7 @@ export const LESSON_41_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Mijozdan soʻrang: 'Sizda bonus kartasi bormi?'",
       target_audio_text: "У вас есть бонусная карта?",
+      accepted_orders: ["Бонусная карта у вас есть?"],
       words_pool: ["У", "вас", "есть", "бонусная", "карта?", "бонусный", "карту"],
       correct_order: ["У", "вас", "есть", "бонусная", "карта?"],
       explanation: "‘Бонусная карта’ — bonus (chegirma) kartasi."
@@ -423,6 +428,7 @@ export const LESSON_42_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Zapravkada ayting: 'Toʻla bak benzin, iltimos'",
       target_audio_text: "Полный бак бензина, пожалуйста.",
+      accepted_orders: ["Пожалуйста, полный бак бензина."],
       words_pool: ["Полный", "бак", "бензина,", "пожалуйста.", "полная", "баки"],
       correct_order: ["Полный", "бак", "бензина,", "пожалуйста."],
       explanation: "‘Бензин’ — benzin; ‘полный бак бензина’ — toʻla bak benzin."
@@ -452,6 +458,7 @@ export const LESSON_42_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Telefonda ayting: 'Kechikyapman, katta tirbandlik'",
       target_audio_text: "Я опаздываю, большая пробка.",
+      accepted_orders: ["Большая пробка, я опаздываю."],
       words_pool: ["Я", "опаздываю,", "большая", "пробка.", "большой", "пробки"],
       correct_order: ["Я", "опаздываю,", "большая", "пробка."],
       explanation: "‘Пробка’ — tirbandlik (ayol jinsi → ‘большая’)."
@@ -513,6 +520,7 @@ export const LESSON_43_DATA: LessonPackage = {
       type: "translate_order",
       instruction: "Ayting: 'Oylik bir haftaga kechikyapti'",
       target_audio_text: "Зарплата задерживается на неделю.",
+      accepted_orders: ["Зарплата на неделю задерживается."],
       words_pool: ["Зарплата", "задерживается", "на", "неделю.", "неделя", "зарплату"],
       correct_order: ["Зарплата", "задерживается", "на", "неделю."],
       explanation: "‘Задерживаться’ — kechikmoq: ‘зарплата задерживается’ — oylik kechikyapti."
@@ -598,10 +606,3 @@ export const LESSON_43_DATA: LessonPackage = {
   ]
 };
 
-export const A1_UNIT_7_LESSONS: LessonPackage[] = [
-  LESSON_39_DATA,
-  LESSON_40_DATA,
-  LESSON_41_DATA,
-  LESSON_42_DATA,
-  LESSON_43_DATA,
-];
