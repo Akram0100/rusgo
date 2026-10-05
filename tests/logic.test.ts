@@ -47,7 +47,7 @@ import {
 } from '../src/utils/review';
 import { collectAudioTexts } from '../src/utils/audioTexts';
 import type { Exercise, LearnWordExercise, MultipleChoiceExercise, TypeWordExercise } from '../src/types/lesson';
-import { checkTyped } from '../src/utils/typing';
+import { checkTyped, checkTypedAgainst } from '../src/utils/typing';
 import type { UserStats } from '../src/types/gamification';
 
 const HAS_CYRILLIC = /[А-Яа-яЁё]/;
@@ -426,6 +426,32 @@ describe('typing steps (src/utils/typing.ts, src/utils/duolingoFlow.ts)', () => 
       assert.ok(!step.instruction.includes(step.answer) && !step.prompt.includes(step.answer), `${tag} is given away`);
     }
     assert.ok(lessonsWithTyping >= INITIAL_LESSONS.length / 2, `only ${lessonsWithTyping} lessons type a word`);
+  });
+
+  it('another correct form (a feminine one) is right too, and a typo note shows the forms it was close to', () => {
+    const answers = ['Я узбек', 'Я узбечка'];
+    assert.deepEqual(checkTypedAgainst('я узбечка', answers), { verdict: 'right', answers: ['Я узбечка'] });
+    assert.deepEqual(checkTypedAgainst('Я узбек', answers), { verdict: 'right', answers: ['Я узбек'] });
+    assert.equal(checkTypedAgainst('я узбечк', answers).verdict, 'typo');
+    assert.ok(checkTypedAgainst('я узбечк', answers).answers.includes('Я узбечка'));
+    assert.deepEqual(checkTypedAgainst('я русский', answers), { verdict: 'wrong', answers });
+
+    const lesson9 = INITIAL_LESSONS.find((lesson) => lesson.lesson_id === 'a1_lesson_09')!;
+    const typing = buildDuolingoProgression(lesson9).find((step): step is TypeWordExercise => step.type === 'type_word')!;
+    assert.equal(typing.answer, 'Я узбек');
+    assert.equal(checkTypedAgainst('я узбечка', [typing.answer, ...(typing.accept ?? [])]).verdict, 'right');
+  });
+
+  it("a word's other forms are real alternatives: Cyrillic, not empty and not the word itself", () => {
+    for (const lesson of INITIAL_LESSONS) {
+      for (const word of lesson.vocabulary ?? []) {
+        for (const alternative of word.alternatives ?? []) {
+          const tag = `${lesson.lesson_id}: "${word.term}" / "${alternative}"`;
+          assert.ok(HAS_CYRILLIC.test(alternative), tag);
+          assert.notEqual(normalize(alternative), normalize(word.term), tag);
+        }
+      }
+    }
   });
 
   it('a lesson whose words are all long phrases gets no typing step', () => {

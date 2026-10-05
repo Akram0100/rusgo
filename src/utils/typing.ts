@@ -38,3 +38,18 @@ export const checkTyped = (typed: string, answer: string): 'right' | 'typo' | 'w
   const letters = expected.replace(/ /g, '').length;
   return letters >= TYPO_MIN_LETTERS && editDistance(given, expected) === 1 ? 'typo' : 'wrong';
 };
+
+/**
+ * Checks the typed text against every accepted answer (e.g. a phrase and its feminine form) and keeps the best
+ * verdict, with the answers that gave it: a typo note then shows the form(s) the learner may have been writing.
+ */
+export const checkTypedAgainst = (
+  typed: string,
+  answers: string[]
+): { verdict: 'right' | 'typo' | 'wrong'; answers: string[] } => {
+  for (const verdict of ['right', 'typo'] as const) {
+    const matched = answers.filter((answer) => checkTyped(typed, answer) === verdict);
+    if (matched.length > 0) return { verdict, answers: matched };
+  }
+  return { verdict: 'wrong', answers };
+};

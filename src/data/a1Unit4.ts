@@ -493,7 +493,7 @@ export const LESSON_27_DATA: LessonPackage = {
     { term: "Вызовите скорую", translation: "Tez yordamni chaqiring", audio_text: "Вызовите скорую" },
     { term: "Звоните сто двенадцать", translation: "112 ga qoʻngʻiroq qiling", audio_text: "Звоните сто двенадцать" },
     { term: "У меня украли телефон", translation: "Telefonimni oʻgʻirlab ketishdi", audio_text: "У меня украли телефон" },
-    { term: "Я потерял паспорт", translation: "Pasportimni yoʻqotdim", audio_text: "Я потерял паспорт" },
+    { term: "Я потерял паспорт", translation: "Pasportimni yoʻqotdim", audio_text: "Я потерял паспорт", alternatives: ["Я потеряла паспорт"] },
     { term: "Пожар!", translation: "Yongʻin!", audio_text: "Пожар!" },
     { term: "Мне плохо", translation: "Ahvolim yomon", audio_text: "Мне плохо" },
     { term: "Где посольство Узбекистана?", translation: "Oʻzbekiston elchixonasi qayerda?", audio_text: "Где посольство Узбекистана?" },

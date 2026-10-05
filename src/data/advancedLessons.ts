@@ -19,7 +19,7 @@ export const A2_LESSON_1: LessonPackage = {
     { term: 'Что вы делали?', translation: 'Siz nima qildingiz?', audio_text: 'Что вы делали?' },
     { term: 'Мы ходили в кино', translation: 'Biz kinoga bordik', audio_text: 'Мы ходили в кино' },
     { term: 'Прошлым летом', translation: 'Oʻtgan yozda', audio_text: 'Прошлым летом' },
-    { term: 'Я прочитал книгу', translation: 'Men kitobni oʻqib boʻldim', audio_text: 'Я прочитал книгу' },
+    { term: 'Я прочитал книгу', translation: 'Men kitobni oʻqib boʻldim', audio_text: 'Я прочитал книгу', alternatives: ['Я прочитала книгу'] },
   ],
   exercises: [
     {
@@ -329,7 +329,7 @@ export const B1_LESSON_1: LessonPackage = {
     { term: 'Заработная плата', translation: 'Oylik ish haqi', audio_text: 'Заработная плата' },
     { term: 'График работы', translation: 'Ish jadvali/tartibi', audio_text: 'График работы' },
     { term: 'Перспективы роста', translation: 'Karyera oʻsish imkoniyatlari', audio_text: 'Перспективы роста' },
-    { term: 'Я готов приступить', translation: 'Men ish boshlashga tayyorman', audio_text: 'Я готов приступить' },
+    { term: 'Я готов приступить', translation: 'Men ish boshlashga tayyorman', audio_text: 'Я готов приступить', alternatives: ['Я готова приступить'] },
   ],
   exercises: [
     {

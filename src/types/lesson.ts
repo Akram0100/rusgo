@@ -42,6 +42,8 @@ export interface TypeWordExercise extends BaseExercise {
   type: 'type_word';
   prompt: string;
   answer: string;
+  /** Other answers that are right too, e.g. the feminine form of a first-person phrase */
+  accept?: string[];
 }
 
 export type Exercise =
@@ -63,5 +65,7 @@ export interface LessonPackage {
     term: string;
     translation: string;
     audio_text: string;
+    /** Other correct forms, e.g. the feminine form of a first-person phrase; a typing step accepts them */
+    alternatives?: string[];
   }[];
 }

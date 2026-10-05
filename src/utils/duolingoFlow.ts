@@ -84,16 +84,20 @@ export function buildDuolingoProgression(lesson: LessonPackage): Exercise[] {
   }
 
   const listening = listeningSteps(steps, vocabulary.map((vocab) => vocab.term));
-  const typing = typingSteps(steps, new Set(listening.map((step) => step.correct_answer)));
+  const typing = typingSteps(steps, new Set(listening.map((step) => step.correct_answer)), vocabulary);
   return [...steps, ...typing, ...listening];
 }
 
 /**
  * A typing step: the Uzbek meaning of a word the lesson taught is shown, and the learner writes the word in Russian.
  * It takes the shortest taught word of one or two Cyrillic words (3 to 12 letters) that the listening steps do not
- * use; a lesson without one gets no typing step.
+ * use; a lesson without one gets no typing step. The word's other correct forms (its `alternatives`) are accepted.
  */
-function typingSteps(steps: Exercise[], skip: Set<string>): TypeWordExercise[] {
+function typingSteps(
+  steps: Exercise[],
+  skip: Set<string>,
+  vocabulary: NonNullable<LessonPackage['vocabulary']>
+): TypeWordExercise[] {
   const letters = (term: string) => term.replace(/[^\p{L}]/gu, '').length;
   const candidates = steps.filter(
     (step): step is LearnWordExercise =>
@@ -107,6 +111,7 @@ function typingSteps(steps: Exercise[], skip: Set<string>): TypeWordExercise[] {
   if (candidates.length === 0) return [];
 
   const card = candidates.reduce((best, step) => (letters(step.term) < letters(best.term) ? step : best));
+  const alternatives = vocabulary.find((word) => word.term.trim() === card.term.trim())?.alternatives ?? [];
   return [
     {
       id: 8101,
@@ -114,8 +119,9 @@ function typingSteps(steps: Exercise[], skip: Set<string>): TypeWordExercise[] {
       instruction: 'Ruscha yozing:',
       prompt: card.translation,
       answer: card.term,
+      ...(alternatives.length > 0 ? { accept: alternatives } : {}),
       target_audio_text: card.target_audio_text,
-      explanation: `‘${card.term}’ — ${card.translation}.`,
+      explanation: `‘${[card.term, ...alternatives].join(' / ')}’ — ${card.translation}.`,
     },
   ];
 }

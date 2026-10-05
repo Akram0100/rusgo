@@ -20,7 +20,7 @@ export const LESSON_9_DATA: LessonPackage = {
     { term: "Мой родной язык — узбекский", translation: "Mening ona tilim — oʻzbek tili", audio_text: "Мой родной язык — узбекский" },
     { term: "Я немного говорю по-русски", translation: "Men ozgina ruscha gapiraman", audio_text: "Я немного говорю по-русски" },
     { term: "Я не понимаю", translation: "Men tushunmayapman", audio_text: "Я не понимаю" },
-    { term: "Я узбек", translation: "Men oʻzbekman", audio_text: "Я узбек" },
+    { term: "Я узбек", translation: "Men oʻzbekman", audio_text: "Я узбек", alternatives: ["Я узбечка"] },
   ],
   exercises: [
     {
@@ -136,7 +136,7 @@ export const LESSON_10_DATA: LessonPackage = {
     { term: "Я строитель", translation: "Men quruvchiman", audio_text: "Я строитель" },
     { term: "Где вы работаете?", translation: "Qayerda ishlaysiz?", audio_text: "Где вы работаете?" },
     { term: "Я работаю в магазине", translation: "Men doʻkonda ishlayman", audio_text: "Я работаю в магазине" },
-    { term: "Я студент", translation: "Men talabaman", audio_text: "Я студент" },
+    { term: "Я студент", translation: "Men talabaman", audio_text: "Я студент", alternatives: ["Я студентка"] },
     { term: "Сегодня у меня выходной", translation: "Bugun dam olish kunim", audio_text: "Сегодня у меня выходной" },
     { term: "Я работаю каждый день", translation: "Men har kuni ishlayman", audio_text: "Я работаю каждый день" },
     { term: "Мой начальник", translation: "Mening boshligʻim", audio_text: "Мой начальник" },

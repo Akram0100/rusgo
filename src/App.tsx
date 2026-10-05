@@ -60,7 +60,7 @@ import {
   preloadAudioRecordings,
 } from './utils/audio';
 import { withShuffledChoices } from './utils/shuffle';
-import { checkTyped } from './utils/typing';
+import { checkTypedAgainst } from './utils/typing';
 
 // Lesson levels are free-form strings (AI lessons too); map them onto the three known levels.
 const toLevel = (value?: string): 'A1' | 'A2' | 'B1' | null => {
@@ -560,10 +560,10 @@ export default function App() {
       const targetSentence = currentExercise.correct_order.join(' ').trim();
       correct = userSentence === targetSentence;
     } else if (currentExercise.type === 'type_word') {
-      // One wrong letter in a longer word still counts, with the spelling shown
-      const result = checkTyped(selectedOption ?? '', currentExercise.answer);
-      correct = result !== 'wrong';
-      if (result === 'typo') setTypoNote(`Imloga eʼtibor bering: ${currentExercise.answer}`);
+      // One wrong letter in a longer word still counts, with the spelling of the form being written shown
+      const result = checkTypedAgainst(selectedOption ?? '', [currentExercise.answer, ...(currentExercise.accept ?? [])]);
+      correct = result.verdict !== 'wrong';
+      if (result.verdict === 'typo') setTypoNote(`Imloga eʼtibor bering: ${result.answers.join(' / ')}`);
     }
 
     setIsCorrect(correct);
@@ -672,7 +672,7 @@ export default function App() {
     if (currentExercise.type === 'multiple_choice') return currentExercise.correct_answer;
     if (currentExercise.type === 'fill_blank') return currentExercise.blank_answer;
     if (currentExercise.type === 'translate_order') return currentExercise.correct_order.join(' ');
-    if (currentExercise.type === 'type_word') return currentExercise.answer;
+    if (currentExercise.type === 'type_word') return [currentExercise.answer, ...(currentExercise.accept ?? [])].join(' / ');
     return '';
   };
 
