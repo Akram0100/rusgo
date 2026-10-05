@@ -26,7 +26,7 @@ export const LESSON_9_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Yangi tanishingiz shunday soʻradi. Bu qanday savol?",
+      instruction: "Yangi tanishingiz 'Сколько вам лет?' deb soʻradi. Bu qanday savol?",
       target_audio_text: "Сколько вам лет?",
       options: ["Yoshingiz nechada?", "Qayerdansiz?", "Ismingiz nima?", "Qayerda yashaysiz?"],
       correct_answer: "Yoshingiz nechada?",
@@ -55,7 +55,7 @@ export const LESSON_9_DATA: LessonPackage = {
     {
       id: 4,
       type: "multiple_choice",
-      instruction: "Bu gap nimani anglatadi?",
+      instruction: "'Я из Ташкента' gapi nimani anglatadi?",
       target_audio_text: "Я из Ташкента.",
       options: ["Men Toshkentdanman", "Men Toshkentda yashayman", "Men Toshkentga boraman", "Men Toshkentni yaxshi koʻraman"],
       correct_answer: "Men Toshkentdanman",
@@ -145,7 +145,7 @@ export const LESSON_10_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Sizdan shunday soʻrashdi. Bu qanday savol?",
+      instruction: "Sizdan 'Кем вы работаете?' deb soʻrashdi. Bu qanday savol?",
       target_audio_text: "Кем вы работаете?",
       options: ["Kim boʻlib ishlaysiz?", "Qayerda yashaysiz?", "Yoshingiz nechada?", "Qayerdansiz?"],
       correct_answer: "Kim boʻlib ishlaysiz?",
@@ -174,7 +174,7 @@ export const LESSON_10_DATA: LessonPackage = {
     {
       id: 4,
       type: "multiple_choice",
-      instruction: "Bu gap nimani anglatadi?",
+      instruction: "'Я строитель' gapi nimani anglatadi?",
       target_audio_text: "Я строитель.",
       options: ["Men quruvchiman", "Men haydovchiman", "Men talabaman", "Men sotuvchiman"],
       correct_answer: "Men quruvchiman",
@@ -269,7 +269,7 @@ export const LESSON_11_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Koʻchada sizdan shunday soʻrashdi. Bu qanday savol?",
+      instruction: "Koʻchada sizdan 'Который час?' deb soʻrashdi. Bu qanday savol?",
       target_audio_text: "Который час?",
       options: ["Soat necha?", "Qayerdasiz?", "Bugun qaysi kun?", "Yoshingiz nechada?"],
       correct_answer: "Soat necha?",
@@ -298,7 +298,7 @@ export const LESSON_11_DATA: LessonPackage = {
     {
       id: 4,
       type: "multiple_choice",
-      instruction: "Bu gap nimani anglatadi?",
+      instruction: "'Утром я завтракаю' gapi nimani anglatadi?",
       target_audio_text: "Утром я завтракаю.",
       options: ["Ertalab men nonushta qilaman", "Kechqurun men kechki ovqat qilaman", "Ertalab men ishga boraman", "Kunduzi men tushlik qilaman"],
       correct_answer: "Ertalab men nonushta qilaman",
@@ -356,7 +356,7 @@ export const LESSON_11_DATA: LessonPackage = {
     {
       id: 10,
       type: "multiple_choice",
-      instruction: "Bu gap nimani anglatadi?",
+      instruction: "'Я встаю в семь часов' gapi nimani anglatadi?",
       target_audio_text: "Я встаю в семь часов.",
       options: ["Men soat yettida turaman", "Men soat yettida uxlayman", "Men soat yettida ishlayman", "Men yetti soat uxlayman"],
       correct_answer: "Men soat yettida turaman",
@@ -388,7 +388,7 @@ export const LESSON_12_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Hamkasbingiz shunday soʻradi. Bu qanday savol?",
+      instruction: "Hamkasbingiz 'Какой сегодня день?' deb soʻradi. Bu qanday savol?",
       target_audio_text: "Какой сегодня день?",
       options: ["Bugun qaysi kun?", "Soat necha?", "Bugun havo qanday?", "Ertaga nima qilasiz?"],
       correct_answer: "Bugun qaysi kun?",
@@ -446,7 +446,7 @@ export const LESSON_12_DATA: LessonPackage = {
     {
       id: 7,
       type: "multiple_choice",
-      instruction: "Bu gapdagi 'каждую среду' nimani anglatadi?",
+      instruction: "'Каждую среду я учу русский язык' gapidagi 'каждую среду' nimani anglatadi?",
       target_audio_text: "Каждую среду я учу русский язык.",
       options: ["Har chorshanba", "Har juma", "Har kuni", "Har dushanba"],
       correct_answer: "Har chorshanba",
@@ -507,7 +507,7 @@ export const LESSON_13_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Doʻstingiz shunday soʻradi. Bu qanday savol?",
+      instruction: "Doʻstingiz 'Какая сегодня погода?' deb soʻradi. Bu qanday savol?",
       target_audio_text: "Какая сегодня погода?",
       options: ["Bugun havo qanday?", "Bugun qaysi kun?", "Soat necha?", "Qayerda yashaysiz?"],
       correct_answer: "Bugun havo qanday?",
@@ -536,7 +536,7 @@ export const LESSON_13_DATA: LessonPackage = {
     {
       id: 4,
       type: "multiple_choice",
-      instruction: "Bu gap nimani anglatadi?",
+      instruction: "'Идёт дождь' gapi nimani anglatadi?",
       target_audio_text: "Идёт дождь.",
       options: ["Yomgʻir yogʻyapti", "Qor yogʻyapti", "Quyosh chiqdi", "Shamol esyapti"],
       correct_answer: "Yomgʻir yogʻyapti",
