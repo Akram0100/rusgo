@@ -20,6 +20,7 @@ import {
   saveUserStats,
 } from '../src/utils/gamification';
 import {
+  LEARN_CARD_XP,
   LESSON_FIRST_XP,
   LESSON_REPLAY_XP,
   MAX_HEARTS,
@@ -27,9 +28,12 @@ import {
   ROLEPLAY_REPEAT_XP,
   SPEED_MATCH_ROUND_MAX_XP,
   addSpeedMatchXp,
+  getLessonXp,
   getSpeedMatchPairXp,
 } from '../src/utils/xp';
-import type { Exercise } from '../src/types/lesson';
+import { buildDuolingoProgression } from '../src/utils/duolingoFlow';
+import { collectAudioTexts } from '../src/utils/audioTexts';
+import type { Exercise, LearnWordExercise } from '../src/types/lesson';
 import type { UserStats } from '../src/types/gamification';
 
 const HAS_CYRILLIC = /[А-Яа-яЁё]/;
@@ -289,6 +293,49 @@ describe('sanitizeGeneratedLesson (AI lessons are validated before they reach th
   });
 });
 
+describe('learning progression (src/utils/duolingoFlow.ts: a card teaches a word before it is tested)', () => {
+  const cardsOf = (steps: Exercise[]) => steps.filter((step): step is LearnWordExercise => step.type === 'learn_word');
+
+  it('keeps every exercise of every lesson, in order, and only adds cards', () => {
+    for (const lesson of INITIAL_LESSONS) {
+      const steps = buildDuolingoProgression(lesson);
+      assert.deepEqual(steps.filter((step) => step.type !== 'learn_word'), lesson.exercises, lesson.lesson_id);
+      assert.equal(steps.length, lesson.exercises.length + cardsOf(steps).length, lesson.lesson_id);
+    }
+  });
+
+  it('teaches each word at most once, and only words from the lesson vocabulary', () => {
+    for (const lesson of INITIAL_LESSONS) {
+      const terms = cardsOf(buildDuolingoProgression(lesson)).map((card) => card.term);
+      assert.equal(new Set(terms).size, terms.length, `${lesson.lesson_id}: a word is taught twice`);
+      const vocabulary = new Set((lesson.vocabulary ?? []).map((word) => word.term));
+      for (const term of terms) assert.ok(vocabulary.has(term), `${lesson.lesson_id}: "${term}" is not in the vocabulary`);
+    }
+  });
+
+  it('gives every step an id of its own, so a card is never mistaken for an exercise', () => {
+    for (const lesson of INITIAL_LESSONS) {
+      const ids = buildDuolingoProgression(lesson).map((step) => step.id);
+      assert.equal(new Set(ids).size, ids.length, lesson.lesson_id);
+    }
+  });
+
+  it('every card has what the screen shows, and its audio is one of the phrases that get an MP3', () => {
+    const withAudio = new Set(collectAudioTexts());
+    for (const lesson of INITIAL_LESSONS) {
+      for (const card of cardsOf(buildDuolingoProgression(lesson))) {
+        assert.ok(card.term.trim() && card.translation.trim(), `${lesson.lesson_id}: an empty card`);
+        assert.ok(withAudio.has(card.target_audio_text.trim()), `${lesson.lesson_id}: no MP3 is planned for "${card.target_audio_text}"`);
+      }
+    }
+  });
+
+  it('a lesson without vocabulary (an AI lesson may have none) gets no cards at all', () => {
+    const lesson = { ...INITIAL_LESSONS[0], vocabulary: undefined };
+    assert.deepEqual(buildDuolingoProgression(lesson), lesson.exercises);
+  });
+});
+
 describe('role-play dialogues', () => {
   it('scenario ids are unique', () => {
     const ids = SCENARIOS.map((scenario) => scenario.id);
@@ -382,6 +429,28 @@ describe('XP rules', () => {
 
   it('the hearts of one attempt fit what firestore.rules accepts (at most 10)', () => {
     assert.ok(Number.isInteger(MAX_HEARTS) && MAX_HEARTS >= 1 && MAX_HEARTS <= 10);
+  });
+
+  it('a lesson pays 50 XP plus 5 for each new-word card the first time, and only 10 when it is repeated', () => {
+    assert.equal(getLessonXp(true, 0), LESSON_FIRST_XP);
+    assert.equal(getLessonXp(true, 10), LESSON_FIRST_XP + 10 * LEARN_CARD_XP);
+    assert.equal(getLessonXp(false, 10), LESSON_REPLAY_XP, 'the cards pay nothing on a repeat');
+    assert.equal(getLessonXp(false, 0), LESSON_REPLAY_XP);
+  });
+
+  it('getLessonXp never pays less than the lesson itself or more than the cards earn, whatever it is asked', () => {
+    for (const odd of [NaN, -3, Infinity, -Infinity, 0.9]) assert.equal(getLessonXp(true, odd), LESSON_FIRST_XP, String(odd));
+    assert.equal(getLessonXp(true, 2.7), LESSON_FIRST_XP + 2 * LEARN_CARD_XP);
+  });
+
+  it('no built-in lesson can be farmed: a repeat pays far less than the first completion', () => {
+    for (const lesson of INITIAL_LESSONS) {
+      const cards = buildDuolingoProgression(lesson).filter((step) => step.type === 'learn_word').length;
+      const first = getLessonXp(true, cards);
+      const repeat = getLessonXp(false, cards);
+      assert.ok(first >= LESSON_FIRST_XP && first <= 150, `${lesson.lesson_id}: ${first} XP the first time`);
+      assert.ok(repeat * 4 <= first, `${lesson.lesson_id}: ${repeat} XP for a repeat against ${first} the first time`);
+    }
   });
 
   it('Speed Match: 3 XP per pair, plus one per pair already in the streak, at most +3', () => {

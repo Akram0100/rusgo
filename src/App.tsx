@@ -32,7 +32,7 @@ import {
 import {
   MAX_HEARTS,
   LESSON_FIRST_XP,
-  LESSON_REPLAY_XP,
+  getLessonXp,
   ROLEPLAY_FIRST_XP,
   ROLEPLAY_REPEAT_XP,
 } from './utils/xp';
@@ -367,11 +367,6 @@ export default function App() {
 
   // Proceed to next exercise or complete lesson with unlock & cloud sync
   const handleContinue = useCallback(() => {
-    // If moving forward from a learn step, reward user with +5 XP
-    if (currentExercise?.type === 'learn_word') {
-      handleAddXp(5);
-    }
-
     // The answer that was just shown cost the last heart: the attempt ends here
     if (hearts === 0) {
       setIsOutOfHearts(true);
@@ -382,9 +377,11 @@ export default function App() {
       setCurrentIndex((prev) => prev + 1);
       resetExerciseState();
     } else {
-      // A lesson pays full XP the first time and a smaller amount when it is repeated
+      // A lesson pays full XP (plus a little for each new-word card it taught) the first time and a smaller
+      // amount when it is repeated. The cards pay nothing on their own: a failed or repeated attempt cannot farm them.
       const isFirstCompletion = !completedLessons.includes(activeLessonId);
-      const lessonXp = isFirstCompletion ? LESSON_FIRST_XP : LESSON_REPLAY_XP;
+      const learnCards = activeSteps.filter((step) => step.type === 'learn_word').length;
+      const lessonXp = getLessonXp(isFirstCompletion, learnCards);
       const today = getLocalDateString();
 
       setLessonXpEarned(lessonXp);
@@ -443,9 +440,8 @@ export default function App() {
       });
     }
   }, [
-    currentExercise?.type,
     currentIndex,
-    activeSteps.length,
+    activeSteps,
     resetExerciseState,
     activeLessonId,
     activeLessonIndex,

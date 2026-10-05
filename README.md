@@ -55,7 +55,7 @@ Barchasi ixtiyoriy va `.env.local` da beriladi; qiymatlar va izohlar [.env.examp
 Barcha raqamlar [src/utils/xp.ts](src/utils/xp.ts) da (oʻzgartirsangiz `npm run test:logic` ni ishga tushiring).
 
 - **Jonlar:** har bir dars urinishida 5 ta. Xato javob 1 ta jonni oladi; jonlar tugasa "Jonlar tugadi" ekrani chiqadi va dars qaytadan boshlanadi (XP berilmaydi).
-- **Dars:** birinchi marta tugatilsa 50 XP, takroran tugatilsa 10 XP.
+- **Dars:** birinchi marta tugatilsa 50 XP va darsda oʻrgatilgan har bir yangi soʻz kartochkasi uchun yana 5 XP, takroran tugatilsa 10 XP. Kartochkalar XP'ni alohida bermaydi: XP faqat dars tugatilganda beriladi, shuning uchun tugamagan yoki takroriy urinish bilan "ferma" qilib boʻlmaydi.
 - **Muloqot:** har bir ssenariy birinchi marta tugatilsa 30 XP, takroran 5 XP.
 - **Juftlash:** juftlik uchun 3 XP, ketma-ket toʻgʻri juftliklar uchun yana +1 (koʻpi bilan +3); bir raundda koʻpi bilan 40 XP. XP raund tugaganda yoki oyna yopilganda avtomatik beriladi.
 - **Yutuqlar:** mukofot XP si yutuq ochilganda bir marta beriladi va bildirishnoma chiqadi.

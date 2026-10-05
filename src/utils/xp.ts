@@ -8,6 +8,20 @@ export const MAX_HEARTS = 5;
 export const LESSON_FIRST_XP = 50;
 export const LESSON_REPLAY_XP = 10;
 
+/** XP for each new-word card a lesson teaches. It is part of the lesson's first completion, never paid on its own. */
+export const LEARN_CARD_XP = 5;
+
+/**
+ * XP a finished lesson pays. The first time: the lesson's XP plus a little for every new-word card it taught.
+ * A repeat pays only the small replay amount, so a lesson cannot be farmed. An attempt that is not finished (the
+ * hearts ran out) pays nothing, because this is only asked for when the last step of the lesson is done.
+ */
+export const getLessonXp = (isFirstCompletion: boolean, learnCards: number): number => {
+  if (!isFirstCompletion) return LESSON_REPLAY_XP;
+  const cards = Number.isFinite(learnCards) ? Math.max(0, Math.floor(learnCards)) : 0;
+  return LESSON_FIRST_XP + LEARN_CARD_XP * cards;
+};
+
 /** XP for finishing a role-play scenario for the first time, and for repeating it afterwards. */
 export const ROLEPLAY_FIRST_XP = 30;
 export const ROLEPLAY_REPEAT_XP = 5;
