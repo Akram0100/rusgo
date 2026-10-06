@@ -117,7 +117,7 @@ export const A2_LESSON_2: LessonPackage = {
     { term: 'Мы поедем', translation: 'Biz transportda boramiz/ketamiz', audio_text: 'Мы поедем' },
     { term: 'На выходных', translation: 'Dam olish kunlarida', audio_text: 'На выходных' },
     { term: 'На следующей неделе', translation: 'Kelasi haftada', audio_text: 'На следующей неделе' },
-    { term: 'Я куплю', translation: 'Men sotib olaman', audio_text: 'Я куплю' },
+    { term: 'Я куплю', translation: 'Men sotib olaman (kelasi zamon)', audio_text: 'Я куплю' },
     { term: 'Важная встреча', translation: 'Muhim uchrashuv', audio_text: 'Важная встреча' },
     { term: 'Я обязательно приду', translation: 'Men albatta kelaman', audio_text: 'Я обязательно приду' },
   ],
@@ -273,7 +273,7 @@ export const A2_LESSON_3: LessonPackage = {
         'Biz yana buyurtma bermoqchimiz'
       ],
       correct_answer: 'Hammasi juda mazali boʻldi, rahmat!',
-      explanation: "‘Очень вкусно’ — juda shirin/mazali."
+      explanation: "‘Очень вкусно’ — juda mazali."
     },
     {
       id: 5,
@@ -411,7 +411,7 @@ export const B1_LESSON_1: LessonPackage = {
     {
       id: 7,
       type: 'multiple_choice',
-      instruction: "Ish beruvchi 'Мы сообщим вам о результатах' desa:",
+      instruction: "Ish beruvchi 'Мы сообщим вам о результатах' dedi. Bu nima degani?",
       target_audio_text: 'Спасибо, мы сообщим вам о результатах на этой неделе.',
       options: [
         'Natijalar haqida sizga xabar beramiz',

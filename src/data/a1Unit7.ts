@@ -135,7 +135,7 @@ export const LESSON_40_DATA: LessonPackage = {
   vocabulary: [
     { term: "Моя смена", translation: "Mening smenam", audio_text: "Моя смена" },
     { term: "Заказ готов", translation: "Buyurtma tayyor", audio_text: "Заказ готов" },
-    { term: "Фартук", translation: "Fartuk", audio_text: "Фартук" },
+    { term: "Фартук", translation: "Fartuk (peshband)", audio_text: "Фартук" },
     { term: "Посудомойка", translation: "Idish yuvish mashinasi", audio_text: "Посудомойка" },
     { term: "Повар", translation: "Oshpaz", audio_text: "Повар" },
     { term: "Официант", translation: "Ofitsiant", audio_text: "Официант" },
@@ -172,7 +172,7 @@ export const LESSON_40_DATA: LessonPackage = {
       hint: "Shakli oʻzgarmaydi",
       options: ["фартук", "фартука", "фартуком", "фартуке"],
       target_audio_text: "Надень фартук, это кухня.",
-      explanation: "‘Фартук’ — fartuk, perednik."
+      explanation: "‘Фартук’ — fartuk (peshband)."
     },
     {
       id: 4,
@@ -262,7 +262,7 @@ export const LESSON_41_DATA: LessonPackage = {
     { term: "Касса не работает", translation: "Kassa ishlamayapti", audio_text: "Касса не работает" },
     { term: "Вам помочь?", translation: "Sizga yordam beraymi?", audio_text: "Вам помочь?" },
     { term: "Подождите минуту", translation: "Bir daqiqa kuting", audio_text: "Подождите минуту" },
-    { term: "Чек нужен?", translation: "Chek kerakmi?", audio_text: "Чек нужен?" },
+    { term: "Чек нужен?", translation: "Chek kerakmi?", audio_text: "Чек нужен?", alternatives: ["Нужен чек?"] },
   ],
   exercises: [
     {
@@ -379,7 +379,7 @@ export const LESSON_42_DATA: LessonPackage = {
     { term: "Заправка", translation: "Zapravka (yoqilgʻi quyish joyi)", audio_text: "Заправка" },
     { term: "Бензин", translation: "Benzin", audio_text: "Бензин" },
     { term: "Пристегнитесь", translation: "Kamarni taqing", audio_text: "Пристегнитесь" },
-    { term: "Превышение скорости", translation: "Tezlikni oshirish", audio_text: "Превышение скорости" },
+    { term: "Превышение скорости", translation: "Tezlikni oshirib yuborish", audio_text: "Превышение скорости" },
     { term: "Пробка", translation: "Tirbandlik", audio_text: "Пробка" },
     { term: "Парковка", translation: "Toʻxtash joyi", audio_text: "Парковка" },
     { term: "Машина сломалась", translation: "Mashina buzildi", audio_text: "Машина сломалась" },
@@ -449,8 +449,8 @@ export const LESSON_42_DATA: LessonPackage = {
       type: "multiple_choice",
       instruction: "'Это превышение скорости' — qanday qoidabuzarlik?",
       target_audio_text: "Это превышение скорости.",
-      options: ["Tezlikni oshirish", "Notoʻgʻri toʻxtash", "Qizil chiroqdan oʻtish", "Kamarsiz haydash"],
-      correct_answer: "Tezlikni oshirish",
+      options: ["Tezlikni oshirib yuborish", "Notoʻgʻri toʻxtash", "Qizil chiroqdan oʻtish", "Kamarsiz haydash"],
+      correct_answer: "Tezlikni oshirib yuborish",
       explanation: "‘Скорость’ — tezlik; ‘превышение скорости’ — ruxsat etilganidan tez haydash."
     },
     {

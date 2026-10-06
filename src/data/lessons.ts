@@ -13,7 +13,7 @@ export const LESSON_1_DATA: LessonPackage = {
     { term: "Меня зовут...", translation: "Mening ismim...", audio_text: "Меня зовут" },
     { term: "Как вас зовут?", translation: "Sizning ismingiz nima?", audio_text: "Как вас зовут?" },
     { term: "Очень приятно", translation: "Tanishganimdan xursandman", audio_text: "Очень приятно" },
-    { term: "Как дела?", translation: "Ishlar/hol-ahvol qalay?", audio_text: "Как дела?" },
+    { term: "Как дела?", translation: "Ishlar qalay?", audio_text: "Как дела?" },
     { term: "Хорошо, спасибо", translation: "Yaxshi, rahmat", audio_text: "Хорошо, спасибо" },
     { term: "Доброе утро", translation: "Xayrli tong", audio_text: "Доброе утро" },
     { term: "До свидания", translation: "Xayr (koʻrishguncha)", audio_text: "До свидания" },
@@ -56,7 +56,7 @@ export const LESSON_1_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Nuqtalar oʻrniga mos soʻzni qoʻying: 'Sizning ismingiz nima?' (rasmiy hurmat shakli)",
+      instruction: "Boʻsh joyga mos soʻzni qoʻying: 'Sizning ismingiz nima?' (rasmiy hurmat shakli)",
       sentence_with_blank: "Как ___ зовут?",
       blank_answer: "вас",
       hint: "Hurmat maʼnosidagi kishilik olmoshi",
@@ -385,10 +385,10 @@ export const LESSON_3_DATA: LessonPackage = {
     { term: "Это моя семья", translation: "Bu mening oilam", audio_text: "Это моя семья" },
     { term: "Моя мама", translation: "Mening onam", audio_text: "Моя мама" },
     { term: "Брат и сестра", translation: "Aka/uka va opa/singil", audio_text: "Брат и сестра" },
-    { term: "У меня есть...", translation: "Menda bor...", audio_text: "У меня есть" },
+    { term: "У меня есть...", translation: "Menda ... bor", audio_text: "У меня есть" },
     { term: "Где вы живёте?", translation: "Siz qayerda yashaysiz?", audio_text: "Где вы живёте?" },
     { term: "Я живу в...", translation: "Men ...da yashayman", audio_text: "Я живу в" },
-    { term: "Мой папа", translation: "Mening otam", audio_text: "Мой папа" },
+    { term: "Мой папа", translation: "Mening otam", audio_text: "Мой папа", alternatives: ["Мой отец"] },
     { term: "Квартира", translation: "Kvartira (xonadon)", audio_text: "Квартира" },
     { term: "Большая и дружная семья", translation: "Katta va ahil oila", audio_text: "Большая и дружная семья" },
     { term: "Мы живём вместе", translation: "Biz birga yashaymiz", audio_text: "Мы живём вместе" },
@@ -482,7 +482,7 @@ export const LESSON_3_DATA: LessonPackage = {
     {
       id: 6,
       type: "fill_blank",
-      instruction: "Nuqtalar oʻrniga mos soʻzni tanlang: 'Mening onam shifokor'",
+      instruction: "Boʻsh joyga mos soʻzni tanlang: 'Mening onam shifokor'",
       sentence_with_blank: "Моя ___ врач.",
       blank_answer: "мама",
       hint: "Oila aʼzosi (ona)",
@@ -765,7 +765,7 @@ export const LESSON_5_DATA: LessonPackage = {
   vocabulary: [
     { term: "Можно примерить?", translation: "Kiyib koʻrsam boʻladimi?", audio_text: "Можно примерить?" },
     { term: "Другой размер", translation: "Boshqa oʻlcham", audio_text: "Другой размер" },
-    { term: "Можно оплатить картой?", translation: "Karta bilan toʻlasa boʻladimi?", audio_text: "Можно оплатить картой?" },
+    { term: "Можно оплатить картой?", translation: "Karta bilan toʻlasam boʻladimi?", audio_text: "Можно оплатить картой?" },
     { term: "Это слишком дорого", translation: "Bu juda qimmat", audio_text: "Это слишком дорого" },
     { term: "У вас есть скидка?", translation: "Chegirma bormi?", audio_text: "У вас есть скидка?" },
     { term: "Примерочная", translation: "Kiyib koʻrish xonasi", audio_text: "Примерочная" },
@@ -792,7 +792,7 @@ export const LESSON_5_DATA: LessonPackage = {
     {
       id: 2,
       type: "translate_order",
-      instruction: "Kassirga 'Karta orqali toʻlasa boʻladimi?' deb soʻrang.",
+      instruction: "Kassirga 'Karta orqali toʻlasam boʻladimi?' deb soʻrang.",
       target_audio_text: "Можно оплатить картой?",
       accepted_orders: ["Можно картой оплатить?"],
       words_pool: [
@@ -812,7 +812,7 @@ export const LESSON_5_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Kiyib koʻrish kabinasini soʻrang: 'Где находится ___?'",
+      instruction: "Kiyib koʻrish xonasini soʻrang: 'Aytingchi, kiyib koʻrish xonasi qayerda?'",
       sentence_with_blank: "Скажите, где находится ___?",
       blank_answer: "примерочная",
       hint: "Kiyim kiyib koʻriladigan joy",
@@ -1005,7 +1005,7 @@ export const LESSON_6_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Ertalabki ovqatlanish vaqtini soʻrang: 'Во сколько ___?'",
+      instruction: "Nonushta vaqtini soʻrang: 'Aytingchi, nonushta soat nechada?'",
       sentence_with_blank: "Подскажите, во сколько ___?",
       blank_answer: "завтрак",
       hint: "Ertalabki taom",
@@ -1106,7 +1106,7 @@ export const LESSON_6_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Xonaga qoʻshimcha sochiq soʻrang: 'Принесите, пожалуйста, чистое ___'",
+      instruction: "Qoʻshimcha sochiq soʻrang: 'Iltimos, toza sochiq olib keling'",
       sentence_with_blank: "Принесите, пожалуйста, чистое ___.",
       blank_answer: "полотенце",
       hint: "Yuvinishdan keyin artinadigan buyum",
@@ -1339,7 +1339,7 @@ export const LESSON_8_DATA: LessonPackage = {
     { term: "Посадочный талон", translation: "Samolyotga oʻtirish taloni", audio_text: "Посадочный талон" },
     { term: "Паспортный контроль", translation: "Pasport nazorati", audio_text: "Паспортный контроль" },
     { term: "Ручная кладь", translation: "Qoʻl yuki", audio_text: "Ручная кладь" },
-    { term: "Выдача багажа", translation: "Yuk topshirish/olish joyi", audio_text: "Выдача багажа" },
+    { term: "Выдача багажа", translation: "Yukni olish joyi", audio_text: "Выдача багажа" },
     { term: "Рейс задерживается", translation: "Parvoz kechikmoqda", audio_text: "Рейс задерживается" },
     { term: "Пристегните ремни", translation: "Xavfsizlik kamarlarini taqing", audio_text: "Пристегните ремни" },
     { term: "Счастливого пути!", translation: "Oq yoʻl! Xayrli safar!", audio_text: "Счастливого пути!" },
@@ -1387,7 +1387,7 @@ export const LESSON_8_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Salonga olib kiriladigan yuk haqida ayting: 'Это моя ___ кладь'",
+      instruction: "Salonga olib kiradigan sumkangiz haqida ayting: 'Bu mening qoʻl yukim'",
       sentence_with_blank: "Это моя ___ кладь.",
       blank_answer: "ручная",
       hint: "Qoʻlda olib yuriladigan yuk",
@@ -1439,7 +1439,7 @@ export const LESSON_8_DATA: LessonPackage = {
     {
       id: 6,
       type: "fill_blank",
-      instruction: "Parvozdan keyin oʻz chamadoningizni qidiryapsiz: 'Где выдача ___?'",
+      instruction: "Parvozdan keyin chamadoningizni qidiryapsiz. Soʻrang: 'Aytingchi, yukni olish joyi qayerda?'",
       sentence_with_blank: "Подскажите, где выдача ___?",
       blank_answer: "багажа",
       hint: "Katta chamadonlar beriladigan joy",
@@ -1450,7 +1450,7 @@ export const LESSON_8_DATA: LessonPackage = {
         "воды"
       ],
       target_audio_text: "Подскажите, где выдача багажа?",
-      explanation: "‘Выдача багажа’ — yuk berish karuseli joylashgan zona."
+      explanation: "‘Выдача багажа’ — yukni olish joyi: chamadonlar lentada aylanib keladi."
     },
     {
       id: 7,
@@ -1490,7 +1490,7 @@ export const LESSON_8_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Chegara tekshiruvidan oʻtish joyi: 'Пройдите на ___ контроль'",
+      instruction: "Aeroport xodimi aytdi: 'Pasport nazoratiga oʻting, iltimos'",
       sentence_with_blank: "Пройдите на ___ контроль, пожалуйста.",
       blank_answer: "паспортный",
       hint: "Shaxsni tasdiqlovchi hujjat nazorati",

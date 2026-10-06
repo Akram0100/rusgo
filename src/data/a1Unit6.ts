@@ -140,8 +140,8 @@ export const LESSON_35_DATA: LessonPackage = {
     { term: "Утюг", translation: "Dazmol", audio_text: "Утюг" },
     { term: "Вынеси мусор", translation: "Axlatni chiqar", audio_text: "Вынеси мусор" },
     { term: "Помоги мне", translation: "Menga yordam ber", audio_text: "Помоги мне" },
-    { term: "Чисто", translation: "Toza", audio_text: "Чисто" },
-    { term: "Грязно", translation: "Iflos", audio_text: "Грязно" },
+    { term: "Чисто", translation: "Toza (joy haqida)", audio_text: "Чисто" },
+    { term: "Грязно", translation: "Iflos (joy haqida)", audio_text: "Грязно" },
   ],
   exercises: [
     {
@@ -226,7 +226,7 @@ export const LESSON_35_DATA: LessonPackage = {
     {
       id: 9,
       type: "fill_blank",
-      instruction: "Ayting: 'Xonada toza, hammasini yigʻishtirdim'",
+      instruction: "Ayting (erkak kishi): 'Xonada toza, hammasini yigʻishtirdim'",
       sentence_with_blank: "В комнате ___, я всё убрал.",
       blank_answer: "чисто",
       hint: "Toza",

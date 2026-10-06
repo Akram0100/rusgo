@@ -142,7 +142,7 @@ export const LESSON_20_DATA: LessonPackage = {
     { term: "Откройте окно", translation: "Oynani oching", audio_text: "Откройте окно" },
     { term: "Мой адрес", translation: "Mening manzilim", audio_text: "Мой адрес" },
     { term: "Какой номер машины?", translation: "Mashina raqami qanday?", audio_text: "Какой номер машины?" },
-    { term: "Сдачи не надо", translation: "Qaytimi kerak emas", audio_text: "Сдачи не надо" },
+    { term: "Сдачи не надо", translation: "Qaytim kerak emas", audio_text: "Сдачи не надо" },
   ],
   exercises: [
     {
@@ -237,11 +237,11 @@ export const LESSON_20_DATA: LessonPackage = {
     {
       id: 10,
       type: "multiple_choice",
-      instruction: "Yoʻl 450 rubl, siz 500 rubl berdingiz. Ayting: 'Qaytimi kerak emas'",
+      instruction: "Yoʻl 450 rubl, siz 500 rubl berdingiz. Ayting: 'Qaytim kerak emas'",
       target_audio_text: "Сдачи не надо.",
       options: ["Сдачи не надо.", "Сколько стоит?", "Дайте сдачу.", "У меня нет денег."],
       correct_answer: "Сдачи не надо.",
-      explanation: "‘Сдача’ — qaytim. ‘Сдачи не надо’ — qaytimi kerak emas."
+      explanation: "‘Сдача’ — qaytim. ‘Сдачи не надо’ — qaytim kerak emas."
     }
   ]
 };

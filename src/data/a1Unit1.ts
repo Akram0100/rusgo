@@ -166,7 +166,7 @@ export const LESSON_10_DATA: LessonPackage = {
     {
       id: 3,
       type: "fill_blank",
-      instruction: "Qayerda ishlashingizni ayting: 'Я ___ на стройке.'",
+      instruction: "Ayting: 'Men qurilishda ishlayman'",
       sentence_with_blank: "Я ___ на стройке.",
       blank_answer: "работаю",
       hint: "‘Я’ bilan keladigan shakl",
@@ -503,8 +503,8 @@ export const LESSON_13_DATA: LessonPackage = {
   exercises_count: 10,
   vocabulary: [
     { term: "Какая сегодня погода?", translation: "Bugun havo qanday?", audio_text: "Какая сегодня погода?" },
-    { term: "Холодно", translation: "Sovuq", audio_text: "Холодно" },
-    { term: "Жарко", translation: "Issiq", audio_text: "Жарко" },
+    { term: "Холодно", translation: "Sovuq (havo haqida)", audio_text: "Холодно" },
+    { term: "Жарко", translation: "Issiq (havo haqida)", audio_text: "Жарко" },
     { term: "Идёт дождь", translation: "Yomgʻir yogʻyapti", audio_text: "Идёт дождь" },
     { term: "Идёт снег", translation: "Qor yogʻyapti", audio_text: "Идёт снег" },
     { term: "Светит солнце", translation: "Quyosh charaqlayapti", audio_text: "Светит солнце" },

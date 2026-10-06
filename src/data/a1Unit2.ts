@@ -261,7 +261,7 @@ export const LESSON_16_DATA: LessonPackage = {
     { term: "Можно подешевле?", translation: "Arzonroq boʻladimi?", audio_text: "Можно подешевле?" },
     { term: "Картошка", translation: "Kartoshka", audio_text: "Картошка" },
     { term: "Лук и морковь", translation: "Piyoz va sabzi", audio_text: "Лук и морковь" },
-    { term: "Огурцы", translation: "Bodring", audio_text: "Огурцы" },
+    { term: "Огурцы", translation: "Bodringlar", audio_text: "Огурцы" },
     { term: "Ещё что-нибудь?", translation: "Yana biror narsa kerakmi?", audio_text: "Ещё что-нибудь?" },
     { term: "Это всё, спасибо", translation: "Shu xolos, rahmat", audio_text: "Это всё, спасибо" },
   ],
@@ -508,7 +508,7 @@ export const LESSON_18_DATA: LessonPackage = {
     {
       id: 1,
       type: "multiple_choice",
-      instruction: "Yangi doʻstingiz 'Что вы делаете в свободное время?' deb soʻradi. Bu qanday savol?",
+      instruction: "Yangi tanishingiz 'Что вы делаете в свободное время?' deb soʻradi. Bu qanday savol?",
       target_audio_text: "Что вы делаете в свободное время?",
       options: ["Boʻsh vaqtingizda nima qilasiz?", "Qayerda ishlaysiz?", "Soat necha?", "Bugun qaysi kun?"],
       correct_answer: "Boʻsh vaqtingizda nima qilasiz?",

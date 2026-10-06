@@ -456,7 +456,7 @@ export const LESSON_32_DATA: LessonPackage = {
     {
       id: 8,
       type: "translate_order",
-      instruction: "Doʻstingizni tinchlantiring: 'Xavotir olmang, hammasi yaxshi'",
+      instruction: "Hamkasbingizni tinchlantiring: 'Xavotir olmang, hammasi yaxshi'",
       target_audio_text: "Не волнуйтесь, всё хорошо.",
       accepted_orders: ["Всё хорошо, не волнуйтесь."],
       words_pool: ["Не", "волнуйтесь,", "всё", "хорошо.", "волнуюсь", "хороший"],

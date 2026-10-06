@@ -371,7 +371,7 @@ export const LESSON_47_DATA: LessonPackage = {
   instruction_language: "uz",
   exercises_count: 10,
   vocabulary: [
-    { term: "Давай встретимся", translation: "Keling, uchrashaylik", audio_text: "Давай встретимся" },
+    { term: "Давай встретимся", translation: "Kel, uchrashaylik", audio_text: "Давай встретимся" },
     { term: "Во сколько?", translation: "Soat nechada?", audio_text: "Во сколько?" },
     { term: "Где встретимся?", translation: "Qayerda uchrashamiz?", audio_text: "Где встретимся?" },
     { term: "Я свободен", translation: "Boʻshman", audio_text: "Я свободен", alternatives: ["Я свободна"] },
@@ -390,7 +390,7 @@ export const LESSON_47_DATA: LessonPackage = {
       target_audio_text: "Давай встретимся в субботу.",
       options: ["Shanba kuni uchrashaylik", "Shanba kuni ishlaymiz", "Shanba kuni qoʻngʻiroq qil", "Shanba kuni dam olaman"],
       correct_answer: "Shanba kuni uchrashaylik",
-      explanation: "‘Давай встретимся’ — keling, uchrashaylik."
+      explanation: "‘Давай встретимся’ — kel, uchrashaylik (doʻstga taklif)."
     },
     {
       id: 2,
