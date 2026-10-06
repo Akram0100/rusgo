@@ -297,6 +297,8 @@ export default function App() {
     setIsCompleted(false);
     setShuffleSeed((seed) => seed + 1);
     resetExerciseState();
+    // Start from the top, not where the long completion screen was scrolled to
+    window.scrollTo({ top: 0 });
   };
 
   // Switch to another lesson
@@ -314,6 +316,8 @@ export default function App() {
     setIsCompleted(false);
     setShuffleSeed((seed) => seed + 1);
     resetExerciseState();
+    // The new lesson starts at its top, with its title, progress and hearts in view
+    window.scrollTo({ top: 0 });
   };
 
   // Switch level (A1 / A2 / B1)
@@ -744,7 +748,6 @@ export default function App() {
               mistakesCount={mistakesCount}
               answeredSteps={lessonSteps.filter((step) => step.type !== 'learn_word').length}
               onRestart={handleResetLesson}
-              onViewJson={() => setActiveTab('json')}
               onNextLesson={handleNextLesson}
               hasNextLesson={activeLessonIndex + 1 < lessons.length}
             />

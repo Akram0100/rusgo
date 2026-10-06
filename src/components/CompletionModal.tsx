@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, CheckCircle, Volume2, RotateCcw, Code } from 'lucide-react';
+import { Trophy, CheckCircle, Volume2, RotateCcw } from 'lucide-react';
 import { LessonPackage } from '../types/lesson';
 import { speakRussian } from '../utils/audio';
 
@@ -11,7 +11,6 @@ interface CompletionModalProps {
   /** Steps that were answered (exercises and listening steps, not the new-word cards); default: the exercises */
   answeredSteps?: number;
   onRestart: () => void;
-  onViewJson: () => void;
   onNextLesson?: () => void;
   hasNextLesson?: boolean;
 }
@@ -23,7 +22,6 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
   mistakesCount,
   answeredSteps,
   onRestart,
-  onViewJson,
   onNextLesson,
   hasNextLesson,
 }) => {
@@ -122,14 +120,6 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
         >
           <RotateCcw className="w-4 h-4" />
           <span>Darsni qayta topshirish</span>
-        </button>
-
-        <button
-          onClick={onViewJson}
-          className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-white shadow-sm flex items-center justify-center gap-2 transition-all active:translate-y-0.5"
-        >
-          <Code className="w-4 h-4 text-emerald-400" />
-          <span>JSON kodini koʻrish</span>
         </button>
       </div>
     </div>
