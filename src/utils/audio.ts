@@ -279,15 +279,15 @@ export async function speakRussian(
 }
 
 /**
- * Preload and permanently save audio recordings in background
- * Ensures that when the user taps any exercise audio, the recording is already saved locally!
+ * Warms pre-generated static MP3s (so the service worker caches them for offline use) and previously saved
+ * IndexedDB recordings into memory for a lesson. Never calls `/api/tts` in the background; uncached phrases
+ * without a static MP3 are synthesized on demand only when the learner plays them via `speakRussian`.
  */
 export async function preloadAudioRecordings(texts: string[]) {
   if (typeof window === 'undefined') return;
 
-  for (const text of texts) {
-    const clean = text.trim();
-    if (!clean) continue;
+  const uniqueTexts = new Set(texts.map((text) => text.trim()).filter(Boolean));
+  for (const clean of uniqueTexts) {
     const cacheKey = `v5_${clean}_normal`;
 
     if (audioCache.has(cacheKey)) continue;
@@ -295,30 +295,13 @@ export async function preloadAudioRecordings(texts: string[]) {
     // A pre-generated MP3 is simply fetched (the service worker keeps it for offline use): no /api/tts call
     if (await loadStaticAudio(clean)) continue;
 
-    const saved = await getSavedAudio(cacheKey);
-    if (saved) {
-      audioCache.set(cacheKey, saved);
-      continue;
-    }
-
-    // Silently fetch and save in background
     try {
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: clean, rate: 0.95, voice: 'Kore' }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.audio) {
-          const mime = data.mimeType || 'audio/mpeg';
-          const dataUri = `data:${mime};base64,${data.audio}`;
-          audioCache.set(cacheKey, dataUri);
-          saveAudioRecording(cacheKey, dataUri).catch(() => {});
-        }
+      const saved = await getSavedAudio(cacheKey);
+      if (saved) {
+        audioCache.set(cacheKey, saved);
       }
     } catch {
-      // Continue next silently
+      // IndexedDB unavailable; audio will be fetched on demand when played
     }
   }
 }

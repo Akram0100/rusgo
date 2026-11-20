@@ -266,7 +266,7 @@ export default function App() {
     ? lessonSteps.length
     : lessonStepsDone(lessonSteps.length, currentIndex, isChecked, retrySteps.length);
 
-  // Preload and save audio recordings permanently in local storage for this lesson
+  // Warm pre-generated MP3s and locally saved recordings for this lesson (never calls /api/tts)
   useEffect(() => {
     if (activeLesson) {
       const textsToPreload = [

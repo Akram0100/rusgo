@@ -15,6 +15,7 @@ import { SCENARIOS } from '../src/data/roleplay';
 import { GRAMMAR_RULES } from '../src/data/grammar';
 import { collectAudioTexts, collectAudioTextsInLessonOrder } from '../src/utils/audioTexts';
 import { getStaticAudioUrl, resetAudioManifest } from '../src/utils/staticAudio';
+import { preloadAudioRecordings } from '../src/utils/audio';
 import { normalizeGeminiAudio, parsePcmMimeType, parseWav, pcmToWav } from '../server/audioFormat';
 import { encodeMp3, inspectMp3 } from '../scripts/lib/mp3';
 import { describeQuota, isDailyQuota, isQuotaError, retryAfterSeconds } from '../scripts/lib/quota';
@@ -358,6 +359,50 @@ describe("the app's manifest lookup (src/utils/staticAudio.ts)", () => {
     resetAudioManifest();
     useFetch(async () => jsonResponse({ version: 1 }));
     assert.equal(await getStaticAudioUrl('Привет'), null);
+  });
+});
+
+describe('preloadAudioRecordings (src/utils/audio.ts)', () => {
+  const realFetch = globalThis.fetch;
+  const realWindow = globalThis.window;
+
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+    if (realWindow === undefined) {
+      delete (globalThis as { window?: unknown }).window;
+    } else {
+      globalThis.window = realWindow;
+    }
+    resetAudioManifest();
+  });
+
+  it('warms pre-generated MP3s once per phrase and never calls /api/tts in the background', async () => {
+    resetAudioManifest();
+    globalThis.window = {} as Window & typeof globalThis;
+    const requestedUrls: string[] = [];
+
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      if (url === '/audio/manifest.json') {
+        return new Response(
+          JSON.stringify({ version: 1, files: { 'Прелоад статика': 'abcdef012345.mp3' } }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        );
+      }
+      if (url === '/audio/abcdef012345.mp3') {
+        return new Response(new Uint8Array([0xff, 0xf3, 0x64, 0xc4]), {
+          status: 200,
+          headers: { 'content-type': 'audio/mpeg' },
+        });
+      }
+      throw new Error(`Unexpected fetch to ${url}`);
+    }) as typeof fetch;
+
+    await preloadAudioRecordings(['Прелоад статика', 'Прелоад статика', 'Прелоад без файла', '   ']);
+
+    assert.deepEqual(requestedUrls, ['/audio/manifest.json', '/audio/abcdef012345.mp3']);
+    assert.equal(requestedUrls.filter((url) => url.includes('/api/tts')).length, 0);
   });
 });
 
